@@ -1,0 +1,167 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>Implement MCP Orchestrator Agent</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/reuben/gauntlet/vel_tutor/docs/stories/1-1-implement-mcp-orchestrator-agent.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>platform developer</asA>
+    <iWant>MCP Orchestrator Agent that routes events to viral loops</iWant>
+    <soThat>the viral growth engine can coordinate multiple agents and loops consistently</soThat>
+    <tasks>
+- Task 1: Implement MCP Orchestrator GenServer (AC: 1, 2, 4)  
+  - Create `lib/viral_engine/agents/orchestrator.ex` with GenServer implementation  
+  - Add `trigger_event/1` handler that logs events to `viral_events` table  
+  - Implement basic health check returning status and metrics  
+  - Add configuration loading from `config/runtime.exs`  
+  - Test: GenServer starts successfully and responds to health checks  
+
+- Task 2: Setup JSON-RPC API Endpoint (AC: 3)  
+  - Add route in `lib/viral_engine_web/router.ex`: `post "/mcp/:agent/:method", AgentController, :call_agent`  
+  - Create `lib/viral_engine_web/controllers/agent_controller.ex` with JSON-RPC handler  
+  - Implement MCP client integration for orchestrator calls  
+  - Add request logging to `agent_decisions` table  
+  - Test: POST to `/mcp/orchestrator/select_loop` returns valid JSON-RPC response  
+
+- Task 3: Implement Event Routing Logic (AC: 2)  
+  - Add stub handlers for `practice_completed`, `session_ended`, `diagnostic_completed` events  
+  - Log events to `viral_events` table with timestamps and context  
+  - Return structured decisions with rationale (Phase 1: "Event logged, no loops active")  
+  - Add eligibility checking framework (stubbed for Phase 1)  
+  - Test: Each event type routes correctly and logs to database  
+
+- Task 4: Add Monitoring and Metrics (AC: 4)  
+  - Implement `/mcp/orchestrator/health` endpoint with uptime and metrics  
+  - Add Telemetry metrics for request latency and error rates  
+  - Integrate with Phoenix LiveDashboard  
+  - Add graceful shutdown that drains requests (30s timeout)  
+  - Test: Health endpoint returns correct status and metrics  
+
+- Task 5: Configuration and Deployment Setup (AC: 5)  
+  - Create `config/runtime.exs` with MCP settings (timeout: 150ms, circuit breaker: true)  
+  - Add Fly.io `fly.toml` configuration for orchestrator service  
+  - Document environment variables (DATABASE_URL, SECRET_KEY_BASE)  
+  - Add startup warm-up that loads active loops from database  
+  - Test: Deploy to Fly.io and verify service health  
+
+- Task 6: Unit and Integration Testing (AC: 6)  
+  - Create `test/viral_engine/agents/orchestrator_test.exs` with GenServer tests  
+  - Add integration tests for JSON-RPC endpoints using Phoenix.ConnTest  
+  - Mock MCP client calls for testing agent coordination  
+  - Test error scenarios (timeout, invalid requests, database errors)  
+  - Verify all tests pass with 100% coverage for critical paths  
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>1. **MCP Orchestrator GenServer implements basic event routing**  
+   - [ ] GenServer starts successfully with health check endpoint  
+   - [ ] Accepts `trigger_event/1` calls with event payloads  
+   - [ ] Logs decisions to `agent_decisions` table  
+   - [ ] Returns structured responses with rationale  
+
+2. **Event routing logic handles Phase 1 triggers**  
+   - [ ] Routes `practice_completed` events to stub handler  
+   - [ ] Routes `session_ended` events to stub handler  
+   - [ ] Routes `diagnostic_completed` events to stub handler  
+   - [ ] Logs "Phase 1: Event logged, no loops active yet" for all events  
+
+3. **JSON-RPC interface operational**  
+   - [ ] `/mcp/orchestrator/select_loop` endpoint accepts JSON-RPC 2.0 requests  
+   - [ ] Returns proper JSON-RPC responses with `result` or `error`  
+   - [ ] Handles timeout (150ms SLA) and circuit breaker patterns  
+   - [ ] Logs all calls to `agent_decisions` table  
+
+4. **Health monitoring and metrics**  
+   - [ ] `/mcp/orchestrator/health` endpoint returns status and metrics  
+   - [ ] Tracks uptime, active loops, cache size, last error  
+   - [ ] Integrates with Phoenix LiveDashboard  
+   - [ ] Graceful shutdown drains requests  
+
+5. **Configuration and deployment ready**  
+   - [ ] Configurable via `config/runtime.exs` (timeout, circuit breaker settings)  
+   - [ ] Fly.io deployment config in `fly.toml`  
+   - [ ] Environment variables for secrets (DATABASE_URL, etc.)  
+   - [ ] Startup warm-up loads active loops from database  
+
+6. **Testing coverage**  
+   - [ ] Unit tests for GenServer lifecycle (start/stop/health)  
+   - [ ] Integration tests for JSON-RPC endpoints  
+   - [ ] Mock tests for MCP client calls  
+   - [ ] Error handling tests (timeout, invalid requests)  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+- path: docs/architecture.md
+  title: Architecture Specification
+  section: MCP Agent Architecture
+  snippet: The MCP Orchestrator is the central coordinator for all viral loops. It routes events to appropriate viral loops and agents using JSON-RPC 2.0 contracts. Implements GenServer FSM with health checks and graceful shutdown.
+
+- path: .taskmaster/docs/prd-phase1.md
+  title: PRD Phase 1 - Foundation & Infrastructure
+  section: Core Phoenix Application
+  snippet: Build the core platform infrastructure without viral loops, proving out the agent architecture and attribution system. Ship a working "invite a friend" feature as proof-of-concept.
+
+- path: docs/architecture.md
+  title: Architecture Specification
+  section: Data Persistence
+  snippet: Log decisions to `agent_decisions` table with `agent_id`, `method`, `input_params`, `output_result`, `latency_ms`. Use `viral_events` table for event logging with timestamps and context.
+
+- path: docs/architecture.md
+  title: Architecture Specification
+  section: Deployment Architecture
+  snippet: Deploy as dedicated MCP service on port 4001 using Fly.io multi-app configuration. Include `fly.toml` with environment variables for DATABASE_URL and SECRET_KEY_BASE.
+
+- path: docs/architecture.md
+  title: Architecture Specification
+  section: API Pattern
+  snippet: JSON-RPC 2.0 endpoints for agent communication. `/mcp/:agent/:method` route pattern. Structured request/response with `request_id` for deduplication and timeout handling (150ms SLA).
+    </docs>
+    <code></code>
+    <dependencies></dependencies>
+  </artifacts>
+
+  <constraints>
+- Use GenServer FSM pattern with health checks and graceful shutdown [Source: docs/architecture.md#Agent-Lifecycle]
+- Implement JSON-RPC 2.0 contracts for MCP communication [Source: docs/architecture.md#MCP-JSON-RPC-Contracts]
+- Log all decisions to `agent_decisions` table [Source: docs/architecture.md#Data-Persistence]
+- Deploy as dedicated Fly.io service on port 4001 [Source: docs/architecture.md#Deployment-Architecture]
+- Follow Elixir/Phoenix naming conventions and hexagonal architecture structure [Source: docs/architecture.md#Implementation-Patterns]
+  </constraints>
+
+  <interfaces>
+- name: trigger_event/1
+  kind: Elixir function
+  signature: def trigger_event(event :: map()) :: {:ok, map()} | {:error, term()}
+  path: lib/viral_engine/agents/orchestrator.ex
+  description: Routes events to appropriate viral loops and agents, returns structured decision with rationale
+
+- name: /mcp/orchestrator/select_loop
+  kind: REST endpoint
+  signature: POST /mcp/orchestrator/select_loop
+  path: lib/viral_engine_web/router.ex
+  description: JSON-RPC 2.0 endpoint for MCP agent communication, accepts event payloads and returns decisions
+
+- name: /mcp/orchestrator/health
+  kind: REST endpoint
+  signature: GET /mcp/orchestrator/health
+  path: lib/viral_engine_web/controllers/agent_controller.ex
+  description: Health check endpoint returning status, uptime, and metrics for monitoring
+  </interfaces>
+
+  <tests>
+    <standards>Follow ExUnit patterns from architecture. Use Phoenix.ConnTest for integration tests. Mock MCP client calls for agent coordination testing. Ensure 100% coverage for critical paths including error scenarios.</standards>
+    <locations>test/viral_engine/agents/orchestrator_test.exs for unit tests, test/viral_engine_web/controllers/agent_controller_test.exs for integration tests</locations>
+    <ideas>
+- Test GenServer lifecycle: start/stop/health (AC: 1)
+- Test JSON-RPC endpoint integration (AC: 3)
+- Mock MCP client calls for coordination testing (AC: 3)
+- Test error scenarios: timeout, invalid requests, database errors (AC: 6)
+- Verify event routing for each trigger type (AC: 2)
+    </ideas>
+  </tests>
+</story-context>
