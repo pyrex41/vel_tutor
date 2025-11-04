@@ -151,65 +151,7 @@ defmodule ViralEngineWeb.AutoChallengeLive do
     []
   end
 
-  defp challenge_motivation_text(challenge) do
-    days_since = calculate_days_since_best(challenge)
-
-    cond do
-      days_since >= 7 ->
-        "It's been #{days_since} days since your best score! Ready to prove you've still got it?"
-
-      days_since >= 3 ->
-        "#{days_since} days without practice... Time to show what you remember!"
-
-      true ->
-        "Can you beat your personal record?"
-    end
-  end
-
-  defp calculate_days_since_best(challenge) do
-    # Calculate days since the original session
-    # In production, this would query the session timestamp
-    challenge.metadata["gap_days"] || 3
-  end
-
-  defp share_message(challenge) do
-    "I'm challenging myself to beat my best score of #{challenge.target_score} in #{challenge.subject}! Think you can do better? #{challenge_url(challenge)}"
-  end
-
-  defp challenge_url(challenge) do
-    "#{ViralEngineWeb.Endpoint.url()}/challenge/#{challenge.challenge_token}"
-  end
-
-  defp time_remaining(expires_at) when not is_nil(expires_at) do
-    seconds = DateTime.diff(expires_at, DateTime.utc_now())
-    days = div(seconds, 24 * 60 * 60)
-
-    cond do
-      days > 1 -> "#{days} days left"
-      days == 1 -> "1 day left"
-      seconds > 3600 -> "#{div(seconds, 3600)} hours left"
-      seconds > 60 -> "#{div(seconds, 60)} minutes left"
-      seconds > 0 -> "Less than a minute left"
-      true -> "Expired"
-    end
-  end
-
-  defp time_remaining(_), do: "No expiration"
-
-  defp difficulty_indicator(target_score) do
-    cond do
-      target_score >= 90 -> {"🔥", "Legendary", "text-red-600"}
-      target_score >= 75 -> {"⭐", "Hard", "text-orange-600"}
-      target_score >= 60 -> {"💪", "Medium", "text-yellow-600"}
-      true -> {"✨", "Easy", "text-green-600"}
-    end
-  end
-
-  defp progress_to_target(current_best, target) do
-    if current_best >= target do
-      100
-    else
-      round((current_best / target) * 100)
-    end
-  end
+  # Note: Additional UI helper functions have been removed until a render/1 function or .heex template is implemented.
+  # Functions included: challenge_motivation_text/1, calculate_days_since_best/1, share_message/1,
+  # challenge_url/1, time_remaining/1, difficulty_indicator/1, progress_to_target/2
 end

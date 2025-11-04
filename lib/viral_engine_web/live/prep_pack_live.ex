@@ -168,61 +168,7 @@ defmodule ViralEngineWeb.PrepPackLive do
     "#{ViralEngineWeb.Endpoint.url()}/prep/#{pack.pack_token}"
   end
 
-  defp share_message(pack) do
-    """
-    Check out this study prep pack for #{pack.subject}!
-    Topics: #{Enum.join(pack.target_topics, ", ")}
-    Estimated time: #{pack.estimated_time_minutes} minutes
-    #{prep_pack_url(pack)}
-    """
-  end
-
-  defp status_badge_class(status) do
-    case status do
-      "generated" -> "bg-blue-100 text-blue-800"
-      "shared" -> "bg-purple-100 text-purple-800"
-      "viewed" -> "bg-yellow-100 text-yellow-800"
-      "completed" -> "bg-green-100 text-green-800"
-      _ -> "bg-gray-100 text-gray-800"
-    end
-  end
-
-  defp status_text(status) do
-    case status do
-      "generated" -> "Ready"
-      "shared" -> "Shared"
-      "viewed" -> "In Progress"
-      "completed" -> "Completed"
-      _ -> "Unknown"
-    end
-  end
-
-  defp pack_type_icon(pack_type) do
-    case pack_type do
-      "practice_prep" -> "📝"
-      "exam_prep" -> "📚"
-      "review_pack" -> "🔄"
-      "challenge_prep" -> "🎯"
-      _ -> "📦"
-    end
-  end
-
-  defp resource_count(resources) when is_map(resources) do
-    Enum.reduce(resources, 0, fn {_key, items}, acc ->
-      if is_list(items), do: acc + length(items), else: acc
-    end)
-  end
-  defp resource_count(_), do: 0
-
-  defp time_ago(datetime) when not is_nil(datetime) do
-    seconds = DateTime.diff(DateTime.utc_now(), datetime)
-
-    cond do
-      seconds < 60 -> "Just now"
-      seconds < 3600 -> "#{div(seconds, 60)} minutes ago"
-      seconds < 86400 -> "#{div(seconds, 3600)} hours ago"
-      true -> "#{div(seconds, 86400)} days ago"
-    end
-  end
-  defp time_ago(_), do: "Unknown"
+  # Note: Additional UI helper functions have been removed until a render/1 function or .heex template is implemented.
+  # Functions included: share_message/1, status_badge_class/1, status_text/1,
+  # pack_type_icon/1, resource_count/1, time_ago/1
 end

@@ -219,56 +219,7 @@ defmodule ViralEngineWeb.RewardsLive do
     {:noreply, socket}
   end
 
-  # Helper functions
-
-  defp xp_progress_bar_width(user_xp) do
-    UserXP.progress_percentage(user_xp)
-  end
-
-  defp rarity_color(rarity) do
-    case rarity do
-      "common" -> "border-gray-400 bg-gray-50"
-      "rare" -> "border-blue-500 bg-blue-50"
-      "epic" -> "border-purple-500 bg-purple-50"
-      "legendary" -> "border-yellow-500 bg-yellow-50"
-      _ -> "border-gray-400 bg-gray-50"
-    end
-  end
-
-  defp rarity_text_color(rarity) do
-    case rarity do
-      "common" -> "text-gray-700"
-      "rare" -> "text-blue-700"
-      "epic" -> "text-purple-700"
-      "legendary" -> "text-yellow-700"
-      _ -> "text-gray-700"
-    end
-  end
-
-  defp reward_type_name(type) do
-    case type do
-      "cosmetic" -> "Cosmetics"
-      "powerup" -> "Powerups"
-      "avatar" -> "Avatars"
-      "theme" -> "Themes"
-      "special" -> "Special"
-      _ -> "Other"
-    end
-  end
-
-  defp can_claim_reward?(reward, user_xp, claimed_ids) do
-    !MapSet.member?(claimed_ids, reward.id) &&
-    reward.xp_cost <= user_xp.total_xp &&
-    reward.level_required <= user_xp.level &&
-    (!reward.is_limited || !reward.stock || reward.stock > 0)
-  end
-
-  defp level_progress_class(progress) do
-    cond do
-      progress >= 75 -> "bg-green-500"
-      progress >= 50 -> "bg-blue-500"
-      progress >= 25 -> "bg-yellow-500"
-      true -> "bg-red-500"
-    end
-  end
+  # Note: UI helper functions have been removed until a render/1 function or .heex template is implemented.
+  # Functions included: xp_progress_bar_width/1, rarity_color/1, rarity_text_color/1,
+  # reward_type_name/1, can_claim_reward?/3, level_progress_class/1
 end

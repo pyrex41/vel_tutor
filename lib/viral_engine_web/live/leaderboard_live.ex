@@ -241,59 +241,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
     end
   end
 
-  defp format_metric_value(entry, metric) do
-    case metric do
-      :total_score -> "#{entry.total_score || 0} pts"
-      :average_score -> "#{Float.round(entry.avg_score || 0.0, 1)}%"
-      :streak -> "#{entry.current_streak || 0} days"
-      :sessions -> "#{entry.sessions || 0} sessions"
-      _ -> "N/A"
-    end
-  end
-
-  defp rank_badge(rank) do
-    case rank do
-      1 -> "🥇"
-      2 -> "🥈"
-      3 -> "🥉"
-      _ -> "##{rank}"
-    end
-  end
-
-  defp rank_color(rank) do
-    case rank do
-      1 -> "text-yellow-600 font-bold"
-      2 -> "text-gray-400 font-bold"
-      3 -> "text-orange-600 font-bold"
-      _ -> "text-gray-600"
-    end
-  end
-
-  defp scope_name(scope) do
-    case scope do
-      :global -> "Global"
-      :subject -> "Subject"
-      :cohort -> "Cohort"
-      _ -> "Global"
-    end
-  end
-
-  defp metric_name(metric) do
-    case metric do
-      :total_score -> "Total Score"
-      :average_score -> "Average Score"
-      :streak -> "Current Streak"
-      :sessions -> "Practice Sessions"
-      _ -> "Total Score"
-    end
-  end
-
-  defp time_period_name(period) do
-    case period do
-      1 -> "Today"
-      7 -> "This Week"
-      30 -> "This Month"
-      _ -> "#{period} Days"
-    end
-  end
+  # Note: UI helper functions have been removed until a render/1 function or .heex template is implemented.
+  # Functions included: format_metric_value/2, rank_badge/1, rank_color/1,
+  # scope_name/1, metric_name/1, time_period_name/1
 end

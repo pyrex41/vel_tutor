@@ -151,68 +151,7 @@ defmodule ViralEngineWeb.BadgeLive do
      |> put_flash(:info, "🎉 New badge unlocked: #{badge.name}!")}
   end
 
-  # Helper functions
-
-  defp badge_card_class(unlocked, is_new) do
-    base = "rounded-lg p-6 border-2 transition-all hover:scale-105"
-
-    cond do
-      is_new and unlocked ->
-        "#{base} border-yellow-400 bg-yellow-50 shadow-lg animate-pulse"
-
-      unlocked ->
-        "#{base} border-green-400 bg-white shadow-md"
-
-      true ->
-        "#{base} border-gray-300 bg-gray-50 opacity-60"
-    end
-  end
-
-  defp rarity_color(rarity) do
-    case rarity do
-      "common" -> "text-gray-600"
-      "rare" -> "text-blue-600"
-      "epic" -> "text-purple-600"
-      "legendary" -> "text-yellow-600"
-      _ -> "text-gray-600"
-    end
-  end
-
-  defp rarity_badge(rarity) do
-    case rarity do
-      "common" -> "Common"
-      "rare" -> "Rare ⭐"
-      "epic" -> "Epic ⭐⭐"
-      "legendary" -> "Legendary ⭐⭐⭐"
-      _ -> ""
-    end
-  end
-
-  defp category_name(category) do
-    case category do
-      "practice" -> "Practice"
-      "diagnostic" -> "Diagnostic"
-      "social" -> "Social"
-      "achievement" -> "Achievement"
-      _ -> "Other"
-    end
-  end
-
-  defp progress_bar_color(progress) do
-    cond do
-      progress >= 100 -> "bg-green-500"
-      progress >= 75 -> "bg-blue-500"
-      progress >= 50 -> "bg-yellow-500"
-      progress >= 25 -> "bg-orange-500"
-      true -> "bg-red-500"
-    end
-  end
-
-  defp completion_percentage(unlocked_count, total_badges) do
-    if total_badges > 0 do
-      Float.round(unlocked_count / total_badges * 100, 1)
-    else
-      0.0
-    end
-  end
+  # Note: UI helper functions have been removed until a render/1 function or .heex template is implemented.
+  # Functions included: badge_card_class/2, rarity_color/1, rarity_badge/1,
+  # category_name/1, progress_bar_color/1, completion_percentage/2
 end
