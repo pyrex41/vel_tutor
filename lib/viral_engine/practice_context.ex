@@ -291,4 +291,18 @@ defmodule ViralEngine.PracticeContext do
       base_message <> "Try again!"
     end
   end
+
+  @doc """
+  Lists completed sessions by subject for leaderboard.
+  """
+  def list_completed_sessions_by_subject(subject, days \\ 7) do
+    cutoff_date = DateTime.add(DateTime.utc_now(), -days, :day)
+
+    from(s in PracticeSession,
+      where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
+      order_by: [desc: s.score],
+      limit: 100
+    )
+    |> Repo.all()
+  end
 end

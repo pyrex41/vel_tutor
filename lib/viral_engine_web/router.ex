@@ -113,8 +113,14 @@ defmodule ViralEngineWeb.Router do
     get("/:agent/health", AgentController, :health)
   end
 
-  # Practice session route
+  # Practice session routes
   live("/practice", PracticeSessionLive)
+  live("/practice/results/:id", PracticeResultsLive)
+
+  # Diagnostic assessment routes
+  live("/diagnostic", DiagnosticAssessmentLive)
+  live("/diagnostic/:id", DiagnosticAssessmentLive)
+  live("/diagnostic/results/:id", DiagnosticResultsLive)
 
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
