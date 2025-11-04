@@ -99,6 +99,10 @@ defmodule ViralEngineWeb.Router do
     get("/fine-tuning-jobs/:id", FineTuningController, :show)
     post("/fine-tuning-jobs/:id/register", FineTuningController, :register_model)
     delete("/fine-tuning-jobs/:id", FineTuningController, :delete)
+
+    # Admin - Audit Logs
+    get("/admin/audit_logs", AdminController, :audit_logs)
+    get("/admin/audit_logs/stats", AdminController, :audit_logs_stats)
   end
 
   scope "/mcp", ViralEngineWeb do
@@ -109,8 +113,56 @@ defmodule ViralEngineWeb.Router do
     get("/:agent/health", AgentController, :health)
   end
 
-  # Practice session route
+  # Practice session routes
   live("/practice", PracticeSessionLive)
+  live("/practice/results/:id", PracticeResultsLive)
+
+  # Diagnostic assessment routes
+  live("/diagnostic", DiagnosticAssessmentLive)
+  live("/diagnostic/:id", DiagnosticAssessmentLive)
+  live("/diagnostic/results/:id", DiagnosticResultsLive)
+
+  # Flashcard study routes
+  live("/flashcards", FlashcardStudyLive)
+  live("/flashcards/study/:deck_id", FlashcardStudyLive)
+
+  # Buddy challenge routes
+  live("/challenge/:token", ChallengeLive)
+  live("/auto-challenges", AutoChallengeLive)
+
+  # Results Rally routes
+  live("/rally/:token", RallyLive)
+
+  # Parent Progress routes (COPPA-compliant)
+  live("/parent/progress/:token", ParentProgressLive)
+
+  # Streak Rescue routes
+  live("/streak-rescue", StreakRescueLive)
+
+  # Leaderboard routes
+  live("/leaderboard", LeaderboardLive)
+
+  # Badge collection routes
+  live("/badges", BadgeLive)
+
+  # Rewards shop routes
+  live("/rewards", RewardsLive)
+
+  # Transcript routes
+  live("/transcripts", TranscriptLive)
+  live("/transcripts/:id", TranscriptLive)
+
+  # Study session routes
+  live("/study", StudySessionLive)
+  live("/study/:token", StudySessionLive)
+
+  # Progress reel routes
+  live("/reels", ProgressReelLive)
+  live("/reel/:token", ProgressReelLive)
+
+  # Prep pack routes
+  live("/prep-packs", PrepPackLive)
+  live("/prep/:token", PrepPackLive)
 
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
@@ -124,6 +176,10 @@ defmodule ViralEngineWeb.Router do
     live("/tasks", TaskExecutionHistoryLive)
     live("/benchmarks", BenchmarksLive)
     live("/rate-limits", RateLimitsLive)
+    live("/k-factor", KFactorDashboardLive)
+    live("/guardrails", GuardrailDashboardLive)
+    live("/reports", PerformanceReportLive)
+    live("/reports/:id", PerformanceReportLive)
   end
 
   # Enable LiveDashboard in development

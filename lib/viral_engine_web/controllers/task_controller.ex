@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.TaskController do
   use ViralEngineWeb, :controller
-  alias ViralEngine.{Task, Repo}
+  alias ViralEngine.{Task, Repo, AuditLogContext}
   import Ecto.Query
   require Logger
 
@@ -27,6 +27,18 @@ defmodule ViralEngineWeb.TaskController do
           {:ok, task} ->
             # Increment rate limit
             increment_rate_limit(user_id)
+
+            # Log audit event
+            AuditLogContext.log_user_action(
+              user_id,
+              "task_created",
+              %{
+                task_id: task.id,
+                agent_id: agent_id,
+                description: String.slice(description, 0..100)
+              },
+              conn
+            )
 
             # Route to orchestrator (placeholder)
             # ViralEngine.Agents.Orchestrator.route_task(task)
@@ -479,8 +491,8 @@ defmodule ViralEngineWeb.TaskController do
   defp log_audit_event(event_type, metadata) do
     Logger.info("Audit Event: #{event_type}", metadata: metadata)
 
-    # TODO: Store audit logs in database
-    # Consider using a dedicated audit_logs table for production
+    # Store audit log in database via AuditLogContext
+    AuditLogContext.log_system_event(event_type, metadata)
     :ok
   end
 

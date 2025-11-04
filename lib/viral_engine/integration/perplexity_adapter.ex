@@ -4,6 +4,7 @@ defmodule ViralEngine.Integration.PerplexityAdapter do
   """
 
   require Logger
+  alias ViralEngine.AuditLogContext
 
   @behaviour ViralEngine.Integration.AdapterBehaviour
 
@@ -65,9 +66,25 @@ defmodule ViralEngine.Integration.PerplexityAdapter do
   end
 
   defp do_chat_completion(prompt, adapter, cache_key, retries) do
+    start_time = System.monotonic_time(:millisecond)
+
     case make_api_call(prompt, adapter) do
       {:ok, response} ->
+        latency_ms = System.monotonic_time(:millisecond) - start_time
         put_cache(adapter.cache, cache_key, response)
+
+        # Log AI call to audit logs
+        Task.start(fn ->
+          AuditLogContext.log_ai_call(
+            nil,  # task_id not available here, will be nil
+            "perplexity",
+            "sonar-large-online",
+            response.tokens_used,
+            Decimal.from_float(response.cost),
+            latency_ms
+          )
+        end)
+
         {:ok, response}
 
       {:error, reason} ->
