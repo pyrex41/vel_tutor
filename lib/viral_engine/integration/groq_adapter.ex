@@ -111,7 +111,8 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
                  if data != "[DONE]" do
                    case Jason.decode(data) do
-                     {:ok, %{"choices" => [%{"delta" => %{"content" => content}} | _]}} when is_binary(content) ->
+                     {:ok, %{"choices" => [%{"delta" => %{"content" => content}} | _]}}
+                     when is_binary(content) ->
                        callback_fn.({:chunk, content})
 
                      {:ok, _} ->

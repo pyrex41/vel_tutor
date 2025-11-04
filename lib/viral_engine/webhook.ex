@@ -49,7 +49,8 @@ defmodule ViralEngine.Webhook do
 
       url ->
         case URI.parse(url) do
-          %URI{scheme: scheme, host: host} when scheme in ["http", "https"] and not is_nil(host) ->
+          %URI{scheme: scheme, host: host}
+          when scheme in ["http", "https"] and not is_nil(host) ->
             # Prevent SSRF attacks
             if is_safe_url?(host) do
               changeset
@@ -74,7 +75,11 @@ defmodule ViralEngine.Webhook do
         if Enum.empty?(invalid_types) do
           changeset
         else
-          add_error(changeset, :event_types, "contains invalid event types: #{inspect(invalid_types)}")
+          add_error(
+            changeset,
+            :event_types,
+            "contains invalid event types: #{inspect(invalid_types)}"
+          )
         end
 
       _ ->
@@ -96,7 +101,8 @@ defmodule ViralEngine.Webhook do
 
   defp is_safe_url?(host) do
     # Block common internal/private IP ranges and localhost
-    blocked_patterns = ~r/(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.)/
+    blocked_patterns =
+      ~r/(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.)/
 
     not String.match?(host, blocked_patterns)
   end

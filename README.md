@@ -85,6 +85,20 @@ npx -y task-master-ai
 
 Visit `http://localhost:4000` to see the application running!
 
+## Live Presence System
+
+The platform features real-time presence tracking for global (app-wide) and subject-specific (e.g., math sessions) user activity:
+
+- **Core**: Phoenix Presence with PubSub broadcasts to "presence:global" and "presence:subject:#{id}".
+- **Persistence**: DB logging via `presences` table (joins/leaves, metadata).
+- **Widgets**: LiveView components showing online counts, user names/roles, avatars (initials), join indicators.
+- **Opt-Out**: User setting hides from lists; immediate untrack/broadcast on toggle.
+- **Integrations**: Mounted in dashboard (global + subjects) and practice sessions (subject-specific).
+- **Performance**: <200ms PubSub latency (Prometheus tracked); validated under 50 concurrent joins (K6).
+- **Privacy**: Filters opted-out users in all queries/lists; no PII in broadcasts.
+
+Usage: Users auto-track on LiveView mount; opt-out via settings.
+
 ## 🏗️ Architecture Overview
 
 ### AI Integration Stack

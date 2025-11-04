@@ -59,16 +59,17 @@ defmodule ViralEngineWeb.WebhooksController do
   def index(conn, %{"user_id" => user_id}) do
     webhooks = WebhookContext.list_webhooks(user_id)
 
-    response = Enum.map(webhooks, fn webhook ->
-      %{
-        id: webhook.id,
-        url: webhook.url,
-        event_types: webhook.event_types,
-        is_active: webhook.is_active,
-        description: webhook.description,
-        created_at: webhook.inserted_at
-      }
-    end)
+    response =
+      Enum.map(webhooks, fn webhook ->
+        %{
+          id: webhook.id,
+          url: webhook.url,
+          event_types: webhook.event_types,
+          is_active: webhook.is_active,
+          description: webhook.description,
+          created_at: webhook.inserted_at
+        }
+      end)
 
     json(conn, %{webhooks: response})
   end

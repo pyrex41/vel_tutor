@@ -112,7 +112,8 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
                  # OpenAI sends [DONE] when stream finishes
                  if data != "[DONE]" do
                    case Jason.decode(data) do
-                     {:ok, %{"choices" => [%{"delta" => %{"content" => content}} | _]}} when is_binary(content) ->
+                     {:ok, %{"choices" => [%{"delta" => %{"content" => content}} | _]}}
+                     when is_binary(content) ->
                        callback_fn.({:chunk, content})
 
                      {:ok, _} ->
@@ -186,7 +187,13 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
             tokens_used = Map.get(usage, "total_tokens", 0)
             cost = calculate_cost(tokens_used, "gpt-4o")
 
-            {:ok, %{content: content, tokens_used: tokens_used, cost: cost, raw_response: response_body}}
+            {:ok,
+             %{
+               content: content,
+               tokens_used: tokens_used,
+               cost: cost,
+               raw_response: response_body
+             }}
 
           {:error, decode_error} ->
             Logger.error("Failed to decode OpenAI response: #{inspect(decode_error)}")

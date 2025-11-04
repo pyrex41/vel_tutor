@@ -1,6 +1,24 @@
 defmodule ViralEngine.Metrics do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Prometheus
+
+  def record_presence_broadcast(topic, latency_ms) do
+    :prometheus_histogram.observe(
+      [name: :presence_broadcast_latency_ms, labels: [topic: topic]],
+      latency_ms
+    )
+  end
+
+  # Existing Ecto schema...
+  defmodule PresenceMetrics do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    schema "metrics" do
+      # ... existing fields
+    end
+
+    # ... existing changeset
+  end
 
   schema "metrics" do
     field(:tenant_id, Ecto.UUID)

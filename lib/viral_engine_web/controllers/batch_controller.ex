@@ -146,10 +146,11 @@ defmodule ViralEngineWeb.BatchController do
   GET /api/batches/:id/results?format=json|csv
   """
   def export_results(conn, %{"id" => id} = params) do
-    format = case Map.get(params, "format", "json") do
-      "csv" -> :csv
-      _ -> :json
-    end
+    format =
+      case Map.get(params, "format", "json") do
+        "csv" -> :csv
+        _ -> :json
+      end
 
     case BatchContext.export_results(id, format) do
       {:ok, data} ->

@@ -184,18 +184,29 @@ export default function () {
 
   sleep(1);
 
-  // Test Group 4: Organization Listing (multi-tenancy stress)
-  group('Multi-Tenancy Operations', function () {
-    const orgListRes = http.get(`${BASE_URL}/api/organizations?limit=50&offset=0`, {
-      headers: {
-        'X-Tenant-ID': TENANT_ID,
-      },
-    });
-
-    check(orgListRes, {
-      'org list status is 200': (r) => r.status === 200,
-    }) || errorRate.add(1);
+// Test Group 4: Presence Simulation (PubSub load)
+group('Presence Simulation', function () {
+  const presencePayload = JSON.stringify({
+    action: 'join',
+    user_id: `${USER_ID}-${__VU}-${Math.floor(Math.random() * 1000)}`,
+    subject: 'practice',
+    meta: { name: `User${__VU}`, role: 'student' }
   });
+
+  const presenceRes = http.post(`${BASE_URL}/api/presence/simulate`, presencePayload, {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Tenant-ID': TENANT_ID,
+    },
+  });
+
+  check(presenceRes, {
+    'presence join status is 200': (r) => r.status === 200,
+  }) || errorRate.add(1);
+
+  const presenceDuration = new Trend('presence_join_duration');
+  presenceDuration.add(presenceRes.timings.duration);
+});
 
   sleep(1);
 }

@@ -109,10 +109,15 @@ defmodule ViralEngineWeb.Router do
     get("/:agent/health", AgentController, :health)
   end
 
+  # Practice session route
+  live("/practice", PracticeSessionLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
 
+    live("/presence", PresenceLive, :index)
+    live("/presence", PresenceLive, :index)
     live("/performance", PerformanceDashboardLive)
     live("/costs", CostDashboardLive)
     live("/alerts", AlertDashboardLive)

@@ -6,6 +6,14 @@ defmodule ViralEngine.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      ViralEngine.Repo,
+      {Phoenix.PubSub, name: ViralEngine.PubSub},
+      ViralEngine.Presence,
+      ViralEngine.Repo,
+      ViralEngine.Presence,
+      {Phoenix.PubSub, name: ViralEngine.PubSub},
+      ViralEngine.Presence,
+
       # Start the Ecto repository
       ViralEngine.Repo,
       # Start the PubSub system

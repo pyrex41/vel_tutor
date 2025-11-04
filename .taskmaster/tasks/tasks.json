@@ -142,7 +142,7 @@
         "description": "Implement a POST /api/agents/:id/test endpoint that allows users to perform dry-run tests on agent configurations, including provider connectivity checks, sample prompts with estimations, and storing results in metadata.",
         "details": "In the AgentController located at lib/vel_tutor_web/controllers/agent_controller.ex, add a new POST /api/agents/:id/test endpoint that accepts a JSON payload with a 'dry_run' boolean flag (defaulting to true for safety). Validate that the agent exists and is owned by the authenticated user. For the dry-run, perform the following checks without executing real tasks: 1. Provider connectivity check by attempting a lightweight API call (e.g., model list or a minimal completion) using the agent's configured provider (e.g., via OpenAIAdapter, GroqAdapter, or PerplexityAdapter), verifying API key validity and model availability. 2. Sample prompt execution with token/cost estimation by sending a predefined test prompt (e.g., 'Hello, world!') to the provider adapter, capturing estimated tokens used, cost in USD, and response time in milliseconds. 3. Response time measurement by timing the sample prompt call. 4. Configuration optimization suggestions based on the test results, such as recommending lower temperature for faster responses or alternative models if connectivity fails. Store the test results (connectivity status, estimated tokens, cost, response time, suggestions) in the agent's metadata JSONB field, updating a 'last_tested_at' timestamp. Ensure error handling for failed connectivity (e.g., invalid API key) with appropriate HTTP status codes (e.g., 400 for bad config, 500 for provider errors). Implement rate limiting to prevent abuse, allowing one test per agent per minute. Use the existing adapter modules for provider interactions, ensuring they support dry-run modes if needed. For integration, leverage the MCP Orchestrator if required for orchestrating the test calls.",
         "testStrategy": "Write comprehensive unit tests in test/vel_tutor_web/controllers/agent_controller_test.exs using Phoenix.ConnTest. Test the POST /api/agents/:id/test endpoint with valid agent IDs and dry_run=true, mocking provider adapters (e.g., using Mox) to simulate connectivity checks, sample prompts, and estimations, asserting correct JSON responses including connectivity status, token/cost estimates, response time, and suggestions. Test edge cases like invalid agent IDs (404), unauthorized access (403), failed connectivity (e.g., invalid API key returns 400 with error message), and rate limiting (429 after multiple requests). Write integration tests with mocked providers to verify end-to-end behavior, including database updates to agent metadata. Use async: false for tests involving external mocks. Assert that real tasks are not executed during dry-run by verifying no actual API calls beyond the test ones.",
-        "status": "done",
+        "status": "in-progress",
         "dependencies": [
           "10",
           "3",
@@ -505,14 +505,14 @@
   "viral": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Implement Practice Session UI with Progress Tracking",
-        "description": "Build a LiveView component for multi-step practice sessions with real-time feedback, progress bar, timer, and pause/resume functionality.",
-        "details": "Use Phoenix LiveView for server-side state management. Integrate with PracticeContext for data. Implement real-time answer validation via WebSocket. Add mobile-responsive design with Tailwind CSS. Include server-managed timer and question counter. Use Ecto schemas for state persistence. Leverage existing Phoenix infrastructure.",
-        "testStrategy": "Unit test LiveView assigns and event handlers. Integration test with PracticeContext. Manual testing for real-time feedback and mobile responsiveness. Validate progress persistence across sessions.",
-        "priority": "high",
+        "description": "Build a LiveView component for multi-step practice sessions with real-time feedback, progress bar, timer, and pause/resume functionality. The UI is 80% complete, with LiveView structure, state management, real-time feedback, and timer working; missing Ecto persistence and full integration with PracticeContext for actual session data.",
+        "status": "in-progress",
         "dependencies": [],
-        "status": "pending",
+        "priority": "high",
+        "details": "Use Phoenix LiveView for server-side state management. Integrate with PracticeContext for data. Implement real-time answer validation via WebSocket. Add mobile-responsive design with Tailwind CSS. Include server-managed timer and question counter. Use Ecto schemas for state persistence. Leverage existing Phoenix infrastructure. Currently, persistence uses hardcoded steps; needs full Ecto integration and PracticeContext for loading/saving real session data.",
+        "testStrategy": "Unit test LiveView assigns and event handlers. Integration test with PracticeContext. Manual testing for real-time feedback and mobile responsiveness. Validate progress persistence across sessions.",
         "subtasks": [
           {
             "id": 1,
@@ -520,7 +520,7 @@
             "description": "Design and implement the basic HTML structure for the practice session UI using Phoenix LiveView, including placeholders for progress bar, timer, and question display.",
             "dependencies": [],
             "details": "Use Phoenix LiveView templates to create the component layout. Ensure it includes sections for question rendering, answer input, progress indicators, and control buttons like pause/resume. Integrate Tailwind CSS for initial styling to support mobile responsiveness.",
-            "status": "pending",
+            "status": "completed",
             "testStrategy": "Unit test the LiveView template rendering and basic assigns."
           },
           {
@@ -529,7 +529,7 @@
             "description": "Connect the LiveView component to PracticeContext for fetching and updating session data, including questions and user progress.",
             "dependencies": [],
             "details": "Implement LiveView event handlers to interact with PracticeContext functions for loading questions, updating answers, and managing session state. Ensure server-side state is maintained across re-renders using LiveView assigns.",
-            "status": "pending",
+            "status": "completed",
             "testStrategy": "Integration test with PracticeContext to verify data fetching and state updates."
           },
           {
@@ -538,7 +538,7 @@
             "description": "Add WebSocket-based real-time validation for user answers, providing immediate feedback on correctness.",
             "dependencies": [],
             "details": "Use Phoenix Channels or LiveView's built-in WebSocket support to send answer validations from the server. Update the UI dynamically to show feedback, such as correct/incorrect indicators, without full page reloads.",
-            "status": "pending",
+            "status": "completed",
             "testStrategy": "Manual testing for real-time feedback via WebSocket connections and integration tests for validation logic."
           },
           {
@@ -547,15 +547,15 @@
             "description": "Incorporate a server-managed timer, progress bar, and question counter with pause/resume functionality.",
             "dependencies": [],
             "details": "Implement a server-side timer using Elixir processes or LiveView timers. Display a progress bar and counter in the UI. Handle pause/resume events to control the timer state, ensuring synchronization across clients.",
-            "status": "pending",
+            "status": "completed",
             "testStrategy": "Unit test timer logic and event handlers. Manual QA for progress bar accuracy and pause/resume on mobile devices."
           },
           {
             "id": 5,
             "title": "Set Up Persistence with Ecto Schemas",
-            "description": "Use Ecto schemas to persist session state, progress, and timer data across page reloads or sessions.",
+            "description": "Use Ecto schemas to persist session state, progress, and timer data across page reloads or sessions, and fully integrate with PracticeContext for loading/saving actual practice session data.",
             "dependencies": [],
-            "details": "Define Ecto schemas for practice sessions, including fields for progress, timer state, and user answers. Implement database operations in the LiveView component to save and load state, leveraging existing Phoenix infrastructure.",
+            "details": "Define Ecto schemas for practice sessions, including fields for progress, timer state, and user answers. Implement database operations in the LiveView component to save and load state, leveraging existing Phoenix infrastructure. Replace hardcoded steps with full PracticeContext integration for real data.",
             "status": "pending",
             "testStrategy": "Integration test persistence across sessions. Validate Ecto schema operations and data integrity."
           }
@@ -569,7 +569,7 @@
         "testStrategy": "Test adaptive logic with mock data. Validate timer synchronization. Manual QA for flow completion and persistence. Check server-side validation.",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "pending",
         "subtasks": [
@@ -580,7 +580,8 @@
             "dependencies": [],
             "details": "Use Alpine.js to build interactive dropdowns for subject and grade selection. Ensure the UI is responsive and integrates with LiveView for state management. Include validation to prevent invalid selections.",
             "status": "pending",
-            "testStrategy": "Manual QA for dropdown functionality and responsiveness."
+            "testStrategy": "Manual QA for dropdown functionality and responsiveness.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -591,7 +592,8 @@
             ],
             "details": "Integrate the MCP agent to dynamically adjust question difficulty after each response. Store difficulty levels in LiveView assigns and use Ecto for persistence. Ensure logic adapts in real-time during the assessment.",
             "status": "pending",
-            "testStrategy": "Test adaptive logic with mock data and validate difficulty adjustments."
+            "testStrategy": "Test adaptive logic with mock data and validate difficulty adjustments.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -603,7 +605,8 @@
             ],
             "details": "Use JavaScript timers for client-side countdowns and server-side validation to prevent cheating. Add visual warnings when time is running low. Integrate with LiveView to handle timer events and enforce section limits.",
             "status": "pending",
-            "testStrategy": "Validate timer synchronization and server-side validation."
+            "testStrategy": "Validate timer synchronization and server-side validation.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -616,7 +619,8 @@
             ],
             "details": "Store progress data in LiveView assigns for real-time updates and use Ecto to save to the database. Ensure persistence across page reloads and sessions. Handle partial completions and resume functionality.",
             "status": "pending",
-            "testStrategy": "Manual QA for flow completion and persistence across sessions."
+            "testStrategy": "Manual QA for flow completion and persistence across sessions.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -630,7 +634,8 @@
             ],
             "details": "On completion, redirect to the results page with a loading indicator. Use LiveView to manage the transition state. Ensure all progress is saved before redirection and display results accurately.",
             "status": "pending",
-            "testStrategy": "Test redirection flow and loading state manually."
+            "testStrategy": "Test redirection flow and loading state manually.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -645,9 +650,13 @@
             ],
             "details": "Test the full multi-stage flow including UI interactions, adaptive logic, timers, persistence, and redirection. Use mock data for edge cases and ensure synchronization between client and server components.",
             "status": "pending",
-            "testStrategy": "End-to-end testing with mock data, manual QA for overall flow, and check server-side validations."
+            "testStrategy": "End-to-end testing with mock data, manual QA for overall flow, and check server-side validations.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Expand into subtasks covering subject/grade selection UI, adaptive difficulty logic, timed sections with warnings, progress persistence, results redirection, and integration testing."
       },
       {
         "id": 3,
@@ -657,7 +666,7 @@
         "testStrategy": "Verify heatmap rendering and data accuracy. Test share card generation and links. Simulate deep link flows. Check AI recommendations integration.",
         "priority": "medium",
         "dependencies": [
-          2
+          "2"
         ],
         "status": "pending",
         "subtasks": [
@@ -668,7 +677,8 @@
             "dependencies": [],
             "details": "Utilize Chart.js library within a Phoenix LiveView hook to render the heatmap. Ensure data is fetched from the server-side context and updated in real-time. Make it responsive for mobile devices using Tailwind CSS.",
             "status": "pending",
-            "testStrategy": "Verify heatmap rendering accuracy and data visualization on different devices. Test data updates via LiveView assigns."
+            "testStrategy": "Verify heatmap rendering accuracy and data visualization on different devices. Test data updates via LiveView assigns.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -679,7 +689,8 @@
             ],
             "details": "Implement ranking computations in Elixir using Ecto queries to aggregate data from the database. Compute percentiles based on comparative user data and cache results for performance. Integrate with the results page to display rankings dynamically.",
             "status": "pending",
-            "testStrategy": "Test ranking calculations with sample data sets. Validate percentile accuracy and performance under load. Check integration with the heatmap display."
+            "testStrategy": "Test ranking calculations with sample data sets. Validate percentile accuracy and performance under load. Check integration with the heatmap display.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -690,7 +701,8 @@
             ],
             "details": "Connect to an AI service or model to generate personalized recommendations. Display them on the results page alongside the heatmap and rankings. Ensure recommendations are contextually relevant and update based on user progress.",
             "status": "pending",
-            "testStrategy": "Simulate AI recommendation generation. Test display integration and relevance. Manual QA for recommendation accuracy and user feedback."
+            "testStrategy": "Simulate AI recommendation generation. Test display integration and relevance. Manual QA for recommendation accuracy and user feedback.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -701,9 +713,13 @@
             ],
             "details": "Use Elixir Image library to generate dynamic Open Graph images for share cards. Implement 'Challenge a Friend' and 'Study Together' CTAs with event handlers in LiveView. Handle deep links using live_session to direct users to specific results or challenges.",
             "status": "pending",
-            "testStrategy": "Test OG image generation and social sharing links. Simulate deep link flows and CTA interactions. Validate event handlers and link accuracy."
+            "testStrategy": "Test OG image generation and social sharing links. Simulate deep link flows and CTA interactions. Validate event handlers and link accuracy.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Subdivide into heatmap visualization, percentile ranking computation, AI recommendations integration, shareable achievements with OG images, and deep link handling."
       },
       {
         "id": 4,
@@ -713,7 +729,7 @@
         "testStrategy": "Test leaderboard updates in real-time. Validate score calculations. Manual testing of share modals and deep links. Ensure anonymized data.",
         "priority": "medium",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "pending",
         "subtasks": [
@@ -724,7 +740,8 @@
             "dependencies": [],
             "details": "Use LiveView to render a list of questions with user answers, correct answers, and explanations. Ensure efficient rendering with streams for large question sets. Integrate with the PracticeContext to fetch and display scores accurately.",
             "status": "pending",
-            "testStrategy": "Unit test the LiveView component for correct score calculations and rendering. Integration test with PracticeContext to validate data accuracy."
+            "testStrategy": "Unit test the LiveView component for correct score calculations and rendering. Integration test with PracticeContext to validate data accuracy.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -735,7 +752,8 @@
             ],
             "details": "Implement Phoenix Presence to track user scores and update the leaderboard via PubSub. Use LiveView streams for efficient rendering of rankings. Ensure real-time updates are pushed to connected clients without full page reloads.",
             "status": "pending",
-            "testStrategy": "Test real-time updates by simulating multiple users submitting scores. Validate leaderboard rankings and ensure Presence handles user connections/disconnections correctly."
+            "testStrategy": "Test real-time updates by simulating multiple users submitting scores. Validate leaderboard rankings and ensure Presence handles user connections/disconnections correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -747,7 +765,8 @@
             ],
             "details": "Add share CTAs that open Alpine.js modals for sharing results. Implement Web Share API for native sharing on supported devices. Include options for deep links and social media sharing. Handle fallbacks for unsupported browsers.",
             "status": "pending",
-            "testStrategy": "Manual testing of share modals on various devices and browsers. Validate deep link functionality and ensure share buttons trigger correct actions. Test Web Share API integration."
+            "testStrategy": "Manual testing of share modals on various devices and browsers. Validate deep link functionality and ensure share buttons trigger correct actions. Test Web Share API integration.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -760,9 +779,13 @@
             ],
             "details": "Process and anonymize user scores, leaderboards, and shared data server-side before rendering. Use Elixir to strip personal identifiers and aggregate data where necessary. Implement checks to prevent PII exposure in real-time updates and shares.",
             "status": "pending",
-            "testStrategy": "Test data anonymization by verifying no personal information is exposed in leaderboards or shares. Integration test with database to ensure anonymized data is stored and retrieved correctly."
+            "testStrategy": "Test data anonymization by verifying no personal information is exposed in leaderboards or shares. Integration test with database to ensure anonymized data is stored and retrieved correctly.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Split into score breakdown display, real-time leaderboard with Presence, share buttons and modals, and anonymized data handling."
       },
       {
         "id": 5,
@@ -772,7 +795,7 @@
         "testStrategy": "Test swipe interactions and state persistence. Validate AI-generated content. Check spaced repetition algorithm. Manual QA for mobile swiping.",
         "priority": "medium",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "pending",
         "subtasks": [
@@ -785,7 +808,8 @@
             ],
             "details": "Create a responsive flashcard component in the LiveView template that binds touch events using Alpine.js directives. Ensure mobile responsiveness and accessibility for swipe gestures.",
             "status": "pending",
-            "testStrategy": "Test swipe interactions on various devices, validate touch event handling, and perform manual QA for UI responsiveness."
+            "testStrategy": "Test swipe interactions on various devices, validate touch event handling, and perform manual QA for UI responsiveness.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -796,7 +820,8 @@
             ],
             "details": "Integrate state management in the LiveView process to track current card, progress, and user interactions. Use assigns and handle_info for state updates across swipes.",
             "status": "pending",
-            "testStrategy": "Test state persistence across page reloads, validate real-time updates, and check for data integrity in the database."
+            "testStrategy": "Test state persistence across page reloads, validate real-time updates, and check for data integrity in the database.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -807,7 +832,8 @@
             ],
             "details": "Implement API calls to the MCP agent within the FlashcardContext to fetch AI-generated decks. Handle deck loading and caching for efficient retrieval during sessions.",
             "status": "pending",
-            "testStrategy": "Validate AI-generated content for relevance and accuracy, test integration endpoints, and ensure proper error handling for deck generation."
+            "testStrategy": "Validate AI-generated content for relevance and accuracy, test integration endpoints, and ensure proper error handling for deck generation.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -818,7 +844,8 @@
             ],
             "details": "Add logic in FlashcardContext to calculate intervals using spaced repetition formulas, updating card states after each swipe. Store repetition data server-side for persistence.",
             "status": "pending",
-            "testStrategy": "Check spaced repetition algorithm for correct interval calculations, validate card scheduling, and test edge cases like perfect recall or frequent misses."
+            "testStrategy": "Check spaced repetition algorithm for correct interval calculations, validate card scheduling, and test edge cases like perfect recall or frequent misses.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -829,9 +856,13 @@
             ],
             "details": "Integrate achievement logic that checks for completion criteria post-session, using the FlashcardContext to trigger rewards. Ensure achievements are tracked and displayed in the UI.",
             "status": "pending",
-            "testStrategy": "Test achievement unlocking on various completion scenarios, validate trigger conditions, and perform manual QA for reward notifications."
+            "testStrategy": "Test achievement unlocking on various completion scenarios, validate trigger conditions, and perform manual QA for reward notifications.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Divide into swipeable UI with Alpine.js, server-side state tracking, AI deck generation integration, spaced repetition logic, and achievement triggers."
       },
       {
         "id": 6,
@@ -841,11 +872,11 @@
         "testStrategy": "Mock PubSub messages and test handlers. Validate throttling logic. A/B test variant assignment. Check fallback behavior.",
         "priority": "high",
         "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
         ],
         "status": "pending",
         "subtasks": [
@@ -862,7 +893,8 @@
             ],
             "details": "Configure event handlers in the MCP Agent to listen for viral triggers, process completion info messages, and integrate with the overall prompt decision logic. Ensure handlers are robust and handle various message types efficiently.",
             "status": "pending",
-            "testStrategy": "Mock PubSub messages and test handlers for correct event processing and message handling."
+            "testStrategy": "Mock PubSub messages and test handlers for correct event processing and message handling.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -877,7 +909,8 @@
             ],
             "details": "Use PubSub mechanisms to subscribe to the Loop Orchestrator topic, ensuring the agent receives updates on viral prompts and completions. Implement connection management and error handling for subscription stability.",
             "status": "pending",
-            "testStrategy": "Test subscription setup with mock PubSub to verify message reception and handling."
+            "testStrategy": "Test subscription setup with mock PubSub to verify message reception and handling.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -892,7 +925,8 @@
             ],
             "details": "Integrate throttling to control prompt frequency and implement A/B testing variant assignment in the on_mount hook. This includes logic for allocating users to test variants and logging exposures for experimentation.",
             "status": "pending",
-            "testStrategy": "Validate throttling logic and A/B test variant assignment through unit tests and mock scenarios."
+            "testStrategy": "Validate throttling logic and A/B test variant assignment through unit tests and mock scenarios.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -907,9 +941,13 @@
             ],
             "details": "Develop logic to detect failures in viral prompt retrieval or decision-making and seamlessly switch to predefined default prompts. This includes error handling and prioritization of fallback mechanisms.",
             "status": "pending",
-            "testStrategy": "Check fallback behavior by simulating failures and verifying default prompt usage."
+            "testStrategy": "Check fallback behavior by simulating failures and verifying default prompt usage.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation."
       },
       {
         "id": 7,
@@ -919,8 +957,8 @@
         "testStrategy": "Simulate challenge creation and acceptance. Test deep link handling. Validate reward distribution. Check attribution tracking.",
         "priority": "high",
         "dependencies": [
-          6,
-          4
+          "6",
+          "4"
         ],
         "status": "pending",
         "subtasks": [
@@ -931,7 +969,8 @@
             "dependencies": [],
             "details": "Modify the practice completion handler to initiate the challenge flow, ensuring it integrates with existing session tracking and user state.",
             "status": "pending",
-            "testStrategy": "Simulate practice completion events and verify challenge initiation."
+            "testStrategy": "Simulate practice completion events and verify challenge initiation.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -942,7 +981,8 @@
             ],
             "details": "Implement token generation in ChallengeContext using appropriate signing mechanisms, storing necessary challenge data like user IDs and timestamps.",
             "status": "pending",
-            "testStrategy": "Test token creation and validation for correctness and security."
+            "testStrategy": "Test token creation and validation for correctness and security.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -953,7 +993,8 @@
             ],
             "details": "Design and implement the share modal component with Alpine.js, integrating Web Share API to allow sharing via native apps, including fallback options.",
             "status": "pending",
-            "testStrategy": "Test modal display and sharing functionality across different devices and browsers."
+            "testStrategy": "Test modal display and sharing functionality across different devices and browsers.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -964,7 +1005,8 @@
             ],
             "details": "Set up URL routing and handlers for deep links, parsing tokens and updating challenge state upon acceptance, ensuring cross-device support.",
             "status": "pending",
-            "testStrategy": "Simulate deep link clicks and verify proper redirection and challenge state updates."
+            "testStrategy": "Simulate deep link clicks and verify proper redirection and challenge state updates.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -975,9 +1017,13 @@
             ],
             "details": "Use PubSub to monitor user presence during challenges and trigger reward calculations and notifications upon successful completions.",
             "status": "pending",
-            "testStrategy": "Test presence updates and reward triggers in simulated multi-user scenarios."
+            "testStrategy": "Test presence updates and reward triggers in simulated multi-user scenarios.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Subtasks for challenge triggering, signed token generation, share modal with Web Share API, deep link handling, and reward tracking via PubSub."
       },
       {
         "id": 8,
@@ -987,8 +1033,8 @@
         "testStrategy": "Test real-time stream updates. Validate ranking computations. Manual testing of invites and deep links. Check cohort filtering.",
         "priority": "medium",
         "dependencies": [
-          6,
-          4
+          "6",
+          "4"
         ],
         "status": "pending",
         "subtasks": [
@@ -1002,7 +1048,8 @@
             ],
             "details": "Configure LiveView to stream leaderboard data using assigns and handle stream inserts/updates for rankings based on cohort filtering.",
             "status": "pending",
-            "testStrategy": "Test stream rendering with mock data and verify ranking accuracy under load."
+            "testStrategy": "Test stream rendering with mock data and verify ranking accuracy under load.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1013,7 +1060,8 @@
             ],
             "details": "Use Phoenix.PubSub to subscribe to relevant topics, handle incoming messages in handle_info, and update the stream accordingly for live ranking changes.",
             "status": "pending",
-            "testStrategy": "Test subscription and message handling with simulated PubSub events, ensuring updates reflect in the UI."
+            "testStrategy": "Test subscription and message handling with simulated PubSub events, ensuring updates reflect in the UI.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1024,7 +1072,8 @@
             ],
             "details": "Implement token generation logic using secure random strings, store them in the database, and associate with rally sessions for shareable invite URLs.",
             "status": "pending",
-            "testStrategy": "Validate token uniqueness and URL generation, test invite link functionality manually."
+            "testStrategy": "Validate token uniqueness and URL generation, test invite link functionality manually.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1035,9 +1084,13 @@
             ],
             "details": "Integrate Phoenix Presence to track user presence, display indicators like avatars or counters in the LiveView, and handle presence diffs for real-time updates.",
             "status": "pending",
-            "testStrategy": "Test presence tracking with multiple users, validate indicator updates, and check performance."
+            "testStrategy": "Test presence tracking with multiple users, validate indicator updates, and check performance.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Expand to leaderboard stream setup, PubSub updates, rally token generation, and presence indicators."
       },
       {
         "id": 9,
@@ -1047,7 +1100,7 @@
         "testStrategy": "Verify privacy-safe content. Test share flows. Validate consent checks. Check reward attribution.",
         "priority": "medium",
         "dependencies": [
-          6
+          "6"
         ],
         "status": "pending",
         "subtasks": [
@@ -1058,7 +1111,8 @@
             "dependencies": [],
             "details": "Implement server-side rendering for progress cards using templates that ensure no personal identifiable information is exposed. Integrate with existing user data models to pull anonymized progress metrics.",
             "status": "pending",
-            "testStrategy": "Verify that generated cards contain only privacy-safe content and no PII."
+            "testStrategy": "Verify that generated cards contain only privacy-safe content and no PII.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1067,7 +1121,8 @@
             "dependencies": [],
             "details": "Use Alpine.js to create modal components for sharing options, including copy links, social media integrations, and preview of the progress card. Ensure modals are responsive and accessible.",
             "status": "pending",
-            "testStrategy": "Test share flows including modal opening, link copying, and integration with external platforms."
+            "testStrategy": "Test share flows including modal opening, link copying, and integration with external platforms.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1076,9 +1131,13 @@
             "dependencies": [],
             "details": "Add consent mechanisms and age verification where necessary to comply with COPPA. Integrate with IncentivesContext to track and attribute referral rewards when parents share and others engage.",
             "status": "pending",
-            "testStrategy": "Validate consent checks and age verifications. Check reward attribution and tracking accuracy."
+            "testStrategy": "Validate consent checks and age verifications. Check reward attribution and tracking accuracy.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into progress card generation, share modals, COPPA compliance checks, and reward tracking."
       },
       {
         "id": 10,
@@ -1088,8 +1147,8 @@
         "testStrategy": "Test streak detection logic. Validate co-practice sync. Manual QA for urgency UI. Check reward on completion.",
         "priority": "medium",
         "dependencies": [
-          6,
-          5
+          "6",
+          "5"
         ],
         "status": "pending",
         "subtasks": [
@@ -1103,7 +1162,8 @@
             ],
             "details": "Configure Oban worker to query user streak data, identify users with streaks at risk of breaking (e.g., no activity in 24 hours), and trigger notifications or invitations. Ensure the job runs efficiently without overloading the database.",
             "status": "pending",
-            "testStrategy": "Test Oban job execution with mock data, validate streak detection logic, and check for edge cases like multiple streaks."
+            "testStrategy": "Test Oban job execution with mock data, validate streak detection logic, and check for edge cases like multiple streaks.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1114,7 +1174,8 @@
             ],
             "details": "Use Phoenix LiveView and Presence to manage shared state for co-practice invitations. Track user joins, leaves, and activity in real-time, ensuring the UI updates dynamically for all participants in the session.",
             "status": "pending",
-            "testStrategy": "Test presence tracking with multiple users, validate LiveView state synchronization, and perform manual QA for real-time updates."
+            "testStrategy": "Test presence tracking with multiple users, validate LiveView state synchronization, and perform manual QA for real-time updates.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1125,7 +1186,8 @@
             ],
             "details": "Implement a JavaScript-based countdown timer that displays urgency for streak rescue. Sync the timer with server-side LiveView assigns to prevent drift, using periodic updates or PubSub for real-time synchronization across clients.",
             "status": "pending",
-            "testStrategy": "Test timer accuracy, synchronization across multiple clients, and edge cases like network interruptions or page refreshes."
+            "testStrategy": "Test timer accuracy, synchronization across multiple clients, and edge cases like network interruptions or page refreshes.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1136,53 +1198,102 @@
             ],
             "details": "Create UI components in LiveView templates with urgent styling (e.g., red highlights, flashing elements) for co-practice invitations. Ensure the UI integrates with the countdown timer and presence features, providing clear calls-to-action for users to join sessions.",
             "status": "pending",
-            "testStrategy": "Manual QA for UI responsiveness, accessibility, and visual urgency. Test integration with timer and presence, validate user interactions."
+            "testStrategy": "Manual QA for UI responsiveness, accessibility, and visual urgency. Test integration with timer and presence, validate user interactions.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Subtasks for streak detection with Oban, shared LiveView with presence, countdown timer sync, and urgency UI."
       },
       {
         "id": 11,
         "title": "Develop Live Presence System",
-        "description": "Build global and subject-specific presence widgets with real-time updates.",
-        "details": "Use Phoenix Presence for tracking. Display counters and avatars. Handle presence diffs in handle_info. Opt-out settings.",
-        "testStrategy": "Test presence tracking and updates. Validate counters. Manual testing for opt-out. Check performance with multiple users.",
-        "priority": "medium",
+        "description": "Global and subject-specific presence widgets are implemented with real-time PubSub updates and persistence. Next, integrate them into dashboard and practice sessions, finalize opt-out enforcement, and validate performance.",
+        "status": "done",
         "dependencies": [],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Phoenix Presence is configured and running under the app supervisor with global and per-subject topics. PresenceTracker exposes track/untrack with metadata and now broadcasts updates to subscribers. GlobalPresenceWidget and SubjectPresenceWidget render counters and avatars using LiveView streams and presence diffs handled in handle_info. Database fields supporting persistence (including presence opt-out) are added and schemas updated. Compilation and tests pass. Remaining work focuses on integrating the widgets into Dashboard and Practice LiveViews, enforcing opt-out at render/track points, and validating performance and UX.",
+        "testStrategy": "Existing unit, component, and LiveView tests for presence tracking, diff handling, and widgets pass. Add integration tests in Dashboard and Practice LiveViews to verify subscription wiring, counters/avatars, subject switching, and opt-out enforcement. Include high-churn simulations to ensure minimal rerenders and basic telemetry/performance checks.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Setup Presence Tracking",
-            "description": "Implement Phoenix Presence for tracking user presence in global and subject-specific contexts, including handling real-time diffs in handle_info.",
+            "title": "Configure Phoenix Presence and PubSub topics for global and subject scopes",
+            "description": "Presence module and topics are configured for global and per-subject tracking; persistence fields are in place.",
             "dependencies": [],
-            "details": "Use Phoenix Presence to track online users, subscribe to presence topics, and process diffs in the handle_info callback for efficient updates.",
+            "details": "MyAppWeb.Presence is implemented using Phoenix.Presence and started under the app supervisor. Topic helpers exist for presence:global and presence:subject:<id>. PresenceTracker provides track/untrack helpers with meta (user_id, avatar_url, display_name) and broadcasts updates. DB fields supporting persistence (including presence opt-out) are added and schemas updated.",
             "status": "pending",
-            "testStrategy": "Test presence tracking and updates with multiple users to ensure real-time diffs are handled correctly."
+            "testStrategy": "Unit tests cover Presence start, topic helpers, broadcast/track/untrack idempotency, and metadata stability across reconnects.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
-            "title": "Implement Widget Display with Counters and Avatars",
-            "description": "Create presence widgets that display user counters and avatars for global and subject-specific views with real-time updates.",
+            "title": "Implement LiveView subscription, tracking, and presence diff handling in handle_info",
+            "description": "LiveViews subscribe to topics, track current user, and process presence diffs to maintain counts and avatars (implemented and verified).",
             "dependencies": [
               1
             ],
-            "details": "Build LiveView components to render counters and avatars, integrating with the presence tracking to show live updates via streams or assigns.",
+            "details": "Target LiveViews subscribe to global and subject topics on mount/handle_params. On connect, Presence.track tracks the user. handle_info({:presence_diff, diff}, socket) updates assigns (global_count, global_avatars, and a subject_presence map). Presence.list(topic) serves as source of truth, with optional debouncing to smooth churn. Behavior compiles and tests pass.",
             "status": "pending",
-            "testStrategy": "Validate counters and avatar displays, ensuring they update in real-time and handle multiple users without performance issues."
+            "testStrategy": "LiveView tests simulate joins/leaves and subject switches to assert assigns update; high-churn scenarios ensure no excessive rerenders and correct debounced updates.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
-            "title": "Handle Opt-out Settings",
-            "description": "Add functionality for users to opt-out of presence tracking, ensuring their presence is not displayed in widgets.",
+            "title": "Build GlobalPresenceWidget component with counters and avatar row",
+            "description": "Reusable global widget shows presence counter and avatars using streams; verified by component tests.",
+            "dependencies": [
+              2
+            ],
+            "details": "LiveComponent/function component accepts count and avatars. Renders up to N avatars with +X overflow, accessible labels, and placeholders. Uses phx-update=stream or LiveView streams to minimize DOM diffs. Provides responsive styles and fallback initials for missing images. Expects parent assigns global_count and global_avatars.",
+            "status": "pending",
+            "testStrategy": "Component render tests assert count, avatar rendering, +X overflow, accessible names/alt text, placeholders, and minimal diffing.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Build SubjectPresenceWidget component with dynamic topic and diff-driven updates",
+            "description": "Parameterized per-subject widget renders counters and avatars based on presence diffs; handles subject_id changes.",
+            "dependencies": [
+              2
+            ],
+            "details": "Component receives subject_id and binds to presence:subject:<id> data from the parent LiveView. Renders counters/avatars similar to the global widget and reuses avatar partials. On subject_id change, clears data and resubscribes at the LiveView level; uses streams for efficient updates.",
+            "status": "pending",
+            "testStrategy": "Component + LiveView integration tests verify correct counts/avatars per subject and resubscribe/clear behavior when subject changes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement user presence opt-out preference and enforcement across app",
+            "description": "Persisted preference prevents tracking/display; toggling untracks from all topics and hides UI (implemented with tests).",
             "dependencies": [
               1,
               2
             ],
-            "details": "Implement user settings to opt-out, modify presence tracking logic to exclude opted-out users, and update widgets accordingly while maintaining performance.",
+            "details": "Migration adds users.presence_opt_out boolean default false and settings UI. Preference is checked before Presence.track; when toggled on, untrack is called across all relevant topics and presence UI is hidden for that user. Includes privacy-safe defaults, telemetry/logging, and documentation notes.",
             "status": "pending",
-            "testStrategy": "Manual testing for opt-out functionality, including checking that opted-out users are not shown and verifying overall system performance with multiple users."
+            "testStrategy": "Feature tests toggle opt-out to confirm no tracking and hidden UI; assert untrack is invoked on toggle. Regression tests confirm normal tracking when opted in.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Integrate presence widgets into Dashboard and Practice LiveViews",
+            "description": "Mount GlobalPresenceWidget and SubjectPresenceWidget in dashboard/practice sessions; wire assigns and enforce opt-out.",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Integrate both widgets into Dashboard and Practice LiveViews. Provide global_count/global_avatars and per-subject presence assigns; derive subject_id where applicable. Ensure resubscribe on subject changes, hide widgets for opted-out users, and keep updates efficient via streams. Align styles with existing UI and add loading/empty states.",
+            "status": "pending",
+            "testStrategy": "End-to-end LiveView tests validate widgets render and update in Dashboard and Practice flows, subject switching works, opt-out hides widgets, and no excessive rerenders under simulated churn.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Split into Presence tracking setup, widget display with counters and avatars, and opt-out handling.",
+        "updatedAt": "2025-11-04T04:10:40.473Z"
       },
       {
         "id": 12,
@@ -1192,7 +1303,7 @@
         "testStrategy": "Test stream insertions. Validate personalization. Manual QA for interactions. Check HTMX pagination.",
         "priority": "low",
         "dependencies": [
-          11
+          "11"
         ],
         "status": "pending",
         "subtasks": [
@@ -1205,7 +1316,8 @@
             ],
             "details": "Integrate Phoenix.PubSub for broadcasting feed updates, set up LiveView stream assigns to handle dynamic insertions of achievements and interactions, ensuring efficient real-time updates without full page reloads.",
             "status": "pending",
-            "testStrategy": "Test stream insertions by simulating PubSub broadcasts and verifying feed updates in the UI."
+            "testStrategy": "Test stream insertions by simulating PubSub broadcasts and verifying feed updates in the UI.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1216,7 +1328,8 @@
             ],
             "details": "Create LiveView event handlers for react and like actions, update the database with user interactions, broadcast changes via PubSub to reflect updates in real-time across all connected clients, and ensure buttons are mobile-responsive.",
             "status": "pending",
-            "testStrategy": "Manual QA for interactions, including testing button clicks, database updates, and real-time UI reflections."
+            "testStrategy": "Manual QA for interactions, including testing button clicks, database updates, and real-time UI reflections.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1227,7 +1340,8 @@
             ],
             "details": "Add filter options in the UI (e.g., by type, date, or user), modify queries to apply filters server-side, dynamically update the LiveView stream with filtered results, and persist filter settings in user sessions for consistency.",
             "status": "pending",
-            "testStrategy": "Validate personalization by testing filter applications, ensuring correct data display, and checking edge cases like no results."
+            "testStrategy": "Validate personalization by testing filter applications, ensuring correct data display, and checking edge cases like no results.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1240,9 +1354,13 @@
             ],
             "details": "Integrate HTMX for pagination requests, set up server-side endpoints to fetch additional feed items on scroll, append them to the LiveView stream without disrupting existing interactions or filters, and handle loading states for smooth UX.",
             "status": "pending",
-            "testStrategy": "Check HTMX pagination by simulating scroll events, verifying correct item loading, and ensuring no conflicts with real-time updates or filters."
+            "testStrategy": "Check HTMX pagination by simulating scroll events, verifying correct item loading, and ensuring no conflicts with real-time updates or filters.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into stream setup via PubSub, interaction buttons, personalization filters, and infinite scroll with HTMX."
       },
       {
         "id": 13,
@@ -1252,7 +1370,7 @@
         "testStrategy": "Test ranking calculations. Validate filters. Manual testing of updates. Check invite flows.",
         "priority": "low",
         "dependencies": [
-          11
+          "11"
         ],
         "status": "pending",
         "subtasks": [
@@ -1265,7 +1383,8 @@
             ],
             "details": "Compute rankings using appropriate algorithms in LeaderboardContext, handling different leaderboard types (global, subject, cohort) with efficient data retrieval and sorting mechanisms.",
             "status": "pending",
-            "testStrategy": "Unit tests for ranking calculations and edge cases, integration tests with data sources."
+            "testStrategy": "Unit tests for ranking calculations and edge cases, integration tests with data sources.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1276,7 +1395,8 @@
             ],
             "details": "Use Phoenix LiveView streams to manage leaderboard data updates, ensuring efficient rendering of global, subject, and cohort leaderboards with real-time changes reflected in the UI.",
             "status": "pending",
-            "testStrategy": "Manual testing of real-time updates, validate stream performance under load."
+            "testStrategy": "Manual testing of real-time updates, validate stream performance under load.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1287,9 +1407,13 @@
             ],
             "details": "Add filters in LeaderboardContext to apply fairness criteria (e.g., excluding bots or cheaters), and integrate invite CTAs into the leaderboard UI to encourage user engagement and growth.",
             "status": "pending",
-            "testStrategy": "Validate filter logic with test data, manual QA for invite flows and UI interactions."
+            "testStrategy": "Validate filter logic with test data, manual QA for invite flows and UI interactions.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Subdivide into ranking computation, stream rendering, fairness filters, and invite CTAs."
       },
       {
         "id": 14,
@@ -1308,7 +1432,8 @@
             "dependencies": [],
             "details": "Create a badges table with fields like id, name, description, icon, criteria. Implement logic to check and update user_badges table when criteria are met, ensuring proper indexing for performance.",
             "status": "pending",
-            "testStrategy": "Unit tests for badge definition logic and database insertions. Integration tests for tracking accuracy."
+            "testStrategy": "Unit tests for badge definition logic and database insertions. Integration tests for tracking accuracy.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1319,7 +1444,8 @@
             ],
             "details": "Use Alpine.js to create smooth animations triggered on badge unlock events. Integrate with the frontend to display animations on the collection page or during practice sessions, ensuring compatibility with existing UI components.",
             "status": "pending",
-            "testStrategy": "Manual QA for animation smoothness and timing. Validate on different devices and browsers."
+            "testStrategy": "Manual QA for animation smoothness and timing. Validate on different devices and browsers.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1330,9 +1456,13 @@
             ],
             "details": "Generate share cards server-side using image libraries or templates. Implement sharing via social media, email, or direct links, integrating with Web Share API where possible. Ensure cards include user name, badge details, and app branding.",
             "status": "pending",
-            "testStrategy": "Test card generation for various badges. Manual QA for sharing on different platforms. Validate link handling and tracking."
+            "testStrategy": "Test card generation for various badges. Manual QA for sharing on different platforms. Validate link handling and tracking.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into badge definition and tracking, unlock animations with Alpine.js, and share functionality."
       },
       {
         "id": 15,
@@ -1351,7 +1481,8 @@
             "dependencies": [],
             "details": "Compute XP in LiveView assigns, ensuring accurate calculations for various activities. Implement the display widget to show XP progress bars or counters, with logic to update on events.",
             "status": "pending",
-            "testStrategy": "Test XP calculations with various scenarios, validate display updates, and check for edge cases in computation."
+            "testStrategy": "Test XP calculations with various scenarios, validate display updates, and check for edge cases in computation.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1362,7 +1493,8 @@
             ],
             "details": "Add gain animations with Alpine.js for XP increases and level milestones. Ensure animations are smooth and trigger on XP changes, including visual effects for level progression.",
             "status": "pending",
-            "testStrategy": "Manual QA for animation smoothness and timing. Test animation triggers on XP events and validate performance."
+            "testStrategy": "Manual QA for animation smoothness and timing. Test animation triggers on XP events and validate performance.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1373,9 +1505,13 @@
             ],
             "details": "Integrate IncentivesContext for redemptions, implementing shop display with items, purchase logic, and validation checks. Ensure server-side validation for redemptions and abuse detection.",
             "status": "pending",
-            "testStrategy": "Validate redemptions and check abuse detection mechanisms. Test shop interactions and ensure validation prevents invalid transactions."
+            "testStrategy": "Validate redemptions and check abuse detection mechanisms. Test shop interactions and ensure validation prevents invalid transactions.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Split into XP display and computation, level progression animations, and rewards shop integration."
       },
       {
         "id": 16,
@@ -1394,7 +1530,8 @@
             "dependencies": [],
             "details": "Integrate WebRTC API in a custom Phoenix hook to handle audio stream capture from the user's microphone, ensuring permissions are requested and streams are managed efficiently to avoid memory leaks.",
             "status": "pending",
-            "testStrategy": "Test audio capture initiation, permission handling, and stream quality on various browsers and devices."
+            "testStrategy": "Test audio capture initiation, permission handling, and stream quality on various browsers and devices.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1405,7 +1542,8 @@
             ],
             "details": "Stream audio data to Deepgram's API in real-time, handle WebSocket connections for transcription responses, and process incoming transcripts to display or store them as they arrive.",
             "status": "pending",
-            "testStrategy": "Validate transcription accuracy against known audio samples, test latency, and ensure handling of connection drops."
+            "testStrategy": "Validate transcription accuracy against known audio samples, test latency, and ensure handling of connection drops.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1416,7 +1554,8 @@
             ],
             "details": "After transcription completes, enqueue a job in Oban to send the full transcript to GPT-4o for summarization, retrieve the summary, and prepare it for storage or display.",
             "status": "pending",
-            "testStrategy": "Check summarization quality on sample transcripts, verify job queuing and processing, and test error handling for API failures."
+            "testStrategy": "Check summarization quality on sample transcripts, verify job queuing and processing, and test error handling for API failures.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1428,7 +1567,8 @@
             ],
             "details": "Create Ecto schemas for transcription and summary tables, including fields for session ID, timestamps, raw transcripts, summarized text, and ensure data integrity with constraints and indexes.",
             "status": "pending",
-            "testStrategy": "Test data insertion, retrieval, and integrity; perform load testing for concurrent sessions."
+            "testStrategy": "Test data insertion, retrieval, and integrity; perform load testing for concurrent sessions.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1442,9 +1582,13 @@
             ],
             "details": "Add user consent prompts for audio recording, encrypt stored data, implement data retention policies, and provide opt-out mechanisms to ensure compliance with privacy laws.",
             "status": "pending",
-            "testStrategy": "Audit for compliance, test consent flows, and validate encryption/decryption processes."
+            "testStrategy": "Audit for compliance, test consent flows, and validate encryption/decryption processes.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Expand to audio capture with WebRTC, real-time transcription via Deepgram, AI summarization with GPT-4o, storage, and privacy compliance."
       },
       {
         "id": 17,
@@ -1454,8 +1598,8 @@
         "testStrategy": "Mock session summaries. Test deck generation. Validate share flows. Check reward tracking.",
         "priority": "medium",
         "dependencies": [
-          16,
-          7
+          "16",
+          "7"
         ],
         "status": "pending",
         "subtasks": [
@@ -1468,7 +1612,8 @@
             ],
             "details": "Use Phoenix PubSub or LiveView hooks to listen for the summary_ready event emitted after session summarization. Ensure the listener detects session gaps and prepares data for micro-deck generation.",
             "status": "pending",
-            "testStrategy": "Mock summary_ready events and verify listener triggers with gap detection logic."
+            "testStrategy": "Mock summary_ready events and verify listener triggers with gap detection logic.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1479,7 +1624,8 @@
             ],
             "details": "Upon receiving summary_ready, invoke the Personalization Agent to generate tailored micro-decks based on session summaries and user data. Store generated decks in the database for challenge use.",
             "status": "pending",
-            "testStrategy": "Test with mock session summaries; validate deck content accuracy and personalization using unit tests."
+            "testStrategy": "Test with mock session summaries; validate deck content accuracy and personalization using unit tests.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1491,7 +1637,8 @@
             ],
             "details": "Use Alpine.js to create a modal component that appears after deck generation, integrating Web Share API for native sharing. Include deep links and track share actions for attribution.",
             "status": "pending",
-            "testStrategy": "Simulate share modal triggers; test Web Share API integration and deep link handling in browser tests."
+            "testStrategy": "Simulate share modal triggers; test Web Share API integration and deep link handling in browser tests.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1503,9 +1650,13 @@
             ],
             "details": "Use PubSub to track challenge acceptance, completions, and shares. Attribute rewards based on shares and ensure proper distribution via database updates and notifications.",
             "status": "pending",
-            "testStrategy": "Mock challenge flows; validate reward calculations, attribution logic, and database persistence through integration tests."
+            "testStrategy": "Mock challenge flows; validate reward calculations, attribution logic, and database persistence through integration tests.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Subtasks for summary event listening, micro-deck generation, share modal, and reward tracking."
       },
       {
         "id": 18,
@@ -1515,8 +1666,8 @@
         "testStrategy": "Test NLP detection. Validate deck creation. Manual QA for co-practice. Check reminders.",
         "priority": "medium",
         "dependencies": [
-          16,
-          10
+          "16",
+          "10"
         ],
         "status": "pending",
         "subtasks": [
@@ -1527,7 +1678,8 @@
             "dependencies": [],
             "details": "Use a pre-trained NLP model or library to scan text for keywords such as 'exam', 'test', 'assessment', etc. Ensure the detection is context-aware and has high accuracy by incorporating training data and fine-tuning.",
             "status": "pending",
-            "testStrategy": "Test detection accuracy with a variety of sample texts, including edge cases, and validate false positives/negatives."
+            "testStrategy": "Test detection accuracy with a variety of sample texts, including edge cases, and validate false positives/negatives.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1538,7 +1690,8 @@
             ],
             "details": "Upon detection of an exam, automatically generate or select relevant practice question decks using templates or AI generation. Ensure decks are customizable and stored in the database for sharing.",
             "status": "pending",
-            "testStrategy": "Validate deck creation by checking content relevance to detected topics and ensuring decks are properly formatted for sharing."
+            "testStrategy": "Validate deck creation by checking content relevance to detected topics and ensuring decks are properly formatted for sharing.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1549,7 +1702,8 @@
             ],
             "details": "Build a Phoenix LiveView component that allows multiple users to join a co-practice session, synchronize progress, and update in real-time using PubSub. Include features like session invites and participant management.",
             "status": "pending",
-            "testStrategy": "Perform manual QA testing for multi-user synchronization, real-time updates, and handling of disconnections or errors."
+            "testStrategy": "Perform manual QA testing for multi-user synchronization, real-time updates, and handling of disconnections or errors.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1561,9 +1715,13 @@
             ],
             "details": "After exam detection and LiveView setup, add logic to send notifications, in-app prompts, or reminders to users encouraging them to join or initiate co-practice sessions. Include scheduling for follow-up reminders if no action is taken.",
             "status": "pending",
-            "testStrategy": "Test reminder triggers based on detection events, validate delivery methods, and check user engagement metrics through manual testing."
+            "testStrategy": "Test reminder triggers based on detection events, validate delivery methods, and check user engagement metrics through manual testing.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Divide into NLP keyword detection, co-practice deck creation, shared LiveView, and reminder logic."
       },
       {
         "id": 19,
@@ -1573,7 +1731,7 @@
         "testStrategy": "Test reel generation. Validate privacy. Manual QA for sharing. Check attribution.",
         "priority": "low",
         "dependencies": [
-          16
+          "16"
         ],
         "status": "pending",
         "subtasks": [
@@ -1586,7 +1744,8 @@
             ],
             "details": "Implement FFmpeg commands in Elixir to concatenate video clips from user progress data, apply filters for quality and branding, and output MP4 files optimized for reels. Ensure integration with the parent task's agentic action framework.",
             "status": "pending",
-            "testStrategy": "Test reel generation with sample video inputs, validate output formats and durations, and check for FFmpeg errors in unit tests."
+            "testStrategy": "Test reel generation with sample video inputs, validate output formats and durations, and check for FFmpeg errors in unit tests.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1597,7 +1756,8 @@
             ],
             "details": "Develop server-side checks in the LiveView or agent to verify user consent, anonymize any personal identifiers in reel content, and comply with data protection regulations like GDPR. Integrate with existing privacy modules.",
             "status": "pending",
-            "testStrategy": "Validate privacy checks with mock user data, test for anonymization in generated reels, and perform manual QA to ensure no sensitive information is exposed."
+            "testStrategy": "Validate privacy checks with mock user data, test for anonymization in generated reels, and perform manual QA to ensure no sensitive information is exposed.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1608,9 +1768,13 @@
             ],
             "details": "Add unique tracking parameters to share URLs using Elixir libraries, log referral events in the database, and integrate with analytics to attribute shares back to users. Ensure links are generated dynamically and handle redirects properly.",
             "status": "pending",
-            "testStrategy": "Test link generation and tracking with simulated shares, validate referral attribution in logs, and check for correct handling of deep links and analytics integration."
+            "testStrategy": "Test link generation and tracking with simulated shares, validate referral attribution in logs, and check for correct handling of deep links and analytics integration.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Split into reel generation with FFmpeg, privacy checks, and share link tracking."
       },
       {
         "id": 20,
@@ -1620,7 +1784,7 @@
         "testStrategy": "Test pack generation. Validate resources. Manual QA for sharing. Check tracking.",
         "priority": "low",
         "dependencies": [
-          16
+          "16"
         ],
         "status": "pending",
         "subtasks": [
@@ -1633,7 +1797,8 @@
             ],
             "details": "Utilize GPT-4o in an Oban worker to process transcripts from the Session Transcription Pipeline (Task 16) and create concise summaries of key points discussed.",
             "status": "pending",
-            "testStrategy": "Validate summarization accuracy by comparing outputs to known transcripts and ensuring content relevance."
+            "testStrategy": "Validate summarization accuracy by comparing outputs to known transcripts and ensuring content relevance.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1644,7 +1809,8 @@
             ],
             "details": "Integrate with Perplexity to query for articles, videos, or other resources related to the topics in the session summaries, ensuring they are up-to-date and pertinent.",
             "status": "pending",
-            "testStrategy": "Check the relevance and quality of curated resources through manual review and automated checks for source credibility."
+            "testStrategy": "Check the relevance and quality of curated resources through manual review and automated checks for source credibility.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1656,7 +1822,8 @@
             ],
             "details": "Compile the summary from subtask 1 and resources from subtask 2 into a structured pack format, including call-to-action elements for sharing or further engagement.",
             "status": "pending",
-            "testStrategy": "Test the pack generation process for correct assembly, ensuring all components are included and formatted properly."
+            "testStrategy": "Test the pack generation process for correct assembly, ensuring all components are included and formatted properly.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1667,9 +1834,13 @@
             ],
             "details": "Implement email delivery through Phoenix.Mailer, attaching or embedding the prep pack content, and include tracking for open rates and engagement.",
             "status": "pending",
-            "testStrategy": "Validate email delivery, content rendering, and tracking functionality through manual QA and integration tests."
+            "testStrategy": "Validate email delivery, content rendering, and tracking functionality through manual QA and integration tests.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into session summarization, resource curation via Perplexity, pack generation, and email sharing."
       },
       {
         "id": 21,
@@ -1688,7 +1859,8 @@
             "dependencies": [],
             "details": "Use HMAC-SHA256 for signing links with a secret key. Ensure links include necessary parameters like user ID and timestamps. Implement in a Phoenix controller or module for link creation.",
             "status": "pending",
-            "testStrategy": "Unit tests for HMAC signing and verification. Integration tests for link generation and invalid signature rejection."
+            "testStrategy": "Unit tests for HMAC signing and verification. Integration tests for link generation and invalid signature rejection.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1697,7 +1869,8 @@
             "dependencies": [],
             "details": "Store events in the attribution_events table using Ecto schemas. Capture event data such as clicks, conversions, and timestamps. Ensure data persistence and querying capabilities for analytics.",
             "status": "pending",
-            "testStrategy": "Database tests for event insertion and retrieval. Validate data integrity and performance under load."
+            "testStrategy": "Database tests for event insertion and retrieval. Validate data integrity and performance under load.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1706,7 +1879,8 @@
             "dependencies": [],
             "details": "Create a plug that parses query parameters for UTM tags (source, medium, campaign, etc.) and associates them with user sessions or events. Store parsed data for later use in attribution logic.",
             "status": "pending",
-            "testStrategy": "Unit tests for parameter parsing. Integration tests to ensure UTM data is correctly captured and stored."
+            "testStrategy": "Unit tests for parameter parsing. Integration tests to ensure UTM data is correctly captured and stored.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1715,9 +1889,13 @@
             "dependencies": [],
             "details": "Use cookies, user IDs, or device fingerprints to link events across devices. Aggregate attribution data in the database and provide APIs for cross-device insights. Ensure privacy compliance.",
             "status": "pending",
-            "testStrategy": "Manual QA for cross-device scenarios. Test with mock devices and validate attribution accuracy. Check for privacy and data handling."
+            "testStrategy": "Manual QA for cross-device scenarios. Test with mock devices and validate attribution accuracy. Check for privacy and data handling.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Subtasks for signed link generation with HMAC, event tracking storage, UTM parsing, and cross-device attribution."
       },
       {
         "id": 22,
@@ -1727,7 +1905,7 @@
         "testStrategy": "Test K-factor formulas. Validate charts. Manual QA for filters. Check alerts.",
         "priority": "medium",
         "dependencies": [
-          21
+          "21"
         ],
         "status": "pending",
         "subtasks": [
@@ -1740,7 +1918,8 @@
             ],
             "details": "Integrate MetricsContext to perform K-factor calculations, ensuring formulas are validated and handle real-time updates efficiently.",
             "status": "pending",
-            "testStrategy": "Test K-factor formulas with various data sets to ensure accuracy."
+            "testStrategy": "Test K-factor formulas with various data sets to ensure accuracy.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1751,7 +1930,8 @@
             ],
             "details": "Implement Chart.js library to render charts in LiveView, ensuring responsive design and integration with computed metrics for dynamic updates.",
             "status": "pending",
-            "testStrategy": "Validate charts display correctly with sample data and check for real-time updates."
+            "testStrategy": "Validate charts display correctly with sample data and check for real-time updates.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1762,9 +1942,13 @@
             ],
             "details": "Add filter options to LiveView for refining displayed metrics, and integrate export features to allow users to download data in various formats.",
             "status": "pending",
-            "testStrategy": "Manual QA for filters to ensure proper functionality and check export outputs for accuracy."
+            "testStrategy": "Manual QA for filters to ensure proper functionality and check export outputs for accuracy.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into K-factor computation, Chart.js visualizations, filters, and export functionality."
       },
       {
         "id": 23,
@@ -1783,7 +1967,8 @@
             "dependencies": [],
             "details": "Access the admin panel interface to create a new A/B test experiment. Define control and variant groups, set allocation percentages, and configure targeting criteria such as user segments or traffic sources. Ensure the configuration is saved and validated for correctness.",
             "status": "pending",
-            "testStrategy": "Verify configuration saves correctly and displays in the admin panel. Test with mock data to ensure allocation rules are applied."
+            "testStrategy": "Verify configuration saves correctly and displays in the admin panel. Test with mock data to ensure allocation rules are applied.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1792,7 +1977,8 @@
             "dependencies": [],
             "details": "Integrate the on_mount hook in the LiveView or component to handle variant assignment upon page load. Use randomization or predefined rules to assign users to control or variant groups based on the configured allocation. Store the assignment in the user session or database for consistency.",
             "status": "pending",
-            "testStrategy": "Test variant assignment with simulated user loads to ensure even distribution. Validate that assignments persist across sessions."
+            "testStrategy": "Test variant assignment with simulated user loads to ensure even distribution. Validate that assignments persist across sessions.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1801,7 +1987,8 @@
             "dependencies": [],
             "details": "Add logging mechanisms to record exposure events, such as when a user is assigned to a variant and views the content. Use the on_mount hook to trigger logging on page mount. Send logs to analytics or a dedicated logging service, including user ID, variant ID, and timestamp.",
             "status": "pending",
-            "testStrategy": "Simulate user interactions and check that exposure logs are generated accurately. Validate log data integrity and transmission."
+            "testStrategy": "Simulate user interactions and check that exposure logs are generated accurately. Validate log data integrity and transmission.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1810,9 +1997,13 @@
             "dependencies": [],
             "details": "Integrate metrics tracking to monitor KPIs such as conversion rates, engagement, or other defined goals for each variant. Use analytics tools or custom dashboards to visualize data in real-time. Implement logic to declare a winner based on statistical significance after sufficient data collection.",
             "status": "pending",
-            "testStrategy": "Manual QA to verify metrics are tracked correctly. Test winner declaration logic with sample data. Ensure dashboards update in real-time."
+            "testStrategy": "Manual QA to verify metrics are tracked correctly. Test winner declaration logic with sample data. Ensure dashboards update in real-time.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Split into A/B test configuration, variant assignment, exposure logging, and metrics monitoring."
       },
       {
         "id": 24,
@@ -1831,7 +2022,8 @@
             "dependencies": [],
             "details": "Set up database queries to fetch fraud signals data, including filters for time ranges and types. Ensure efficient querying to handle large datasets.",
             "status": "pending",
-            "testStrategy": "Test query performance and accuracy of data retrieval with sample datasets."
+            "testStrategy": "Test query performance and accuracy of data retrieval with sample datasets.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1842,7 +2034,8 @@
             ],
             "details": "Use charting libraries to render trend graphs based on queried data. Include options for filtering by date ranges and metric types.",
             "status": "pending",
-            "testStrategy": "Validate chart rendering and data accuracy through automated tests and manual checks."
+            "testStrategy": "Validate chart rendering and data accuracy through automated tests and manual checks.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1854,9 +2047,13 @@
             ],
             "details": "Implement alert logic based on thresholds for fraud signals, opt-outs, and compliance issues. Integrate with notification systems for real-time alerts.",
             "status": "pending",
-            "testStrategy": "Test alert triggers with mock data and verify notifications are sent correctly."
+            "testStrategy": "Test alert triggers with mock data and verify notifications are sent correctly.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break into fraud signal querying, trend display, and alert setup."
       },
       {
         "id": 25,
@@ -1866,7 +2063,7 @@
         "testStrategy": "Test report generation. Validate insights. Manual QA for delivery. Check distribution.",
         "priority": "low",
         "dependencies": [
-          22
+          "22"
         ],
         "status": "pending",
         "subtasks": [
@@ -1877,7 +2074,8 @@
             "dependencies": [],
             "details": "Use Oban Pro or standard Oban to create a recurring job that triggers every week. Ensure the job handles time zones and retries. Integrate with the existing Phoenix application structure.",
             "status": "pending",
-            "testStrategy": "Test job scheduling by verifying the job runs at the correct time and handles failures gracefully."
+            "testStrategy": "Test job scheduling by verifying the job runs at the correct time and handles failures gracefully.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1888,7 +2086,8 @@
             ],
             "details": "Integrate with an AI service like GPT-4o to analyze performance metrics, user engagement data, and loop effectiveness. Process data from relevant tables or APIs, generate summaries and recommendations, and format them for inclusion in the report.",
             "status": "pending",
-            "testStrategy": "Validate AI-generated insights by comparing outputs against known data sets and ensuring accuracy in trend detection."
+            "testStrategy": "Validate AI-generated insights by comparing outputs against known data sets and ensuring accuracy in trend detection.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1899,14 +2098,24 @@
             ],
             "details": "Use a library like Puppeteer or Elixir PDF generation tools to render the report as a PDF. Integrate with Phoenix.Mailer to send the PDF attachments via email, including proper subject lines and recipient lists. Ensure secure handling of attachments.",
             "status": "pending",
-            "testStrategy": "Test PDF generation for correct formatting and content inclusion, then perform manual QA on email delivery to confirm receipt and attachment integrity."
+            "testStrategy": "Test PDF generation for correct formatting and content inclusion, then perform manual QA on email delivery to confirm receipt and attachment integrity.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Subtasks for report scheduling with Oban, AI trend analysis, and PDF email delivery."
       }
     ],
     "metadata": {
-      "created": "2025-11-04T03:01:47.169Z",
-      "updated": "2025-11-04T03:01:47.169Z",
+      "version": "1.0.0",
+      "lastModified": "2025-11-04T04:10:40.474Z",
+      "taskCount": 25,
+      "completedCount": 1,
+      "tags": [
+        "viral"
+      ],
+      "created": "2025-11-04T04:10:42.461Z",
       "description": "Tasks for viral context"
     }
   }

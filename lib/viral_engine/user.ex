@@ -9,6 +9,10 @@ defmodule ViralEngine.User do
     field(:name, :string)
     belongs_to(:organization, ViralEngine.Organization)
 
+    field(:last_seen_at, :utc_datetime)
+    field(:presence_status, :string, default: "offline")
+    field(:presence_opt_out, :boolean, default: false)
+
     # Many-to-many relationship with roles
     many_to_many(:roles, ViralEngine.Role, join_through: ViralEngine.UserRole)
 
@@ -17,7 +21,7 @@ defmodule ViralEngine.User do
 
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :name, :organization_id])
+    |> cast(attrs, [:email, :name, :organization_id, :presence_opt_out])
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)

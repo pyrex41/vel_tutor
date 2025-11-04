@@ -1,0 +1,42 @@
+<div class="max-w-4xl mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-6">Practice Session</h1>
+  <aside class="steps-list flex space-x-2 mb-4">
+    <%= for step <- @steps do %>
+      <div class={"step-item px-4 py-2 rounded #{if step.completed, do: 'bg-green-200', else: 'bg-gray-200'} #{if step.id == @current_step, do: 'border-2 border-blue-500'}"}>
+        <%= step.title %>
+      </div>
+    <% end %>
+  </aside>
+  
+  <!-- Progress Bar -->
+  <div class="w-full bg-gray-200 rounded-full h-2.5">
+    <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={"width: #{(socket.assigns.current_step / length(@steps)) * 100}%"}></div>
+  </div>
+  
+  <!-- Current Step -->
+  <%= if step = Enum.at(@steps, @current_step - 1) do %>
+    <div class="step bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4"><%= step.title %></h2>
+      <p class="mb-6"><%= step.content %></p>
+      <form phx-submit="submit_answer" class="mb-4">
+        <input type="text" name="answer" placeholder="Your answer" class="border p-2 rounded mr-2" />
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+      </form>
+      <%= if @feedback != "" do %>
+        <div class="feedback p-3 rounded <%= if String.contains?(@feedback, "Correct"), do: "bg-green-100 text-green-800", else: "bg-red-100 text-red-800" %> mb-4"><%= @feedback %></div>
+      <% end %>
+      <button phx-click="next_step" class="bg-green-500 text-white px-4 py-2 rounded">Next</button>
+    </div>
+  <% end %>
+  
+  <!-- Timer Placeholder -->
+  <div class="timer mt-6 p-4 bg-gray-50 rounded-lg">
+  <span class="text-lg font-mono">Time: <%= @timer %>s</span>
+  <%= if @paused, do: ~s(<span class="text-green-600 ml-2">(Paused)</span>), else: ~s(<span class="text-yellow-600 ml-2">(Running)</span>) %>
+</div>
+<div class="mt-4">
+  <button phx-click="pause" class="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600 <%= if @paused, do: "bg-green-500 hover:bg-green-600", else: "" %>">
+    <%= if @paused, do: "Resume", else: "Pause" %>
+  </button>
+</div>
+</div>

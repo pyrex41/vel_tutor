@@ -148,14 +148,16 @@ defmodule ViralEngineWeb.TaskController do
           changeset =
             Task.changeset(task, %{
               status: "cancelled",
-              execution_history: task.execution_history ++ [
-                %{
-                  event: "cancelled",
-                  timestamp: DateTime.utc_now(),
-                  user_id: user_id,
-                  reason: reason
-                }
-              ]
+              execution_history:
+                task.execution_history ++
+                  [
+                    %{
+                      event: "cancelled",
+                      timestamp: DateTime.utc_now(),
+                      user_id: user_id,
+                      reason: reason
+                    }
+                  ]
             })
 
           case Repo.update(changeset) do
@@ -235,13 +237,14 @@ defmodule ViralEngineWeb.TaskController do
           |> send_chunked(200)
 
         # Send initial task state
-        initial_event = format_sse_event("connected", %{
-          task_id: task.id,
-          status: task.status,
-          progress: task.progress || 0,
-          provider: task.provider,
-          created_at: task.inserted_at
-        })
+        initial_event =
+          format_sse_event("connected", %{
+            task_id: task.id,
+            status: task.status,
+            progress: task.progress || 0,
+            provider: task.provider,
+            created_at: task.inserted_at
+          })
 
         {:ok, conn} = chunk(conn, initial_event)
 
@@ -262,11 +265,12 @@ defmodule ViralEngineWeb.TaskController do
             # Check if task is complete
             if update[:status] in ["completed", "failed", "cancelled"] do
               # Send final event and close
-              final_event = format_sse_event("complete", %{
-                task_id: task_id,
-                status: update[:status],
-                message: "Task finished"
-              })
+              final_event =
+                format_sse_event("complete", %{
+                  task_id: task_id,
+                  status: update[:status],
+                  message: "Task finished"
+                })
 
               chunk(conn, final_event)
               Phoenix.PubSub.unsubscribe(ViralEngine.PubSub, topic)
@@ -282,22 +286,24 @@ defmodule ViralEngineWeb.TaskController do
         end
 
       {:task_error, error} ->
-        event = format_sse_event("error", %{
-          task_id: task_id,
-          error: error
-        })
+        event =
+          format_sse_event("error", %{
+            task_id: task_id,
+            error: error
+          })
 
         chunk(conn, event)
         Phoenix.PubSub.unsubscribe(ViralEngine.PubSub, topic)
         conn
-
     after
       30_000 ->
         # Heartbeat every 30 seconds
         heartbeat = format_sse_event("heartbeat", %{timestamp: DateTime.utc_now()})
 
         case chunk(conn, heartbeat) do
-          {:ok, conn} -> stream_task_updates(conn, task_id, topic)
+          {:ok, conn} ->
+            stream_task_updates(conn, task_id, topic)
+
           {:error, :closed} ->
             Logger.info("SSE connection closed during heartbeat for task #{task_id}")
             Phoenix.PubSub.unsubscribe(ViralEngine.PubSub, topic)
@@ -327,19 +333,21 @@ defmodule ViralEngineWeb.TaskController do
           |> send_chunked(200)
 
         # Send initial connected event
-        {:ok, conn} = chunk(conn, format_sse_event("connected", %{task_id: task.id, status: task.status}))
+        {:ok, conn} =
+          chunk(conn, format_sse_event("connected", %{task_id: task.id, status: task.status}))
 
         # Get provider adapter based on task agent_id
         {adapter_module, prompt} = get_adapter_and_prompt(task)
 
         # Use Agent for buffer state management
-        {:ok, buffer_pid} = Agent.start_link(fn ->
-          %{
-            tokens: [],
-            token_count: 0,
-            last_send_time: System.monotonic_time(:millisecond)
-          }
-        end)
+        {:ok, buffer_pid} =
+          Agent.start_link(fn ->
+            %{
+              tokens: [],
+              token_count: 0,
+              last_send_time: System.monotonic_time(:millisecond)
+            }
+          end)
 
         # Stream callback with buffering logic
         callback_fn = fn message ->
@@ -348,16 +356,21 @@ defmodule ViralEngineWeb.TaskController do
               # Update buffer atomically
               Agent.update(buffer_pid, fn buffer ->
                 updated = %{
-                  buffer |
-                  tokens: buffer.tokens ++ [text],
-                  token_count: buffer.token_count + 1
+                  buffer
+                  | tokens: buffer.tokens ++ [text],
+                    token_count: buffer.token_count + 1
                 }
 
                 # Check if we should send
                 if should_send_buffer?(updated) do
                   # Send buffered tokens
                   combined_text = Enum.join(updated.tokens, "")
-                  event = format_sse_event("token", %{content: combined_text, tokens: updated.token_count})
+
+                  event =
+                    format_sse_event("token", %{
+                      content: combined_text,
+                      tokens: updated.token_count
+                    })
 
                   case chunk(conn, event) do
                     {:ok, _conn} -> :ok
@@ -365,7 +378,11 @@ defmodule ViralEngineWeb.TaskController do
                   end
 
                   # Reset buffer
-                  %{tokens: [], token_count: 0, last_send_time: System.monotonic_time(:millisecond)}
+                  %{
+                    tokens: [],
+                    token_count: 0,
+                    last_send_time: System.monotonic_time(:millisecond)
+                  }
                 else
                   updated
                 end
@@ -377,7 +394,10 @@ defmodule ViralEngineWeb.TaskController do
 
               if buffer.token_count > 0 do
                 combined_text = Enum.join(buffer.tokens, "")
-                event = format_sse_event("token", %{content: combined_text, tokens: buffer.token_count})
+
+                event =
+                  format_sse_event("token", %{content: combined_text, tokens: buffer.token_count})
+
                 chunk(conn, event)
               end
 
@@ -414,11 +434,13 @@ defmodule ViralEngineWeb.TaskController do
 
   defp get_adapter_and_prompt(task) do
     # Map agent_id to adapter module
-    adapter_module = case task.agent_id do
-      "gpt_4o" -> ViralEngine.Integration.OpenAIAdapter
-      "llama_3_1" -> ViralEngine.Integration.GroqAdapter
-      _ -> ViralEngine.Integration.OpenAIAdapter  # Default to OpenAI
-    end
+    adapter_module =
+      case task.agent_id do
+        "gpt_4o" -> ViralEngine.Integration.OpenAIAdapter
+        "llama_3_1" -> ViralEngine.Integration.GroqAdapter
+        # Default to OpenAI
+        _ -> ViralEngine.Integration.OpenAIAdapter
+      end
 
     prompt = task.description || "Hello"
     {adapter_module, prompt}

@@ -154,10 +154,12 @@ defmodule ViralEngine.WebhookContext do
           update_delivery_success(delivery, response)
 
         {:error, reason} ->
-          Logger.warning("Webhook #{webhook.id} delivery failed (attempt #{attempt + 1}): #{inspect(reason)}")
+          Logger.warning(
+            "Webhook #{webhook.id} delivery failed (attempt #{attempt + 1}): #{inspect(reason)}"
+          )
 
           # Exponential backoff: 1s, 2s, 4s
-          backoff_ms = :math.pow(2, attempt) * 1000 |> round()
+          backoff_ms = (:math.pow(2, attempt) * 1000) |> round()
           Process.sleep(backoff_ms)
 
           deliver_with_retry(webhook, delivery, payload, attempt + 1)
@@ -180,11 +182,12 @@ defmodule ViralEngine.WebhookContext do
     body = Jason.encode!(payload)
 
     # Update delivery record with signature
-    delivery_changeset = WebhookDelivery.changeset(delivery, %{
-      signature: signature,
-      attempt_count: delivery.attempt_count + 1,
-      last_attempt_at: DateTime.utc_now()
-    })
+    delivery_changeset =
+      WebhookDelivery.changeset(delivery, %{
+        signature: signature,
+        attempt_count: delivery.attempt_count + 1,
+        last_attempt_at: DateTime.utc_now()
+      })
 
     Repo.update(delivery_changeset)
 
@@ -204,17 +207,19 @@ defmodule ViralEngine.WebhookContext do
 
   defp generate_hmac_signature(secret, payload) do
     json_payload = Jason.encode!(payload)
+
     :crypto.mac(:hmac, :sha256, secret, json_payload)
     |> Base.encode16(case: :lower)
   end
 
   defp create_delivery_record(webhook_id, event_type, payload) do
-    changeset = WebhookDelivery.changeset(%WebhookDelivery{}, %{
-      webhook_id: webhook_id,
-      event_type: event_type,
-      payload: payload,
-      status: "pending"
-    })
+    changeset =
+      WebhookDelivery.changeset(%WebhookDelivery{}, %{
+        webhook_id: webhook_id,
+        event_type: event_type,
+        payload: payload,
+        status: "pending"
+      })
 
     case Repo.insert(changeset) do
       {:ok, delivery} -> delivery
@@ -223,21 +228,23 @@ defmodule ViralEngine.WebhookContext do
   end
 
   defp update_delivery_success(delivery, response) do
-    changeset = WebhookDelivery.changeset(delivery, %{
-      status: "success",
-      response_code: response.status,
-      response_body: String.slice(response.body, 0..500)
-    })
+    changeset =
+      WebhookDelivery.changeset(delivery, %{
+        status: "success",
+        response_code: response.status,
+        response_body: String.slice(response.body, 0..500)
+      })
 
     Repo.update(changeset)
   end
 
   defp update_delivery_failure(delivery, reason, attempt_count) do
-    changeset = WebhookDelivery.changeset(delivery, %{
-      status: "failed",
-      error_message: inspect(reason),
-      attempt_count: attempt_count
-    })
+    changeset =
+      WebhookDelivery.changeset(delivery, %{
+        status: "failed",
+        error_message: inspect(reason),
+        attempt_count: attempt_count
+      })
 
     Repo.update(changeset)
   end

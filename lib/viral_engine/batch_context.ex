@@ -64,7 +64,9 @@ defmodule ViralEngine.BatchContext do
           batch = Repo.get!(Batch, batch_id)
 
           # Update final status
-          final_status = if batch.completed_count == batch.total_count, do: "completed", else: "failed"
+          final_status =
+            if batch.completed_count == batch.total_count, do: "completed", else: "failed"
+
           update_batch_status(batch, final_status)
 
           # Trigger webhook notification
