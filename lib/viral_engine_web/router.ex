@@ -122,6 +122,10 @@ defmodule ViralEngineWeb.Router do
   live("/diagnostic/:id", DiagnosticAssessmentLive)
   live("/diagnostic/results/:id", DiagnosticResultsLive)
 
+  # Flashcard study routes
+  live("/flashcards", FlashcardStudyLive)
+  live("/flashcards/study/:deck_id", FlashcardStudyLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
