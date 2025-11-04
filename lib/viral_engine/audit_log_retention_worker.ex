@@ -15,12 +15,14 @@ defmodule ViralEngine.AuditLogRetentionWorker do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @impl true
   def init(_opts) do
     Logger.info("Starting AuditLogRetentionWorker - 90-day retention policy enabled")
     schedule_cleanup()
     {:ok, %{last_run: nil, deleted_count: 0}}
   end
 
+  @impl true
   def handle_info(:run_retention_cleanup, state) do
     Logger.info("Running scheduled audit log retention cleanup")
 
@@ -46,6 +48,7 @@ defmodule ViralEngine.AuditLogRetentionWorker do
     GenServer.call(__MODULE__, :run_now)
   end
 
+  @impl true
   def handle_call(:run_now, _from, state) do
     Logger.info("Running manual audit log retention cleanup")
 
@@ -60,12 +63,15 @@ defmodule ViralEngine.AuditLogRetentionWorker do
     end
   end
 
+  @impl true
+  def handle_call(:get_stats, _from, state) do
+    {:reply, state, state}
+  end
+
+  # Public API
+
   # Get worker stats
   def get_stats do
     GenServer.call(__MODULE__, :get_stats)
-  end
-
-  def handle_call(:get_stats, _from, state) do
-    {:reply, state, state}
   end
 end

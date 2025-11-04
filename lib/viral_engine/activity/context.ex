@@ -75,29 +75,6 @@ defmodule ViralEngine.Activity.Context do
      List.last(results) && results |> List.last() |> Map.get(:inserted_at)}
   end
 
-  def toggle_like(activity_id, user_id) do
-    activity = Repo.get!(Activity, activity_id)
-
-    case activity.type do
-      "like" ->
-        # Remove like
-        Repo.delete!(activity)
-        {:ok, :unliked}
-
-      _ ->
-        # Add like
-        like_attrs = %{
-          type: "like",
-          content: "liked an activity",
-          user_id: user_id,
-          target_id: activity_id,
-          target_type: activity.type
-        }
-
-        create_activity(like_attrs)
-    end
-  end
-
   defp maybe_filter_type(query, nil), do: query
   defp maybe_filter_type(query, type_filter) do
     from(a in query, where: a.type == ^type_filter)
