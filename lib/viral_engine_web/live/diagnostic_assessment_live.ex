@@ -104,6 +104,34 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
     end
   end
 
+  def handle_info(:advance_question, socket) do
+    assessment = socket.assigns.assessment
+
+    if assessment.current_question >= assessment.total_questions do
+      # Assessment complete
+      DiagnosticContext.complete_assessment(assessment.id)
+
+      {:noreply,
+       socket
+       |> put_flash(:success, "Assessment completed!")
+       |> redirect(to: "/diagnostic/results/#{assessment.id}")}
+    else
+      # Advance question
+      {:ok, updated_assessment} = DiagnosticContext.advance_question(assessment.id)
+
+      # Load next question
+      next_question =
+        DiagnosticContext.get_question(updated_assessment.id, updated_assessment.current_question)
+
+      {:noreply,
+       socket
+       |> assign(:assessment, updated_assessment)
+       |> assign(:current_question, next_question)
+       |> assign(:feedback, "")
+       |> assign(:loading, false)}
+    end
+  end
+
   @impl true
   def handle_event("select_subject", %{"subject" => subject}, socket) do
     {:noreply, assign(socket, :selected_subject, subject)}
@@ -179,34 +207,6 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
        |> assign(:loading, true)}
     else
       {:noreply, put_flash(socket, :error, "Error submitting answer")}
-    end
-  end
-
-  def handle_info(:advance_question, socket) do
-    assessment = socket.assigns.assessment
-
-    if assessment.current_question >= assessment.total_questions do
-      # Assessment complete
-      DiagnosticContext.complete_assessment(assessment.id)
-
-      {:noreply,
-       socket
-       |> put_flash(:success, "Assessment completed!")
-       |> redirect(to: "/diagnostic/results/#{assessment.id}")}
-    else
-      # Advance question
-      {:ok, updated_assessment} = DiagnosticContext.advance_question(assessment.id)
-
-      # Load next question
-      next_question =
-        DiagnosticContext.get_question(updated_assessment.id, updated_assessment.current_question)
-
-      {:noreply,
-       socket
-       |> assign(:assessment, updated_assessment)
-       |> assign(:current_question, next_question)
-       |> assign(:feedback, "")
-       |> assign(:loading, false)}
     end
   end
 

@@ -65,15 +65,6 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   end
 
   @impl true
-  def handle_info({:activity, user_id, activity}, socket) do
-    if user_id == socket.assigns.user_id do
-      {:noreply, stream_insert(socket, :activities, activity, at: 0)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
   def handle_event("toggle-like", %{"activity_id" => activity_id}, socket) do
     user_id = socket.assigns.current_user.id
     {:ok, result} = ActivityContext.toggle_like(activity_id, user_id)
@@ -81,6 +72,15 @@ defmodule ViralEngineWeb.ActivityFeedLive do
     # Refresh activities to show like state
     activities = ActivityContext.list_activities_for_user(user_id)
     {:noreply, stream(socket, :activities, activities)}
+  end
+
+  @impl true
+  def handle_info({:activity, user_id, activity}, socket) do
+    if user_id == socket.assigns.user_id do
+      {:noreply, stream_insert(socket, :activities, activity, at: 0)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

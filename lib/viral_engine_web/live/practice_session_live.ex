@@ -105,6 +105,11 @@ defmodule ViralEngineWeb.PracticeSessionLive do
   end
 
   @impl true
+  def handle_info(:next_after_feedback, socket) do
+    handle_event("next_step", %{}, socket)
+  end
+
+  @impl true
   def handle_event("pause", _params, socket) do
     new_paused = !socket.assigns.paused
 
@@ -202,11 +207,6 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       {:error, _changeset} ->
         {:noreply, assign(socket, :feedback, "Error recording answer. Please try again.")}
     end
-  end
-
-  @impl true
-  def handle_info(:next_after_feedback, socket) do
-    handle_event("next_step", %{}, socket)
   end
 
   @impl true

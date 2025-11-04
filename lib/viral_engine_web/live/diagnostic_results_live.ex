@@ -119,6 +119,43 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     {:noreply, put_flash(socket, :info, "Link copied to clipboard!")}
   end
 
+  @impl true
+  def handle_event("create_rally", _params, socket) do
+    assessment = socket.assigns.assessment
+    user = socket.assigns.user
+
+    case RallyContext.create_rally(user.id, assessment.id) do
+      {:ok, rally} ->
+        rally_link = RallyContext.generate_rally_link(rally)
+
+        {:noreply,
+         socket
+         |> assign(:rally_created, true)
+         |> assign(:rally_link, rally_link)
+         |> assign(:show_viral_modal, false)
+         |> put_flash(:success, "Rally created! Share the link to invite friends.")}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Could not create rally. Please try again.")}
+    end
+  end
+
+  @impl true
+  def handle_event("close_viral_modal", _params, socket) do
+    {:noreply, assign(socket, :show_viral_modal, false)}
+  end
+
+  @impl true
+  def handle_event("viral_prompt_clicked", %{"prompt_log_id" => log_id}, socket) do
+    # Record click
+    if log_id do
+      ViralPrompts.record_click(String.to_integer(log_id))
+    end
+
+    # Close modal
+    {:noreply, assign(socket, :show_viral_modal, false)}
+  end
+
   # Private functions
 
   defp generate_ai_recommendations(assessment) do
@@ -210,43 +247,6 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     do: "Good work! You're right around average"
 
   defp get_percentile_message(_percentile), do: "Keep practicing - you can improve!"
-
-  @impl true
-  def handle_event("create_rally", _params, socket) do
-    assessment = socket.assigns.assessment
-    user = socket.assigns.user
-
-    case RallyContext.create_rally(user.id, assessment.id) do
-      {:ok, rally} ->
-        rally_link = RallyContext.generate_rally_link(rally)
-
-        {:noreply,
-         socket
-         |> assign(:rally_created, true)
-         |> assign(:rally_link, rally_link)
-         |> assign(:show_viral_modal, false)
-         |> put_flash(:success, "Rally created! Share the link to invite friends.")}
-
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, "Could not create rally. Please try again.")}
-    end
-  end
-
-  @impl true
-  def handle_event("close_viral_modal", _params, socket) do
-    {:noreply, assign(socket, :show_viral_modal, false)}
-  end
-
-  @impl true
-  def handle_event("viral_prompt_clicked", %{"prompt_log_id" => log_id}, socket) do
-    # Record click
-    if log_id do
-      ViralPrompts.record_click(String.to_integer(log_id))
-    end
-
-    # Close modal
-    {:noreply, assign(socket, :show_viral_modal, false)}
-  end
 
   defp trigger_results_rally_prompt(user_id, assessment) do
     event_data = %{
