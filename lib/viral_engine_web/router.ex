@@ -141,6 +141,9 @@ defmodule ViralEngineWeb.Router do
   # Leaderboard routes
   live("/leaderboard", LeaderboardLive)
 
+  # Badge collection routes
+  live("/badges", BadgeLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
