@@ -338,54 +338,64 @@ defmodule ViralEngine.GuardrailMetricsContext do
     alerts = []
 
     # Critical COPPA violations
-    if health_data.components.coppa.parent_shares.violations_found > 0 do
-      alerts = alerts ++ [%{
+    alerts = if health_data.components.coppa.parent_shares.violations_found > 0 do
+      alerts ++ [%{
         severity: :critical,
         type: :coppa_violation,
         message: "#{health_data.components.coppa.parent_shares.violations_found} COPPA violations detected in parent shares",
         timestamp: DateTime.utc_now()
       }]
+    else
+      alerts
     end
 
     # Fraud alerts
-    if health_data.components.fraud.total_flagged_ips > 5 do
-      alerts = alerts ++ [%{
+    alerts = if health_data.components.fraud.total_flagged_ips > 5 do
+      alerts ++ [%{
         severity: :high,
         type: :fraud_detection,
         message: "#{health_data.components.fraud.total_flagged_ips} suspicious IPs detected",
         timestamp: DateTime.utc_now()
       }]
+    else
+      alerts
     end
 
     # Bot behavior
-    if health_data.components.bots.total_flagged_devices > 3 do
-      alerts = alerts ++ [%{
+    alerts = if health_data.components.bots.total_flagged_devices > 3 do
+      alerts ++ [%{
         severity: :medium,
         type: :bot_detection,
         message: "#{health_data.components.bots.total_flagged_devices} bot-like devices detected",
         timestamp: DateTime.utc_now()
       }]
+    else
+      alerts
     end
 
     # High opt-out rates
     parent_opt_out = health_data.components.opt_outs.parent_shares.opt_out_rate
-    if parent_opt_out > 30 do
-      alerts = alerts ++ [%{
+    alerts = if parent_opt_out > 30 do
+      alerts ++ [%{
         severity: :medium,
         type: :high_opt_out,
         message: "Parent share opt-out rate is #{parent_opt_out}%",
         timestamp: DateTime.utc_now()
       }]
+    else
+      alerts
     end
 
     # Conversion anomalies
-    if health_data.components.anomalies.total_flagged > 0 do
-      alerts = alerts ++ [%{
+    alerts = if health_data.components.anomalies.total_flagged > 0 do
+      alerts ++ [%{
         severity: :high,
         type: :conversion_anomaly,
         message: "#{health_data.components.anomalies.total_flagged} suspicious conversion patterns detected",
         timestamp: DateTime.utc_now()
       }]
+    else
+      alerts
     end
 
     %{

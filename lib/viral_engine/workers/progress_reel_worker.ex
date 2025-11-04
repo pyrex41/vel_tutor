@@ -289,7 +289,7 @@ defmodule ViralEngine.Workers.ProgressReelWorker do
     }
 
     case ViralPrompts.trigger_prompt(:parent_reel_ready, student_id, event_data) do
-      {:ok, prompt} ->
+      {:ok, _prompt} ->
         Logger.info("Triggered parent reel prompt for student #{student_id}")
         ViralPrompts.broadcast_event(:parent_reel_ready, student_id, event_data)
 

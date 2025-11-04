@@ -216,10 +216,12 @@ defmodule ViralEngine.PerformanceReportContext do
     ]
 
     # Trend insights
-    if data.k_factor_trend == "up" do
-      insights = insights ++ ["📈 K-factor is trending upward - growth is accelerating!"]
+    insights = if data.k_factor_trend == "up" do
+      insights ++ ["📈 K-factor is trending upward - growth is accelerating!"]
     else if data.k_factor_trend == "down" do
-      insights = insights ++ ["⚠️ K-factor is declining - review recent changes and engagement strategies"]
+      insights ++ ["⚠️ K-factor is declining - review recent changes and engagement strategies"]
+    else
+      insights
     end
     end
 
@@ -227,67 +229,69 @@ defmodule ViralEngine.PerformanceReportContext do
     top_loop = data.loop_performance
     |> Enum.max_by(fn {_source, perf} -> perf[:k_factor] || 0.0 end, fn -> nil end)
 
-    if top_loop do
+    insights = if top_loop do
       {source, perf} = top_loop
       source_name = source_display_name(source)
-      insights = insights ++ [
+      insights ++ [
         "🏆 Top performing loop: #{source_name} with K-factor of #{Float.round(perf[:k_factor] || 0.0, 2)}"
       ]
+    else
+      insights
     end
 
     # Health insights
     health_score = data.health_data.health_score
-    if health_score < 75 do
-      insights = insights ++ [
+    insights = if health_score < 75 do
+      insights ++ [
         "⚠️ System health score is #{health_score}/100 - review guardrail metrics and address flagged issues"
       ]
     else
-      insights = insights ++ [
+      insights ++ [
         "✅ System health is strong at #{health_score}/100 - all viral loops operating within healthy parameters"
       ]
     end
 
     # Top referrer insights
-    if length(data.top_referrers) > 0 do
+    insights = if length(data.top_referrers) > 0 do
       top_ref = hd(data.top_referrers)
-      insights = insights ++ [
+      insights ++ [
         "🌟 Top referrer contributed #{top_ref.total_conversions} conversions with a #{Float.round(top_ref.conversion_rate || 0.0, 1)}% conversion rate"
       ]
+    else
+      insights
     end
 
     insights
   end
 
   defp generate_recommendations(data) do
-    recommendations = []
-
     k_factor = data.k_factor.k_factor
 
     # K-factor recommendations
-    cond do
+    recommendations = cond do
       k_factor < 0.3 ->
-        recommendations = recommendations ++ [
+        [
           "Focus on increasing both invitation frequency and conversion rates",
           "Review user onboarding flow to improve first-time experience",
           "Consider incentivizing referrals with rewards or gamification"
         ]
 
       k_factor < 0.7 ->
-        recommendations = recommendations ++ [
+        [
           "Optimize invitation messaging and call-to-action placement",
           "A/B test different viral loop entry points",
           "Reduce friction in the invitation acceptance flow"
         ]
 
       k_factor < 1.0 ->
-        recommendations = recommendations ++ [
+        [
           "You're close to viral threshold! Focus on small optimizations",
           "Identify and replicate patterns from top-performing users",
           "Consider seasonal or event-based campaigns to push over 1.0"
         ]
 
       true ->
-        recommendations = recommendations ++ [
+        [
           "Maintain viral momentum while monitoring for sustainable growth",
           "Scale infrastructure to handle exponential user growth",
           "Continue optimizing loop performance to increase K-factor further"
@@ -298,22 +302,25 @@ defmodule ViralEngine.PerformanceReportContext do
     weak_loops = data.loop_performance
     |> Enum.filter(fn {_source, perf} -> (perf[:k_factor] || 0.0) < 0.3 end)
 
-    if length(weak_loops) > 0 do
-      Enum.each(weak_loops, fn {source, _perf} ->
+    recommendations = if length(weak_loops) > 0 do
+      loop_recommendations = Enum.map(weak_loops, fn {source, _perf} ->
         source_name = source_display_name(source)
-        recommendations = recommendations ++ [
-          "Improve #{source_name} loop performance through better messaging and timing"
-        ]
+        "Improve #{source_name} loop performance through better messaging and timing"
       end)
+      recommendations ++ loop_recommendations
+    else
+      recommendations
     end
 
     # Health-based recommendations
     health_score = data.health_data.health_score
-    if health_score < 75 do
-      recommendations = recommendations ++ [
+    recommendations = if health_score < 75 do
+      recommendations ++ [
         "Address guardrail issues to improve system health",
         "Review fraud detection and compliance metrics"
       ]
+    else
+      recommendations
     end
 
     recommendations

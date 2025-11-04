@@ -49,7 +49,7 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
   Finds users who haven't practiced in the specified number of days.
   """
   def find_inactive_users(days) do
-    cutoff_date = DateTime.add(DateTime.utc_now(), -days * 24 * 60 * 60, :second)
+    _cutoff_date = DateTime.add(DateTime.utc_now(), -days * 24 * 60 * 60, :second)
 
     # Query users with last practice session before cutoff
     # This would need a proper query against the practice_sessions table
@@ -116,8 +116,8 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
   @doc """
   Finds the user's best scoring session in the past N days.
   """
-  def find_best_recent_session(user_id, lookback_days) do
-    cutoff_date = DateTime.add(DateTime.utc_now(), -lookback_days * 24 * 60 * 60, :second)
+  def find_best_recent_session(_user_id, lookback_days) do
+    _cutoff_date = DateTime.add(DateTime.utc_now(), -lookback_days * 24 * 60 * 60, :second)
 
     # Query best session by score
     # In production:
@@ -137,7 +137,7 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
   @doc """
   Checks if user already has an active auto-generated challenge.
   """
-  def has_active_auto_challenge?(user_id) do
+  def has_active_auto_challenge?(_user_id) do
     # Query for active auto-challenges
     # In production:
     # from(c in Challenge,
@@ -164,7 +164,7 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
     }
 
     case ViralPrompts.trigger_prompt(:auto_challenge_created, user_id, event_data) do
-      {:ok, prompt} ->
+      {:ok, _prompt} ->
         Logger.info("Triggered auto-challenge prompt for user #{user_id}")
         ViralPrompts.broadcast_event(:auto_challenge_created, user_id, event_data)
 
