@@ -9,7 +9,7 @@ defmodule ViralEngine.Agents.Orchestrator do
   use GenServer
   require Logger
 
-  alias ViralEngine.{Repo, AgentDecision, ViralEvent}
+  alias ViralEngine.{Repo, AgentDecision, ViralEvent, Agents.ProviderRouter}
 
   # Client API
 
@@ -143,11 +143,11 @@ defmodule ViralEngine.Agents.Orchestrator do
 
   # Private functions
 
-  defp select_provider_logic(criteria, state) do
-    # Simple logic: if reliability is high, choose gpt_4o, else round-robin
-    case criteria[:reliability] do
-      :high -> :gpt_4o
-      _ -> Enum.at(state.providers, state.provider_index)
+  defp select_provider_logic(criteria, _state) do
+    # Use ProviderRouter for intelligent selection based on criteria
+    case ProviderRouter.select_provider(criteria) do
+      %ViralEngine.Provider{name: name} -> String.to_atom(String.replace(name, "-", "_"))
+      other -> other
     end
   end
 
@@ -196,9 +196,26 @@ defmodule ViralEngine.Agents.Orchestrator do
 
   # Event handlers (stubbed for Phase 1)
 
-  defp handle_practice_completed(event, _state) do
+  defp handle_practice_completed(event, state) do
     Logger.info("Practice completed event: #{inspect(event)}")
-    # TODO: Route to Buddy Challenge loop
+
+    # Select provider for AI decision making
+    criteria = %{priority: :performance, weights: %{reliability: 0.5, performance: 0.5}}
+    provider = select_provider_logic(criteria, state)
+
+    # TODO: Route to Buddy Challenge loop with selected provider
+    Logger.info("Routing practice completed to Buddy Challenge with provider: #{provider}")
+
+    # Example: Trigger AI analysis
+    decision = %{
+      type: :ai_analysis,
+      provider: provider,
+      event_data: event,
+      rationale: "Selected #{provider} for high-performance practice analysis"
+    }
+
+    # Log the AI routing decision
+    log_ai_decision(decision)
   end
 
   defp handle_session_ended(event, _state) do
@@ -227,6 +244,27 @@ defmodule ViralEngine.Agents.Orchestrator do
     case Repo.insert(agent_decision) do
       {:ok, _} -> Logger.info("Decision logged to database")
       {:error, changeset} -> Logger.error("Failed to log decision: #{inspect(changeset.errors)}")
+    end
+  end
+
+  defp log_ai_decision(decision) do
+    agent_decision = %AgentDecision{
+      agent_id: "orchestrator",
+      decision_type: "ai_routing",
+      decision_data: decision,
+      timestamp: DateTime.utc_now(),
+      viral_loop_id: decision[:loop_id],
+      # TODO: measure actual AI call latency
+      latency_ms: 0,
+      success: true
+    }
+
+    case Repo.insert(agent_decision) do
+      {:ok, _} ->
+        Logger.info("AI decision logged: #{decision.type}")
+
+      {:error, changeset} ->
+        Logger.error("Failed to log AI decision: #{inspect(changeset.errors)}")
     end
   end
 end

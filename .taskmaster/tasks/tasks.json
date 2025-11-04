@@ -175,7 +175,7 @@
         "description": "Implement a GET /api/health endpoint in the HealthController that performs system health checks, including database connectivity and AI provider reachability, returning status information like uptime, version, and active provider count.",
         "details": "Create a new HealthController module at lib/vel_tutor_web/controllers/health_controller.ex with a single GET /api/health endpoint that is public (no authentication required). Implement health checks by: 1) Testing database connectivity using Ecto.Repo (e.g., a simple query like Repo.all(from u in User, limit: 1) to verify connection without exposing data); 2) Checking at least one AI provider by attempting a lightweight API call (e.g., model list or minimal completion) through the respective adapters (OpenAI, Groq, Perplexity) and counting reachable ones; 3) Collecting system metrics such as uptime (using Erlang's :erlang.system_info(:uptime) or a custom start time), version (from application config or mix.exs), and active provider count. Ensure the response is JSON with fields like {\"status\": \"healthy\", \"uptime\": \"12345s\", \"version\": \"1.0.0\", \"active_providers\": 2} for 200 OK, or {\"status\": \"unhealthy\", \"errors\": [\"Database unreachable\", \"No providers reachable\"]} for 503. Optimize for <500ms response time by running checks concurrently using Task.async_stream or similar. Handle errors gracefully, logging issues without exposing sensitive details. Add the route to the router.ex file under the API scope. Consider caching health status briefly (e.g., 30s) to avoid overloading providers during frequent checks, but ensure real-time accuracy for monitoring tools.",
         "testStrategy": "Write integration tests in test/vel_tutor_web/controllers/health_controller_test.exs using Phoenix.ConnTest. Test the GET /api/health endpoint for healthy scenarios by mocking database queries (using Ecto.Adapters.SQL.Sandbox) and provider adapters (using Mox to simulate successful connectivity checks), asserting 200 status, correct JSON structure with uptime, version, and active_providers > 0, and response time <500ms (using :timer.tc). Test unhealthy scenarios by mocking database failures (e.g., connection errors) and provider unavailability (e.g., 500 responses), asserting 503 status with detailed errors in JSON. Include tests for concurrent checks and edge cases like partial provider failures. Run tests with async: false for database mocking. Additionally, perform manual testing with tools like curl or Postman to verify real API responses and timing.",
-        "status": "done",
+        "status": "in-progress",
         "dependencies": [
           "3",
           "4",
@@ -308,8 +308,8 @@
         "id": 23,
         "title": "Implement Anomaly Detection and Alerting System",
         "description": "Develop an automated anomaly detection system using statistical methods to monitor key metrics such as error rate, latency, cost per task, and failures, with configurable alert triggers and a notification system including email, webhook, and in-app alerts, along with an alert history dashboard.",
-        "details": "Implement the anomaly detection functionality in lib/vel_tutor/anomaly_detection.ex as an Elixir module. Use the mean + 3\u03c3 (standard deviations) algorithm for detecting anomalies in monitored metrics: error rate (percentage of failed tasks), latency (response time in milliseconds), cost per task (monetary value), and failures (count of failures). Integrate with the MetricsContext module (from Task 20) to fetch real-time metrics data at regular intervals (e.g., every minute) for analysis. Define alert triggers as configurable thresholds: latency spike (e.g., >2x baseline), error rate >10%, cost anomaly (e.g., >3\u03c3 above mean). Implement a notification system supporting email (using Bamboo or similar), webhooks (HTTP POST to configured URLs), and in-app notifications (via Phoenix LiveView broadcasts). Create an Alert schema with fields like id, metric_type, value, threshold, triggered_at, status (active/resolved), and details (jsonb for context). Persist alerts in PostgreSQL with a migration. Build the alert history dashboard at /dashboard/alerts using Phoenix LiveView in lib/vel_tutor_web/live/alert_dashboard_live.ex, displaying a table of alerts with filters by metric, time range, and status, including pagination and real-time updates via LiveView subscriptions. Ensure the system logs alerts to the audit log (integrating with Task 12 if available) and includes manual alert resolution features. Optimize for low false positive rate (<5%) by tuning the \u03c3 multiplier and adding smoothing filters (e.g., moving averages). Handle edge cases like insufficient data for baseline calculation (e.g., require at least 100 data points). Include configuration options in config files for alert thresholds and notification endpoints.",
-        "testStrategy": "Write unit tests in test/vel_tutor/anomaly_detection_test.exs using ExUnit to verify the anomaly detection algorithm: mock metrics data and assert correct anomaly flags for values beyond mean + 3\u03c3, test edge cases like low data volume, and validate false positive rates by simulating 1000 data points with known distributions (aim for <5% false positives). Write integration tests in test/vel_tutor/anomaly_detection_integration_test.exs to test end-to-end alerting: simulate metric spikes, verify alert creation and persistence, and mock notification sends (use Mox for email/webhook mocks) asserting correct payloads. Test the dashboard in test/vel_tutor_web/live/alert_dashboard_live_test.exs using Phoenix.LiveViewTest: assert rendering of alert history, simulate filter changes, and verify real-time updates on new alerts. Perform load testing to ensure anomaly detection runs efficiently on high-volume metrics without impacting system performance. Manually verify notification delivery in a staging environment and measure false positive rates over a week of simulated traffic.",
+        "details": "Implement the anomaly detection functionality in lib/vel_tutor/anomaly_detection.ex as an Elixir module. Use the mean + 3σ (standard deviations) algorithm for detecting anomalies in monitored metrics: error rate (percentage of failed tasks), latency (response time in milliseconds), cost per task (monetary value), and failures (count of failures). Integrate with the MetricsContext module (from Task 20) to fetch real-time metrics data at regular intervals (e.g., every minute) for analysis. Define alert triggers as configurable thresholds: latency spike (e.g., >2x baseline), error rate >10%, cost anomaly (e.g., >3σ above mean). Implement a notification system supporting email (using Bamboo or similar), webhooks (HTTP POST to configured URLs), and in-app notifications (via Phoenix LiveView broadcasts). Create an Alert schema with fields like id, metric_type, value, threshold, triggered_at, status (active/resolved), and details (jsonb for context). Persist alerts in PostgreSQL with a migration. Build the alert history dashboard at /dashboard/alerts using Phoenix LiveView in lib/vel_tutor_web/live/alert_dashboard_live.ex, displaying a table of alerts with filters by metric, time range, and status, including pagination and real-time updates via LiveView subscriptions. Ensure the system logs alerts to the audit log (integrating with Task 12 if available) and includes manual alert resolution features. Optimize for low false positive rate (<5%) by tuning the σ multiplier and adding smoothing filters (e.g., moving averages). Handle edge cases like insufficient data for baseline calculation (e.g., require at least 100 data points). Include configuration options in config files for alert thresholds and notification endpoints.",
+        "testStrategy": "Write unit tests in test/vel_tutor/anomaly_detection_test.exs using ExUnit to verify the anomaly detection algorithm: mock metrics data and assert correct anomaly flags for values beyond mean + 3σ, test edge cases like low data volume, and validate false positive rates by simulating 1000 data points with known distributions (aim for <5% false positives). Write integration tests in test/vel_tutor/anomaly_detection_integration_test.exs to test end-to-end alerting: simulate metric spikes, verify alert creation and persistence, and mock notification sends (use Mox for email/webhook mocks) asserting correct payloads. Test the dashboard in test/vel_tutor_web/live/alert_dashboard_live_test.exs using Phoenix.LiveViewTest: assert rendering of alert history, simulate filter changes, and verify real-time updates on new alerts. Perform load testing to ensure anomaly detection runs efficiently on high-volume metrics without impacting system performance. Manually verify notification delivery in a staging environment and measure false positive rates over a week of simulated traffic.",
         "status": "done",
         "dependencies": [
           "20"
@@ -505,7 +505,7 @@
   "viral": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Implement Practice Session UI with Progress Tracking",
         "description": "Build a LiveView component for multi-step practice sessions with real-time feedback, progress bar, timer, and pause/resume functionality. The UI is 80% complete, with LiveView structure, state management, real-time feedback, and timer working; missing Ecto persistence and full integration with PracticeContext for actual session data.",
         "status": "in-progress",
@@ -521,7 +521,8 @@
             "dependencies": [],
             "details": "Use Phoenix LiveView templates to create the component layout. Ensure it includes sections for question rendering, answer input, progress indicators, and control buttons like pause/resume. Integrate Tailwind CSS for initial styling to support mobile responsiveness.",
             "status": "completed",
-            "testStrategy": "Unit test the LiveView template rendering and basic assigns."
+            "testStrategy": "Unit test the LiveView template rendering and basic assigns.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -530,7 +531,8 @@
             "dependencies": [],
             "details": "Implement LiveView event handlers to interact with PracticeContext functions for loading questions, updating answers, and managing session state. Ensure server-side state is maintained across re-renders using LiveView assigns.",
             "status": "completed",
-            "testStrategy": "Integration test with PracticeContext to verify data fetching and state updates."
+            "testStrategy": "Integration test with PracticeContext to verify data fetching and state updates.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -539,7 +541,8 @@
             "dependencies": [],
             "details": "Use Phoenix Channels or LiveView's built-in WebSocket support to send answer validations from the server. Update the UI dynamically to show feedback, such as correct/incorrect indicators, without full page reloads.",
             "status": "completed",
-            "testStrategy": "Manual testing for real-time feedback via WebSocket connections and integration tests for validation logic."
+            "testStrategy": "Manual testing for real-time feedback via WebSocket connections and integration tests for validation logic.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -548,7 +551,8 @@
             "dependencies": [],
             "details": "Implement a server-side timer using Elixir processes or LiveView timers. Display a progress bar and counter in the UI. Handle pause/resume events to control the timer state, ensuring synchronization across clients.",
             "status": "completed",
-            "testStrategy": "Unit test timer logic and event handlers. Manual QA for progress bar accuracy and pause/resume on mobile devices."
+            "testStrategy": "Unit test timer logic and event handlers. Manual QA for progress bar accuracy and pause/resume on mobile devices.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -557,12 +561,16 @@
             "dependencies": [],
             "details": "Define Ecto schemas for practice sessions, including fields for progress, timer state, and user answers. Implement database operations in the LiveView component to save and load state, leveraging existing Phoenix infrastructure. Replace hardcoded steps with full PracticeContext integration for real data.",
             "status": "pending",
-            "testStrategy": "Integration test persistence across sessions. Validate Ecto schema operations and data integrity."
+            "testStrategy": "Integration test persistence across sessions. Validate Ecto schema operations and data integrity.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down the implementation into subtasks for UI component creation, state management integration, real-time feedback mechanisms, timer and progress tracking, and persistence with Ecto."
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Develop Diagnostic Assessment Flow",
         "description": "Create a multi-stage diagnostic LiveView with subject/grade selection, adaptive difficulty, timed sections, and progress persistence.",
         "details": "Use Alpine.js for dropdowns. Implement server-side adaptive difficulty via MCP agent. Add countdown warnings with JavaScript timer and server validation. Persist progress in LiveView assigns and Ecto. Redirect to results on completion with loading state.",
@@ -659,7 +667,7 @@
         "expansionPrompt": "Expand into subtasks covering subject/grade selection UI, adaptive difficulty logic, timed sections with warnings, progress persistence, results redirection, and integration testing."
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Create Viral Results Page for Diagnostics",
         "description": "Design a results page with skills heatmap, percentile ranking, AI recommendations, and shareable achievements.",
         "details": "Use Chart.js for heatmap via Phoenix hook. Compute rankings server-side. Generate share cards with dynamic OG images using Elixir Image library. Implement 'Challenge a Friend' and 'Study Together' CTAs with event handlers. Handle deep links with live_session.",
@@ -722,7 +730,7 @@
         "expansionPrompt": "Subdivide into heatmap visualization, percentile ranking computation, AI recommendations integration, shareable achievements with OG images, and deep link handling."
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Build Viral Results Page for Practice Tests",
         "description": "Develop a results page with score breakdown, mini-leaderboard, and share buttons for challenges.",
         "details": "Display question-by-question breakdown in LiveView. Use Phoenix Presence for real-time leaderboard updates via PubSub. Implement stream for efficient rendering. Add share CTAs with Alpine.js modal and Web Share API.",
@@ -788,7 +796,7 @@
         "expansionPrompt": "Split into score breakdown display, real-time leaderboard with Presence, share buttons and modals, and anonymized data handling."
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Implement Flashcard Study Session",
         "description": "Create a swipeable flashcard UI with AI-generated decks, spaced repetition, and achievement triggers.",
         "details": "Use Alpine.js for touch events. Track state server-side in LiveView. Integrate with MCP Personalization Agent for deck generation. Implement spaced repetition logic in FlashcardContext. Trigger achievements on completion.",
@@ -865,7 +873,7 @@
         "expansionPrompt": "Divide into swipeable UI with Alpine.js, server-side state tracking, AI deck generation integration, spaced repetition logic, and achievement triggers."
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Integrate Loop Orchestrator MCP Agent for Viral Prompts",
         "description": "Set up event handlers for viral triggers, PubSub subscription, and decision logic for prompts.",
         "details": "Handle info messages for completions. Subscribe to Loop Orchestrator topic. Include throttling and A/B test support via on_mount hook. Fallback to default prompts.",
@@ -878,7 +886,7 @@
           "4",
           "5"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -947,10 +955,11 @@
         ],
         "complexity": 9,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation."
+        "expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation.",
+        "updatedAt": "2025-11-04T04:31:41.348Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement Buddy Challenge Loop",
         "description": "Build the student-to-student challenge flow with share options, deep links, and rewards.",
         "details": "Trigger on practice completion. Generate signed tokens in ChallengeContext. Use Alpine.js for share modal with Web Share API. Track presence and rewards via PubSub.",
@@ -1026,7 +1035,7 @@
         "expansionPrompt": "Subtasks for challenge triggering, signed token generation, share modal with Web Share API, deep link handling, and reward tracking via PubSub."
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Develop Results Rally Loop",
         "description": "Create cohort leaderboard with invite functionality and real-time updates.",
         "details": "Use LiveView stream for rankings. Subscribe to PubSub for updates. Generate rally tokens. Implement presence indicators.",
@@ -1093,7 +1102,7 @@
         "expansionPrompt": "Expand to leaderboard stream setup, PubSub updates, rally token generation, and presence indicators."
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Build Proud Parent Loop",
         "description": "Implement parent progress sharing with privacy-safe cards and referral rewards.",
         "details": "Generate progress cards server-side. Use Alpine.js for share modals. Ensure COPPA compliance. Track rewards via IncentivesContext.",
@@ -1140,7 +1149,7 @@
         "expansionPrompt": "Divide into progress card generation, share modals, COPPA compliance checks, and reward tracking."
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Implement Streak Rescue Loop",
         "description": "Create at-risk streak detection and co-practice invitation with urgency UI.",
         "details": "Use Oban for checks. Implement shared LiveView with presence. Add countdown timer with JavaScript. Sync timers server-side.",
@@ -1207,7 +1216,7 @@
         "expansionPrompt": "Subtasks for streak detection with Oban, shared LiveView with presence, countdown timer sync, and urgency UI."
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Develop Live Presence System",
         "description": "Global and subject-specific presence widgets are implemented with real-time PubSub updates and persistence. Next, integrate them into dashboard and practice sessions, finalize opt-out enforcement, and validate performance.",
         "status": "done",
@@ -1296,7 +1305,7 @@
         "updatedAt": "2025-11-04T04:10:40.473Z"
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Create Activity Feed",
         "description": "Implement a social feed with achievements and interactions using LiveView stream.",
         "details": "Stream feed items via PubSub. Add react/like buttons. Personalize with user filters. Infinite scroll with HTMX.",
@@ -1363,7 +1372,7 @@
         "expansionPrompt": "Break into stream setup via PubSub, interaction buttons, personalization filters, and infinite scroll with HTMX."
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Build Leaderboards",
         "description": "Develop global, subject, and cohort leaderboards with ranking logic.",
         "details": "Compute rankings in LeaderboardContext. Use LiveView streams. Add fairness filters. Include invite CTAs.",
@@ -1416,7 +1425,7 @@
         "expansionPrompt": "Subdivide into ranking computation, stream rendering, fairness filters, and invite CTAs."
       },
       {
-        "id": 14,
+        "id": "14",
         "title": "Implement Badges and Achievements System",
         "description": "Create badge unlock animations, collection page, and share functionality.",
         "details": "Define badges in table. Use Alpine.js for animations. Generate share cards server-side. Track in user_badges.",
@@ -1465,7 +1474,7 @@
         "expansionPrompt": "Divide into badge definition and tracking, unlock animations with Alpine.js, and share functionality."
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "Develop XP and Rewards System UI",
         "description": "Build XP display, level progression, and rewards shop with validation.",
         "details": "Compute XP in assigns. Add gain animations with Alpine.js. Integrate IncentivesContext for redemptions.",
@@ -1514,7 +1523,7 @@
         "expansionPrompt": "Split into XP display and computation, level progression animations, and rewards shop integration."
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Implement Session Transcription Pipeline",
         "description": "Set up audio capture, real-time transcription, and AI summarization.",
         "details": "Use WebRTC in Phoenix hook. Transcribe with Deepgram. Summarize via GPT-4o in Oban worker. Store in tables.",
@@ -1591,7 +1600,7 @@
         "expansionPrompt": "Expand to audio capture with WebRTC, real-time transcription via Deepgram, AI summarization with GPT-4o, storage, and privacy compliance."
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "Build Auto Beat-My-Skill Challenge Agentic Action",
         "description": "Trigger challenges based on session gaps with share options.",
         "details": "Listen for summary_ready. Generate micro-decks via Personalization Agent. Implement share modal.",
@@ -1659,7 +1668,7 @@
         "expansionPrompt": "Subtasks for summary event listening, micro-deck generation, share modal, and reward tracking."
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "Develop Study Buddy Nudge Agentic Action",
         "description": "Detect exams and prompt co-practice invites.",
         "details": "NLP detect keywords. Generate co-practice decks. Implement shared LiveView.",
@@ -1724,7 +1733,7 @@
         "expansionPrompt": "Divide into NLP keyword detection, co-practice deck creation, shared LiveView, and reminder logic."
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Create Parent Progress Reel Agentic Action",
         "description": "Generate video reels on high ratings with share links.",
         "details": "Use FFmpeg for reels. Ensure privacy. Track referrals.",
@@ -1777,7 +1786,7 @@
         "expansionPrompt": "Split into reel generation with FFmpeg, privacy checks, and share link tracking."
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Implement Next-Session Prep Pack Share",
         "description": "Auto-generate prep packs with resources and share CTAs.",
         "details": "Summarize sessions. Curate resources via Perplexity. Email via Phoenix.Mailer.",
@@ -1843,7 +1852,7 @@
         "expansionPrompt": "Break into session summarization, resource curation via Perplexity, pack generation, and email sharing."
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Build Smart Link Attribution System",
         "description": "Generate signed links, track events, and handle cross-device attribution.",
         "details": "Use HMAC for signing. Store in attribution_events. Parse UTM in plugs.",
@@ -1898,7 +1907,7 @@
         "expansionPrompt": "Subtasks for signed link generation with HMAC, event tracking storage, UTM parsing, and cross-device attribution."
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Develop K-Factor Tracking Dashboard",
         "description": "Compute K-factor metrics and display in LiveView with filters.",
         "details": "Use MetricsContext for calculations. Chart.js for visualizations. Add export functionality.",
@@ -1951,7 +1960,7 @@
         "expansionPrompt": "Divide into K-factor computation, Chart.js visualizations, filters, and export functionality."
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Integrate Experimentation Agent",
         "description": "Set up A/B tests with variant assignment and metrics.",
         "details": "Configure in admin panel. Use on_mount for allocation. Log exposures.",
@@ -2006,7 +2015,7 @@
         "expansionPrompt": "Split into A/B test configuration, variant assignment, exposure logging, and metrics monitoring."
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Create Guardrail Metrics Dashboard",
         "description": "Monitor fraud, opt-outs, and compliance metrics.",
         "details": "Query fraud_signals. Display trends. Set up alerts.",
@@ -2056,7 +2065,7 @@
         "expansionPrompt": "Break into fraud signal querying, trend display, and alert setup."
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Implement Weekly Viral Loop Performance Report",
         "description": "Generate automated reports with insights and delivery.",
         "details": "Use Oban for scheduling. AI-analyze trends. Email PDFs.",
@@ -2109,15 +2118,12 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-04T04:10:40.474Z",
+      "lastModified": "2025-11-04T04:31:41.349Z",
       "taskCount": 25,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "viral"
-      ],
-      "created": "2025-11-04T04:10:42.461Z",
-      "description": "Tasks for viral context",
-      "updated": "2025-11-04T04:15:25.134Z"
+      ]
     }
   }
 }

@@ -3,18 +3,21 @@ defmodule ViralEngineWeb.ActivityFeedLive do
 
   alias ViralEngine.Activity.Context, as: ActivityContext
 
-@impl true
+  @impl true
   def mount(params, _session, socket) do
     user_id = socket.assigns.current_user.id
     type_filter = params["type"] || "all"
-    
+
     if connected?(socket) do
       Phoenix.PubSub.subscribe(ViralEngine.PubSub, "activities:#{user_id}")
     end
 
-    activities = ActivityContext.list_activities_for_user(user_id, type: if(type_filter == "all", do: nil, else: type_filter))
-    
-    socket = 
+    activities =
+      ActivityContext.list_activities_for_user(user_id,
+        type: if(type_filter == "all", do: nil, else: type_filter)
+      )
+
+    socket =
       socket
       |> stream(:activities, activities)
       |> assign(:user_id, user_id)
@@ -31,13 +34,14 @@ defmodule ViralEngineWeb.ActivityFeedLive do
     type_filter = socket.assigns.type_filter
     cursor = socket.assigns.next_cursor
 
-    {new_activities, next_cursor} = ActivityContext.list_activities_paginated(user_id, 
-      limit: 10, 
-      cursor: cursor, 
-      type: if(type_filter == "all", do: nil, else: type_filter)
-    )
+    {new_activities, next_cursor} =
+      ActivityContext.list_activities_paginated(user_id,
+        limit: 10,
+        cursor: cursor,
+        type: if(type_filter == "all", do: nil, else: type_filter)
+      )
 
-    socket = 
+    socket =
       socket
       |> stream(:activities, new_activities, at: -1)
       |> assign(:next_cursor, next_cursor)
@@ -49,8 +53,8 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   @impl true
   def handle_event("filter-type", %{"type" => type}, socket) do
     activities = ActivityContext.list_activities_for_user(socket.assigns.user_id, type: type)
-    
-    socket = 
+
+    socket =
       socket
       |> stream(:activities, activities)
       |> assign(:type_filter, type)
@@ -59,15 +63,13 @@ defmodule ViralEngineWeb.ActivityFeedLive do
 
     {:noreply, socket}
   end
-  end
 
   @impl true
   def handle_info({:activity, user_id, activity}, socket) do
-    if user_id == socket.assigns.user_id do
-      {:noreply, stream_insert(socket, :activities, activity, at: 0)}
-    else
-      {:noreply, socket}
-    end
+  if user_id == socket.assigns.user_id do
+    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
+  else
+    {:noreply, socket}
   end
 
   @impl true
@@ -163,5 +165,5 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   defp has_user_liked?(assigns, activity_id) do
     # Simple check - in production you'd query the DB
     false
-  end
+end
 end
