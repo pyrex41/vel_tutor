@@ -132,6 +132,9 @@ defmodule ViralEngineWeb.Router do
   # Results Rally routes
   live("/rally/:token", RallyLive)
 
+  # Parent Progress routes (COPPA-compliant)
+  live("/parent/progress/:token", ParentProgressLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
