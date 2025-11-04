@@ -8,10 +8,22 @@ defmodule ViralEngine.Application do
     children = [
       # Start the Ecto repository
       ViralEngine.Repo,
+      # Start the PubSub system
+      {Phoenix.PubSub, name: ViralEngine.PubSub},
       # Start the Telemetry supervisor
       ViralEngineWeb.Telemetry,
+      # Start Finch for HTTP requests
+      {Finch, name: ViralEngine.Finch},
+      # Start the approval timeout checker
+      ViralEngine.ApprovalTimeoutChecker,
+      # Start the anomaly detection worker
+      ViralEngine.AnomalyDetectionWorker,
       # Start the MCP Orchestrator
       ViralEngine.Agents.Orchestrator,
+      # Start the rate limit reset scheduler
+      ViralEngine.Jobs.ResetHourlyLimits,
+      # Start Oban for background job processing
+      {Oban, Application.fetch_env!(:viral_engine, Oban)},
       # Start the Endpoint (http/https)
       ViralEngineWeb.Endpoint
     ]

@@ -1,4 +1,5 @@
 import Config
+config :viral_engine, Oban, testing: :manual
 
 # Configure your database
 #

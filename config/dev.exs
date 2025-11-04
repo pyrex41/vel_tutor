@@ -26,7 +26,7 @@ config :viral_engine, ViralEngineWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "your_secret_key_base",
+  secret_key_base: "b1jnEqxSbRMF+xSc5UQSJSiAfaFjwMDpjBO9pnVaGu3IcFBSBe7mxxuKHIn7ZaMp",
   watchers: []
 
 # ## SSL Support

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(task-master list:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

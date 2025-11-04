@@ -1,0 +1,10 @@
+{application,phoenix_pubsub_redis,
+             [{config_mtime,1762213625},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,phoenix_pubsub,redix,
+                             poolboy]},
+              {description,"The Redis PubSub adapter for the Phoenix framework"},
+              {modules,['Elixir.Phoenix.PubSub.Redis',
+                        'Elixir.Phoenix.PubSub.RedisServer']},
+              {registered,[]},
+              {vsn,"3.0.1"}]}.

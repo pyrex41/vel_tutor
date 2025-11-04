@@ -9,7 +9,7 @@ defmodule ViralEngineWeb.AgentController do
   use ViralEngineWeb, :controller
   require Logger
 
-  alias ViralEngine.{Repo, AgentDecision}
+  alias ViralEngine.{Repo, AgentDecision, MetricsContext}
 
   # 150ms SLA
   @mcp_timeout 150
@@ -25,6 +25,9 @@ defmodule ViralEngineWeb.AgentController do
 
         latency = System.monotonic_time(:millisecond) - start_time
 
+        # Collect metrics
+        collect_operation_metrics(agent, method, latency, result)
+
         # Log to agent_decisions table
         log_agent_call(agent, method, validated_params, result, latency)
 
@@ -39,6 +42,17 @@ defmodule ViralEngineWeb.AgentController do
       {:error, validation_error} ->
         jsonrpc_error(conn, request_id, validation_error)
     end
+  end
+
+  def health(conn, %{"agent" => "orchestrator"}) do
+    health_data = ViralEngine.Agents.Orchestrator.health()
+    json(conn, health_data)
+  end
+
+  def health(conn, _params) do
+    conn
+    |> put_status(404)
+    |> json(%{error: "Agent not found"})
   end
 
   # Private functions
@@ -96,6 +110,49 @@ defmodule ViralEngineWeb.AgentController do
       {:error, changeset} ->
         Logger.error("Failed to log agent call: #{inspect(changeset.errors)}")
     end
+  end
+
+  defp collect_operation_metrics(agent, method, latency, result) do
+    # Extract provider from agent name (simplified mapping)
+    provider =
+      case agent do
+        "openai" -> "openai"
+        "groq" -> "groq"
+        "perplexity" -> "perplexity"
+        _ -> "unknown"
+      end
+
+    # Extract cost and token information from result if available
+    {cost, tokens_used} =
+      case result do
+        {:ok, response_data} ->
+          # Try to extract cost and tokens from response metadata
+          cost = get_in(response_data, ["metadata", "cost"]) || Decimal.new(0)
+          tokens = get_in(response_data, ["metadata", "tokens_used"]) || 0
+          {cost, tokens}
+
+        _ ->
+          {Decimal.new(0), 0}
+      end
+
+    operation_result = %{
+      provider: provider,
+      latency_ms: latency,
+      cost: cost,
+      tokens_used: tokens_used,
+      timestamp: DateTime.utc_now()
+    }
+
+    # Collect metrics asynchronously to avoid blocking the response
+    Task.start(fn ->
+      case MetricsContext.collect_metrics(operation_result) do
+        {:ok, _} ->
+          Logger.debug("Metrics collected for #{agent}/#{method}")
+
+        {:error, changeset} ->
+          Logger.warning("Failed to collect metrics: #{inspect(changeset.errors)}")
+      end
+    end)
   end
 
   defp jsonrpc_success(conn, id, result) do

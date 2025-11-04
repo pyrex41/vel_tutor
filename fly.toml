@@ -16,6 +16,16 @@ primary_region = "iad"
   auto_start_machines = true
   min_machines_running = 1
 
+  # Auto-scaling configuration
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 1000
+    soft_limit = 800
+
+  [[http_service.autoscaling]]
+    min_count = 1
+    max_count = 10
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1

@@ -42,6 +42,19 @@ defmodule ViralEngine.Agents.Orchestrator do
     GenServer.call(__MODULE__, :health)
   end
 
+  @doc """
+  Selects an AI provider based on criteria.
+
+  ## Parameters
+  - criteria: Map with selection criteria (e.g., %{reliability: :high, cost_sensitive: true})
+
+  ## Returns
+  - Selected provider atom (:gpt_4o or :llama_3_1)
+  """
+  def select_provider(criteria \\ %{}) do
+    GenServer.call(__MODULE__, {:select_provider, criteria})
+  end
+
   # Server Callbacks
 
   @impl true
@@ -60,7 +73,9 @@ defmodule ViralEngine.Agents.Orchestrator do
         results_rally: ViralEngine.Agents.ResultsRally,
         proud_parent: ViralEngine.Agents.ProudParent,
         tutor_spotlight: ViralEngine.Agents.TutorSpotlight
-      }
+      },
+      providers: [:gpt_4o, :llama_3_1],
+      provider_index: 0
     }
 
     Logger.info("MCP Orchestrator started")
@@ -95,7 +110,46 @@ defmodule ViralEngine.Agents.Orchestrator do
     {:reply, health_data, state}
   end
 
+  @impl true
+  def handle_call({:select_provider, criteria}, _from, state) do
+    provider = select_provider_logic(criteria, state)
+    new_index = rem(state.provider_index + 1, length(state.providers))
+    new_state = %{state | provider_index: new_index}
+
+    Logger.info("Selected provider: #{provider} for criteria: #{inspect(criteria)}")
+    {:reply, provider, new_state}
+  end
+
+  @impl true
+  def handle_cast({:cancel_task, task_id}, state) do
+    Logger.info("Cancellation requested for task #{task_id}")
+
+    # TODO: Implement actual task cancellation logic
+    # This would involve:
+    # 1. Finding the running task process
+    # 2. Sending it a graceful shutdown signal
+    # 3. Cleaning up any pending work
+    # 4. Notifying the task tracking system
+
+    # For now, just log the cancellation
+    Phoenix.PubSub.broadcast(
+      ViralEngine.PubSub,
+      "task:#{task_id}",
+      {:task_update, %{status: "cancelling", message: "Cancellation in progress"}}
+    )
+
+    {:noreply, state}
+  end
+
   # Private functions
+
+  defp select_provider_logic(criteria, state) do
+    # Simple logic: if reliability is high, choose gpt_4o, else round-robin
+    case criteria[:reliability] do
+      :high -> :gpt_4o
+      _ -> Enum.at(state.providers, state.provider_index)
+    end
+  end
 
   defp process_event(%{type: event_type} = event, state) do
     timestamp = DateTime.utc_now()

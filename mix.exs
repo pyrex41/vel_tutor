@@ -38,18 +38,24 @@ defmodule ViralEngine.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:postgrex, "~> 0.17"},
       {:phoenix_html, "~> 4.0"},
+      {:phoenix_html_helpers, "~> 1.0"},
       {:phoenix_live_reload, "~> 1.2"},
       {:phoenix_live_view, "~> 0.20.1"},
       {:phoenix_live_dashboard, "~> 0.8"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
+      {:hackney, "~> 1.18"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:oban, "~> 2.17"},
+      {:phoenix_pubsub_redis, "~> 3.0"},
+      {:mox, "~> 1.0", only: :test},
+      {:igniter, "~> 0.3", only: [:dev, :test]}
     ]
   end
 

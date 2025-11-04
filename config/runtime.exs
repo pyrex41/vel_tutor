@@ -29,3 +29,28 @@ config :viral_engine, ViralEngineWeb.Telemetry,
   metrics: [
     ViralEngineWeb.Telemetry.Metrics
   ]
+
+# Configure Redis for distributed PubSub (multi-node support)
+redis_url = System.get_env("REDIS_URL") || "redis://localhost:6379/0"
+
+if redis_url do
+  config :viral_engine, ViralEngine.PubSub,
+    adapter: Phoenix.PubSub.Redis,
+    url: redis_url,
+    node_name: System.get_env("FLY_MACHINE_ID") || :erlang.node()
+end
+
+# Configure Oban for distributed task queue
+config :viral_engine, Oban,
+  repo: ViralEngine.Repo,
+  queues: [default: 10, webhooks: 20, batch: 50],
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Run anomaly detection every hour
+       {"0 * * * *", ViralEngine.Jobs.AnomalyDetectionWorker},
+       # Check approval timeouts every 5 minutes
+       {"*/5 * * * *", ViralEngine.Jobs.ApprovalTimeoutChecker}
+     ]}
+  ]

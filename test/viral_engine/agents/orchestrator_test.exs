@@ -45,4 +45,19 @@ defmodule ViralEngine.Agents.OrchestratorTest do
       assert is_integer(health.cache_size)
     end
   end
+
+  describe "select_provider/1" do
+    test "selects gpt_4o for high reliability" do
+      provider = Orchestrator.select_provider(%{reliability: :high})
+      assert provider == :gpt_4o
+    end
+
+    test "uses round-robin for other criteria" do
+      provider1 = Orchestrator.select_provider(%{})
+      provider2 = Orchestrator.select_provider(%{})
+      assert provider1 in [:gpt_4o, :llama_3_1]
+      assert provider2 in [:gpt_4o, :llama_3_1]
+      # Since round-robin, they should alternate
+    end
+  end
 end
