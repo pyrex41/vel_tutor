@@ -1,7 +1,9 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.PracticeContext
+  alias ViralEngine.{PracticeContext, ViralPrompts}
   require Logger
+
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(%{"session_id" => session_id}, %{"user_token" => user_token}, socket) do
@@ -67,8 +69,11 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       |> assign(:paused, session.paused)
       |> assign(:feedback, "")
       |> assign(:user, user)
+      |> assign(:user_id, user.id)
       |> assign(:practice_users, [])
       |> assign(:loading, false)
+      |> assign(:viral_prompt, nil)
+      |> assign(:show_viral_modal, false)
 
     {:ok, socket}
   end
@@ -128,12 +133,19 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       {:noreply, assign(socket, :current_step, new_step, :feedback, "")}
     else
       # Session complete
-      PracticeContext.complete_session(socket.assigns.session.id)
+      {:ok, completed_session} = PracticeContext.complete_session(socket.assigns.session.id)
 
-      {:noreply,
-       socket
-       |> assign(:feedback, "Session complete! Great job!")
-       |> put_flash(:info, "Practice session completed successfully")}
+      # Trigger viral prompt
+      viral_prompt = trigger_completion_prompt(socket.assigns.user_id, completed_session)
+
+      socket =
+        socket
+        |> assign(:feedback, "Session complete! Great job!")
+        |> assign(:viral_prompt, viral_prompt)
+        |> assign(:show_viral_modal, viral_prompt != nil)
+        |> put_flash(:info, "Practice session completed successfully")
+
+      {:noreply, socket}
     end
   end
 
@@ -193,5 +205,51 @@ defmodule ViralEngineWeb.PracticeSessionLive do
      |> assign(:paused, false)
      |> assign(:feedback, "Session reset!")
      |> put_flash(:info, "Practice session has been reset")}
+  end
+
+  @impl true
+  def handle_event("close_viral_modal", _params, socket) do
+    {:noreply, assign(socket, :show_viral_modal, false)}
+  end
+
+  @impl true
+  def handle_event("viral_prompt_clicked", %{"prompt_log_id" => log_id}, socket) do
+    # Record click
+    if log_id do
+      ViralPrompts.record_click(String.to_integer(log_id))
+    end
+
+    # Close modal and handle viral action (e.g., share, challenge)
+    {:noreply,
+     socket
+     |> assign(:show_viral_modal, false)
+     |> put_flash(:info, "Let's share your results!")}
+  end
+
+  # Private helper functions
+
+  defp trigger_completion_prompt(user_id, session) do
+    event_data = %{
+      session_id: session.id,
+      score: session.score || 0,
+      subject: session.subject,
+      session_type: session.session_type
+    }
+
+    case ViralPrompts.trigger_prompt(:practice_completed, user_id, event_data) do
+      {:ok, prompt} ->
+        # Broadcast event for analytics
+        ViralPrompts.broadcast_event(:practice_completed, user_id, event_data)
+        prompt
+
+      {:throttled, reason} ->
+        Logger.info("Viral prompt throttled for user #{user_id}: #{reason}")
+        nil
+
+      {:no_prompt, reason} ->
+        Logger.info("No viral prompt for user #{user_id}: #{reason}")
+        # Fallback to default prompt
+        ViralPrompts.get_default_prompt(:practice_completed)
+    end
   end
 end

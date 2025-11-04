@@ -1,7 +1,9 @@
 defmodule ViralEngineWeb.FlashcardStudyLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{FlashcardContext, AchievementContext}
+  alias ViralEngine.{FlashcardContext, AchievementContext, ViralPrompts}
   require Logger
+
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(%{"deck_id" => deck_id}, %{"user_token" => user_token}, socket) do
@@ -186,17 +188,24 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
 
   defp complete_session(socket) do
     session = socket.assigns.session
+    user_id = socket.assigns.user.id
 
     # Complete session and calculate score
     {:ok, completed_session} = FlashcardContext.complete_study_session(session.id)
 
     # Check for achievements
-    trigger_achievements(socket.assigns.user.id, completed_session)
+    trigger_achievements(user_id, completed_session)
+
+    # Trigger viral prompt
+    viral_prompt = trigger_completion_prompt(user_id, completed_session)
 
     {:noreply,
      socket
      |> assign(:stage, :completed)
      |> assign(:session, completed_session)
+     |> assign(:viral_prompt, viral_prompt)
+     |> assign(:show_viral_modal, viral_prompt != nil)
+     |> assign(:user_id, user_id)
      |> put_flash(:success, "Study session completed! Score: #{completed_session.score}%")}
   end
 
@@ -256,6 +265,32 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
       4 -> "bg-green-500"
       5 -> "bg-blue-500"
       _ -> "bg-gray-500"
+    end
+  end
+
+  defp trigger_completion_prompt(user_id, session) do
+    event_data = %{
+      session_id: session.id,
+      score: session.score || 0,
+      cards_reviewed: session.cards_reviewed,
+      cards_mastered: session.cards_mastered,
+      duration: session.session_duration_seconds
+    }
+
+    case ViralPrompts.trigger_prompt(:flashcard_session_completed, user_id, event_data) do
+      {:ok, prompt} ->
+        # Broadcast event for analytics
+        ViralPrompts.broadcast_event(:flashcard_session_completed, user_id, event_data)
+        prompt
+
+      {:throttled, reason} ->
+        Logger.info("Viral prompt throttled for user #{user_id}: #{reason}")
+        nil
+
+      {:no_prompt, reason} ->
+        Logger.info("No viral prompt for user #{user_id}: #{reason}")
+        # Fallback to default prompt
+        ViralPrompts.get_default_prompt(:flashcard_session_completed)
     end
   end
 end

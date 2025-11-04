@@ -893,7 +893,7 @@
           "4",
           "5"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -907,7 +907,7 @@
               5
             ],
             "details": "Configure event handlers in the MCP Agent to listen for viral triggers, process completion info messages, and integrate with the overall prompt decision logic. Ensure handlers are robust and handle various message types efficiently.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Mock PubSub messages and test handlers for correct event processing and message handling.",
             "parentId": "undefined"
           },
@@ -923,7 +923,7 @@
               5
             ],
             "details": "Use PubSub mechanisms to subscribe to the Loop Orchestrator topic, ensuring the agent receives updates on viral prompts and completions. Implement connection management and error handling for subscription stability.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test subscription setup with mock PubSub to verify message reception and handling.",
             "parentId": "undefined"
           },
@@ -939,7 +939,7 @@
               5
             ],
             "details": "Integrate throttling to control prompt frequency and implement A/B testing variant assignment in the on_mount hook. This includes logic for allocating users to test variants and logging exposures for experimentation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validate throttling logic and A/B test variant assignment through unit tests and mock scenarios.",
             "parentId": "undefined"
           },
@@ -955,14 +955,16 @@
               5
             ],
             "details": "Develop logic to detect failures in viral prompt retrieval or decision-making and seamlessly switch to predefined default prompts. This includes error handling and prioritization of fallback mechanisms.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check fallback behavior by simulating failures and verifying default prompt usage.",
             "parentId": "undefined"
           }
         ],
         "complexity": 9,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation."
+        "expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation.",
+        "completedAt": "2025-11-04T05:36:23.793465Z",
+        "completionNotes": "Implemented Loop Orchestrator for viral prompts with throttling, A/B testing, and PubSub:\n\n1. LoopOrchestrator GenServer (lib/viral_engine/loop_orchestrator.ex):\n   - Manages viral loop triggers across the application\n   - Event routing: practice_completed \u2192 buddy_challenge, diagnostic_completed \u2192 results_rally, etc.\n   - Throttling: Max 3 prompts per 24 hours globally, loop-specific cooldowns (4-24 hours)\n   - A/B testing: Weighted variant assignment (control, competitive, collaborative, etc.)\n   - PubSub integration: Subscribes to viral:loops topic, broadcasts events\n   - Fallback logic: Default prompts when throttled or unavailable\n   - Decision logging: All prompts logged to database for analytics\n   \n2. Viral Loop Types Configured:\n   - buddy_challenge (practice_completed, 4h cooldown, high priority)\n   - results_rally (diagnostic_completed, 6h cooldown, high priority)\n   - proud_parent (achievement_unlocked, 12h cooldown, medium priority)\n   - streak_rescue (streak_at_risk, 24h cooldown, high priority)\n   - flashcard_master (flashcard_session_completed, 8h cooldown, medium priority)\n   \n3. A/B Test Variants:\n   - buddy_challenge: control (50%), competitive (25%), collaborative (25%)\n   - results_rally: control (50%), social_proof (25%), achievement (25%)\n   - Consistent variant assignment per user (seeded with user_id)\n   \n4. ViralPromptLog Schema (lib/viral_engine/viral_prompt_log.ex):\n   - Tracks all prompts shown to users\n   - Fields: user_id, loop_type, variant, prompt_text, event_data\n   - Click tracking: clicked, clicked_at\n   - Conversion tracking: converted, converted_at\n   - Conversion rate calculations: total_shown, click_rate, conversion_rate\n   - Database indexes for throttling queries, A/B test analysis\n   \n5. ViralPrompts Context (lib/viral_engine/viral_prompts.ex):\n   - trigger_prompt: Main entry point for triggering viral prompts\n   - record_click: Track prompt clicks\n   - record_conversion: Track viral action completions\n   - get_conversion_stats: A/B test performance metrics\n   - broadcast_event: PubSub event broadcasting\n   - get_variant: Get A/B test variant for user\n   - is_throttled?: Check if user is throttled\n   - get_recent_prompts: User prompt history\n   - get_performance_metrics: Dashboard metrics (7-day default)\n   - get_default_prompt: Fallback prompts for each event type\n   \n6. ViralPromptsHook (lib/viral_engine_web/live/viral_prompts_hook.ex):\n   - on_mount hook for LiveView integration\n   - Auto-subscribes to user:#{user_id}:viral PubSub topic\n   - Checks throttle status on mount\n   - Assigns: viral_prompts_enabled, viral_throttled, viral_prompt, viral_variant_cache\n   - Graceful degradation when user_id unavailable\n   \n7. LiveView Integration:\n   - PracticeSessionLive: Triggers buddy_challenge on completion\n   - FlashcardStudyLive: Triggers flashcard_master on completion\n   - Event handlers: close_viral_modal, viral_prompt_clicked\n   - Assigns: viral_prompt, show_viral_modal, user_id\n   - Fallback to default prompts when orchestrator unavailable\n   - Analytics broadcasting on completion\n   \n8. Application Supervision (lib/viral_engine/application.ex):\n   - Added ViralEngine.LoopOrchestrator to supervision tree\n   - Cleaned up duplicate child entries\n   - Starts after MCP Orchestrator\n   \n9. Migration (priv/repo/migrations/20251104080000_create_viral_prompt_logs.exs):\n   - viral_prompt_logs table with all tracking fields\n   - Indexes: [user_id, inserted_at], [user_id, loop_type, inserted_at]\n   - A/B test analysis: [loop_type, variant], [loop_type, variant, converted]\n   \n10. Comprehensive Tests (test/viral_engine/loop_orchestrator_test.exs):\n    - Event triggering: buddy_challenge, flashcard_master, unknown events\n    - Throttling: daily limits (3/day), loop-specific cooldowns, cooldown expiry\n    - A/B testing: consistent variant assignment, variant distribution\n    - Fallback behavior: default prompts for all event types\n    - PubSub: event broadcasting and subscription\n    - Conversion tracking: clicks, conversions, conversion rates\n    - Performance metrics: dashboard metrics, loop filtering\n    \nFeatures Completed:\n\u2705 Event handlers for viral triggers (practice, diagnostic, flashcard, achievement)\n\u2705 PubSub subscription to viral:loops topic\n\u2705 Throttling logic (global 3/day, loop-specific cooldowns)\n\u2705 A/B test variant assignment with weighted distribution\n\u2705 Fallback to default prompts when throttled or unavailable\n\u2705 Click and conversion tracking\n\u2705 Performance metrics for dashboard\n\u2705 on_mount hook for LiveView integration\n\u2705 Comprehensive test coverage\n\nReady for integration with actual viral UI components and external sharing platforms."
       },
       {
         "id": 7,

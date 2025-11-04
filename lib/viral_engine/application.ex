@@ -6,18 +6,12 @@ defmodule ViralEngine.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      ViralEngine.Repo,
-      {Phoenix.PubSub, name: ViralEngine.PubSub},
-      ViralEngine.Presence,
-      ViralEngine.Repo,
-      ViralEngine.Presence,
-      {Phoenix.PubSub, name: ViralEngine.PubSub},
-      ViralEngine.Presence,
-
       # Start the Ecto repository
       ViralEngine.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: ViralEngine.PubSub},
+      # Start the Presence system
+      ViralEngine.Presence,
       # Start the Telemetry supervisor
       ViralEngineWeb.Telemetry,
       # Start Finch for HTTP requests
@@ -30,6 +24,8 @@ defmodule ViralEngine.Application do
       ViralEngine.AuditLogRetentionWorker,
       # Start the MCP Orchestrator
       ViralEngine.Agents.Orchestrator,
+      # Start the Loop Orchestrator (viral prompts)
+      ViralEngine.LoopOrchestrator,
       # Start the rate limit reset scheduler
       ViralEngine.Jobs.ResetHourlyLimits,
       # Start Oban for background job processing
