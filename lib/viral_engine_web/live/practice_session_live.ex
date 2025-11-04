@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext, StreakContext, BadgeContext}
+  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext, StreakContext, BadgeContext, XPContext}
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook
@@ -137,6 +137,13 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
       # Record activity for streak tracking
       StreakContext.record_activity(socket.assigns.user_id)
+
+      # Grant XP for completing session (async)
+      Task.start(fn ->
+        base_xp = 50  # Base XP for completing a session
+        score_bonus = round((completed_session.score || 0) / 2)  # Bonus XP based on score
+        XPContext.grant_xp(socket.assigns.user_id, base_xp + score_bonus, :practice_session)
+      end)
 
       # Check for badge unlocks (async)
       Task.start(fn ->

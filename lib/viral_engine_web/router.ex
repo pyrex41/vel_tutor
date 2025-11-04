@@ -144,6 +144,9 @@ defmodule ViralEngineWeb.Router do
   # Badge collection routes
   live("/badges", BadgeLive)
 
+  # Rewards shop routes
+  live("/rewards", RewardsLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])

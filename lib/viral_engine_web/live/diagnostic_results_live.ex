@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.DiagnosticResultsLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{DiagnosticContext, RallyContext, ViralPrompts, BadgeContext}
+  alias ViralEngine.{DiagnosticContext, RallyContext, ViralPrompts, BadgeContext, XPContext}
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook
@@ -32,6 +32,13 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     results = assessment.results
     recommendations = generate_ai_recommendations(assessment)
     share_url = generate_share_url(assessment.id)
+
+    # Grant XP for completing assessment (async)
+    Task.start(fn ->
+      base_xp = 100  # Base XP for completing assessment
+      score_bonus = round((assessment.score || 0) * 2)  # 2 XP per score point
+      XPContext.grant_xp(user.id, base_xp + score_bonus, :diagnostic_assessment)
+    end)
 
     # Check for badge unlocks (async)
     Task.start(fn ->

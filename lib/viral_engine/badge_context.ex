@@ -6,7 +6,7 @@ defmodule ViralEngine.BadgeContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, Badge, UserBadge, PracticeContext, DiagnosticContext, StreakContext}
+  alias ViralEngine.{Repo, Badge, UserBadge, PracticeContext, DiagnosticContext, StreakContext, XPContext}
   require Logger
 
   @doc """
@@ -143,7 +143,9 @@ defmodule ViralEngine.BadgeContext do
             # Grant XP reward
             if badge.reward_xp > 0 do
               Logger.info("Granting #{badge.reward_xp} XP for badge: #{badge.name}")
-              # TODO: Integrate with XP system when available
+              Task.start(fn ->
+                XPContext.grant_xp(user_id, badge.reward_xp, :badge_unlock)
+              end)
             end
 
             # Broadcast unlock event
