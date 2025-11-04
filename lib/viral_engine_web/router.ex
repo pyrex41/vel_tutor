@@ -160,6 +160,10 @@ defmodule ViralEngineWeb.Router do
   live("/reels", ProgressReelLive)
   live("/reel/:token", ProgressReelLive)
 
+  # Prep pack routes
+  live("/prep-packs", PrepPackLive)
+  live("/prep/:token", PrepPackLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
