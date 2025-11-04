@@ -1,0 +1,35 @@
+# Example runtime configuration for Viral Engine Guardrails
+# Copy to config/runtime.exs and configure your environment variables
+
+import Config
+
+if config_env() == :prod do
+  # Viral Engine Guardrail Configuration
+  config :viral_engine, :viral_guardrails,
+    # Fraud Detection Thresholds
+    fraud_detection_threshold: String.to_integer(System.get_env("FRAUD_DETECTION_THRESHOLD") || "10"),
+    fraud_detection_days: String.to_integer(System.get_env("FRAUD_DETECTION_DAYS") || "7"),
+
+    # Bot Detection Parameters
+    bot_detection_time_window: String.to_integer(System.get_env("BOT_DETECTION_TIME_WINDOW") || "5"),
+    bot_detection_min_clicks: String.to_integer(System.get_env("BOT_DETECTION_MIN_CLICKS") || "3"),
+    bot_detection_days: String.to_integer(System.get_env("BOT_DETECTION_DAYS") || "7"),
+
+    # Opt-out Rate Configuration
+    opt_out_rate_days: String.to_integer(System.get_env("OPT_OUT_RATE_DAYS") || "30"),
+
+    # COPPA Compliance Configuration
+    coppa_compliance_days: String.to_integer(System.get_env("COPPA_COMPLIANCE_DAYS") || "30"),
+
+    # Conversion Anomaly Detection
+    conversion_anomaly_threshold: String.to_integer(System.get_env("CONVERSION_ANOMALY_THRESHOLD") || "10"),
+    conversion_anomaly_rate_threshold: String.to_float(System.get_env("CONVERSION_ANOMALY_RATE_THRESHOLD") || "80.0"),
+
+    # Health Score Calculation
+    health_score_days: String.to_integer(System.get_env("HEALTH_SCORE_DAYS") || "7"),
+
+    # Alert Thresholds
+    alert_fraud_threshold: String.to_integer(System.get_env("ALERT_FRAUD_THRESHOLD") || "5"),
+    alert_bot_threshold: String.to_integer(System.get_env("ALERT_BOT_THRESHOLD") || "3"),
+    alert_opt_out_threshold: String.to_float(System.get_env("ALERT_OPT_OUT_THRESHOLD") || "30.0")
+end
