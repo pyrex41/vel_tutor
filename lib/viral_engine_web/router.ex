@@ -135,6 +135,9 @@ defmodule ViralEngineWeb.Router do
   # Parent Progress routes (COPPA-compliant)
   live("/parent/progress/:token", ParentProgressLive)
 
+  # Streak Rescue routes
+  live("/streak-rescue", StreakRescueLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])

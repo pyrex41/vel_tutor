@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.FlashcardStudyLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{FlashcardContext, AchievementContext, ViralPrompts}
+  alias ViralEngine.{FlashcardContext, AchievementContext, ViralPrompts, StreakContext}
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook
@@ -192,6 +192,9 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
 
     # Complete session and calculate score
     {:ok, completed_session} = FlashcardContext.complete_study_session(session.id)
+
+    # Record activity for streak tracking
+    StreakContext.record_activity(user_id)
 
     # Check for achievements
     trigger_achievements(user_id, completed_session)

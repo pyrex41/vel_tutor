@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext}
+  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext, StreakContext}
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook
@@ -134,6 +134,9 @@ defmodule ViralEngineWeb.PracticeSessionLive do
     else
       # Session complete
       {:ok, completed_session} = PracticeContext.complete_session(socket.assigns.session.id)
+
+      # Record activity for streak tracking
+      StreakContext.record_activity(socket.assigns.user_id)
 
       # Check if this was a buddy challenge session
       if completed_session.metadata["challenge_id"] do
