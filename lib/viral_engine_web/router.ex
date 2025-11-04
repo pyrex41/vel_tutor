@@ -147,6 +147,10 @@ defmodule ViralEngineWeb.Router do
   # Rewards shop routes
   live("/rewards", RewardsLive)
 
+  # Transcript routes
+  live("/transcripts", TranscriptLive)
+  live("/transcripts/:id", TranscriptLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
