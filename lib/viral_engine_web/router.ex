@@ -128,6 +128,7 @@ defmodule ViralEngineWeb.Router do
 
   # Buddy challenge routes
   live("/challenge/:token", ChallengeLive)
+  live("/auto-challenges", AutoChallengeLive)
 
   # Results Rally routes
   live("/rally/:token", RallyLive)
