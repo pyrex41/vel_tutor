@@ -142,7 +142,7 @@
         "description": "Implement a POST /api/agents/:id/test endpoint that allows users to perform dry-run tests on agent configurations, including provider connectivity checks, sample prompts with estimations, and storing results in metadata.",
         "details": "In the AgentController located at lib/vel_tutor_web/controllers/agent_controller.ex, add a new POST /api/agents/:id/test endpoint that accepts a JSON payload with a 'dry_run' boolean flag (defaulting to true for safety). Validate that the agent exists and is owned by the authenticated user. For the dry-run, perform the following checks without executing real tasks: 1. Provider connectivity check by attempting a lightweight API call (e.g., model list or a minimal completion) using the agent's configured provider (e.g., via OpenAIAdapter, GroqAdapter, or PerplexityAdapter), verifying API key validity and model availability. 2. Sample prompt execution with token/cost estimation by sending a predefined test prompt (e.g., 'Hello, world!') to the provider adapter, capturing estimated tokens used, cost in USD, and response time in milliseconds. 3. Response time measurement by timing the sample prompt call. 4. Configuration optimization suggestions based on the test results, such as recommending lower temperature for faster responses or alternative models if connectivity fails. Store the test results (connectivity status, estimated tokens, cost, response time, suggestions) in the agent's metadata JSONB field, updating a 'last_tested_at' timestamp. Ensure error handling for failed connectivity (e.g., invalid API key) with appropriate HTTP status codes (e.g., 400 for bad config, 500 for provider errors). Implement rate limiting to prevent abuse, allowing one test per agent per minute. Use the existing adapter modules for provider interactions, ensuring they support dry-run modes if needed. For integration, leverage the MCP Orchestrator if required for orchestrating the test calls.",
         "testStrategy": "Write comprehensive unit tests in test/vel_tutor_web/controllers/agent_controller_test.exs using Phoenix.ConnTest. Test the POST /api/agents/:id/test endpoint with valid agent IDs and dry_run=true, mocking provider adapters (e.g., using Mox) to simulate connectivity checks, sample prompts, and estimations, asserting correct JSON responses including connectivity status, token/cost estimates, response time, and suggestions. Test edge cases like invalid agent IDs (404), unauthorized access (403), failed connectivity (e.g., invalid API key returns 400 with error message), and rate limiting (429 after multiple requests). Write integration tests with mocked providers to verify end-to-end behavior, including database updates to agent metadata. Use async: false for tests involving external mocks. Assert that real tasks are not executed during dry-run by verifying no actual API calls beyond the test ones.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "10",
           "3",
@@ -150,7 +150,8 @@
           "5"
         ],
         "priority": "medium",
-        "subtasks": []
+        "subtasks": [],
+        "updatedAt": "2025-11-04T04:28:46.014033Z"
       },
       {
         "id": 12,
@@ -158,7 +159,7 @@
         "description": "Create the AuditLogContext module to log all user actions, AI decisions, and system events with full context, including a 90-day retention policy and a query interface for administrators.",
         "details": "Implement the AuditLogContext module in lib/vel_tutor/audit_log_context.ex as an Elixir context module using Ecto for database interactions. Define an AuditLog schema with fields such as user_id (integer, nullable for system events), action (string, e.g., 'task_created', 'ai_call'), payload (map for detailed data), ip_address (string), user_agent (string), timestamp (datetime), task_id (integer, nullable), provider (string, nullable), model (string, nullable), tokens_used (integer, nullable), cost (decimal, nullable), latency_ms (integer, nullable), event_type (string for system events like 'circuit_breaker_trip', 'failover', 'error'), and consent_flag (boolean for PII handling). Use Ecto changesets for validation, ensuring no PII is logged without the consent_flag set to true. Implement functions like log_user_action/4 (user_id, action, payload, conn) to extract IP and user_agent from the Plug.Conn, log_ai_call/6 (task_id, provider, model, tokens, cost, latency) for AI provider interactions, and log_system_event/2 (event_type, details) for system events. Integrate logging into all controller actions (e.g., in TaskController, AgentController) by calling AuditLogContext.log_user_action in plugs or after actions. For AI calls, hook into the adapters (OpenAIAdapter, GroqAdapter, PerplexityAdapter) to log after each call. Enforce the 90-day retention policy using a background job (e.g., with Oban) to periodically delete old logs. Create a query interface in a new AdminController or extend an existing one with endpoints like GET /api/admin/audit_logs?user_id=X&action=Y&date_from=Z&date_to=W, using Ecto queries with filters and pagination. Ensure privacy by redacting sensitive data unless consent_flag is true. Consider using PostgreSQL's JSONB for payload storage and indexes on frequently queried fields like user_id, action, and timestamp for performance.",
         "testStrategy": "Write unit tests in test/vel_tutor/audit_log_context_test.exs to verify changeset validations, such as rejecting logs with PII without consent_flag, and correct insertion of logs for user actions, AI calls, and system events. Use ExUnit with fixtures for conn structs to test IP and user_agent extraction. Write integration tests in test/vel_tutor_web/controllers/ (e.g., task_controller_test.exs, agent_controller_test.exs) to assert that logging occurs on controller actions by checking the database after requests. Mock adapter calls in integration tests for adapters (e.g., openai_adapter_test.exs) to verify AI call logging with correct fields. Test the retention policy by inserting old logs and running the deletion job, asserting removal after 90 days. For the query interface, write controller tests in a new admin_controller_test.exs using Phoenix.ConnTest, testing filtered queries with various parameters, asserting correct JSON responses and pagination. Use database assertions to verify log entries are created correctly without PII leaks.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "1",
           "3",
@@ -167,7 +168,7 @@
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2025-11-03T22:50:24.914Z"
+        "updatedAt": "2025-11-04T04:28:46.014061Z"
       },
       {
         "id": 13,

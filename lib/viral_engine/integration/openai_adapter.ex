@@ -4,6 +4,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
   """
 
   require Logger
+  alias ViralEngine.AuditLogContext
 
   @behaviour ViralEngine.Integration.AdapterBehaviour
 
@@ -148,9 +149,25 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
   end
 
   defp do_chat_completion(prompt, adapter, retries) do
+    start_time = System.monotonic_time(:millisecond)
+
     case make_api_call(prompt, adapter) do
       {:ok, response} ->
+        latency_ms = System.monotonic_time(:millisecond) - start_time
         update_circuit_breaker(adapter, :success)
+
+        # Log AI call to audit logs
+        Task.start(fn ->
+          AuditLogContext.log_ai_call(
+            nil,  # task_id not available here, will be nil
+            "openai",
+            "gpt-4o",
+            response.tokens_used,
+            Decimal.from_float(response.cost),
+            latency_ms
+          )
+        end)
+
         {:ok, response}
 
       {:error, reason} ->

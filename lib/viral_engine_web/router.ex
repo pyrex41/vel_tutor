@@ -99,6 +99,10 @@ defmodule ViralEngineWeb.Router do
     get("/fine-tuning-jobs/:id", FineTuningController, :show)
     post("/fine-tuning-jobs/:id/register", FineTuningController, :register_model)
     delete("/fine-tuning-jobs/:id", FineTuningController, :delete)
+
+    # Admin - Audit Logs
+    get("/admin/audit_logs", AdminController, :audit_logs)
+    get("/admin/audit_logs/stats", AdminController, :audit_logs_stats)
   end
 
   scope "/mcp", ViralEngineWeb do

@@ -26,6 +26,8 @@ defmodule ViralEngine.Application do
       ViralEngine.ApprovalTimeoutChecker,
       # Start the anomaly detection worker
       ViralEngine.AnomalyDetectionWorker,
+      # Start the audit log retention worker (90-day policy)
+      ViralEngine.AuditLogRetentionWorker,
       # Start the MCP Orchestrator
       ViralEngine.Agents.Orchestrator,
       # Start the rate limit reset scheduler
