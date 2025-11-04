@@ -177,6 +177,7 @@ defmodule ViralEngineWeb.Router do
     live("/benchmarks", BenchmarksLive)
     live("/rate-limits", RateLimitsLive)
     live("/k-factor", KFactorDashboardLive)
+    live("/guardrails", GuardrailDashboardLive)
   end
 
   # Enable LiveDashboard in development
