@@ -2,9 +2,9 @@ import Config
 
 # Configure your database
 config :viral_engine, ViralEngine.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
+  username: "claude",
+  password: "",
+  socket_dir: "/var/run/postgresql",
   database: "viral_engine_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
