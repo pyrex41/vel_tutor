@@ -144,22 +144,15 @@ defmodule ViralEngineWeb.BenchmarksLive do
     benchmark = BenchmarksContext.get_benchmark(benchmark_id)
 
     if benchmark do
-      case BenchmarksContext.run_benchmark(benchmark) do
-        {:ok, results, stats} ->
-          # Broadcast completion
-          Phoenix.PubSub.broadcast(
-            ViralEngine.PubSub,
-            "benchmarks",
-            {:benchmark_completed, benchmark_id, results, stats}
-          )
+      # Run benchmark (always succeeds in current implementation)
+      {:ok, results, stats} = BenchmarksContext.run_benchmark(benchmark)
 
-        {:error, error} ->
-          Phoenix.PubSub.broadcast(
-            ViralEngine.PubSub,
-            "benchmarks",
-            {:benchmark_failed, benchmark_id, error}
-          )
-      end
+      # Broadcast completion
+      Phoenix.PubSub.broadcast(
+        ViralEngine.PubSub,
+        "benchmarks",
+        {:benchmark_completed, benchmark_id, results, stats}
+      )
     end
   end
 

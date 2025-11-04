@@ -121,37 +121,20 @@ defmodule ViralEngine.BenchmarksContext do
 
     # TODO: Implement execute_task/1 in MCPOrchestrator or use trigger_event/1
     # For now, return a placeholder result to avoid compilation errors
-    result = {:ok, %{cost: 0, tokens_used: 0, response: "Benchmark not yet implemented"}}
+    {:ok, task_result} = {:ok, %{cost: 0, tokens_used: 0, response: "Benchmark not yet implemented"}}
 
-    case result do
-      {:ok, task_result} ->
-        end_time = System.monotonic_time(:millisecond)
-        latency = end_time - start_time
+    end_time = System.monotonic_time(:millisecond)
+    latency = end_time - start_time
 
-        %{
-          provider: provider,
-          success: true,
-          latency_ms: latency,
-          cost: task_result[:cost] || 0,
-          tokens_used: task_result[:tokens_used] || 0,
-          response: task_result[:response],
-          error: nil
-        }
-
-      {:error, reason} ->
-        end_time = System.monotonic_time(:millisecond)
-        latency = end_time - start_time
-
-        %{
-          provider: provider,
-          success: false,
-          latency_ms: latency,
-          cost: 0,
-          tokens_used: 0,
-          response: nil,
-          error: inspect(reason)
-        }
-    end
+    %{
+      provider: provider,
+      success: true,
+      latency_ms: latency,
+      cost: task_result[:cost] || 0,
+      tokens_used: task_result[:tokens_used] || 0,
+      response: task_result[:response],
+      error: nil
+    }
   end
 
   defp process_results(results) do

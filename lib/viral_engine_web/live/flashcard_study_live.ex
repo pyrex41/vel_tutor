@@ -103,16 +103,13 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
   def handle_event("generate_ai_deck", %{"subject" => subject, "topic" => topic, "difficulty" => _difficulty}, socket) do
     diff = String.to_integer(_difficulty)
 
-    case FlashcardContext.generate_ai_deck(socket.assigns.user.id, subject, topic, diff, 10) do
-      {:ok, %{deck: deck}} ->
-        {:noreply,
-         socket
-         |> put_flash(:success, "AI deck generated! #{deck.title}")
-         |> redirect(to: "/flashcards/study/#{deck.id}")}
+    # Generate AI deck (always succeeds in current implementation)
+    {:ok, %{deck: deck}} = FlashcardContext.generate_ai_deck(socket.assigns.user.id, subject, topic, diff, 10)
 
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to generate deck")}
-    end
+    {:noreply,
+     socket
+     |> put_flash(:success, "AI deck generated! #{deck.title}")
+     |> redirect(to: "/flashcards/study/#{deck.id}")}
   end
 
   @impl true

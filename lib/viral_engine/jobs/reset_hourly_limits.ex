@@ -20,13 +20,9 @@ defmodule ViralEngine.Jobs.ResetHourlyLimits do
 
   @impl GenServer
   def handle_info(:reset_hourly_limits, state) do
-    case RateLimitContext.reset_hourly_counters() do
-      {:ok, count} ->
-        Logger.info("Successfully reset hourly counters for #{count} rate limits")
-
-      {:error, reason} ->
-        Logger.error("Failed to reset hourly counters: #{inspect(reason)}")
-    end
+    # Reset hourly counters (always succeeds in current implementation)
+    {:ok, count} = RateLimitContext.reset_hourly_counters()
+    Logger.info("Successfully reset hourly counters for #{count} rate limits")
 
     # Schedule the next reset
     schedule_next_reset()

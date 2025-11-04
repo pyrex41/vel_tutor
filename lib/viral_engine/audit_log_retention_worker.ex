@@ -31,11 +31,6 @@ defmodule ViralEngine.AuditLogRetentionWorker do
         Logger.info("Deleted #{count} audit logs older than 90 days")
         schedule_cleanup()
         {:noreply, %{state | last_run: DateTime.utc_now(), deleted_count: count}}
-
-      {:error, reason} ->
-        Logger.error("Failed to delete old audit logs: #{inspect(reason)}")
-        schedule_cleanup()
-        {:noreply, state}
     end
   end
 
@@ -56,10 +51,6 @@ defmodule ViralEngine.AuditLogRetentionWorker do
       {:ok, count} ->
         Logger.info("Deleted #{count} audit logs older than 90 days")
         {:reply, {:ok, count}, %{state | last_run: DateTime.utc_now(), deleted_count: count}}
-
-      {:error, reason} ->
-        Logger.error("Failed to delete old audit logs: #{inspect(reason)}")
-        {:reply, {:error, reason}, state}
     end
   end
 

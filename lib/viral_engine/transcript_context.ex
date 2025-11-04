@@ -90,35 +90,29 @@ defmodule ViralEngine.TranscriptContext do
           # Mark as summarizing
           {:ok, transcript} = Repo.update(SessionTranscript.mark_summarizing(transcript))
 
-          # Step 2: Generate AI summary
-          case summarize_transcript(transcription_result.text, transcript.session_type) do
-            {:ok, summary_result} ->
-              # Update summary and key points
-              {:ok, transcript} = Repo.update(SessionTranscript.changeset(transcript, %{
-                ai_summary: summary_result.summary,
-                key_points: summary_result.key_points,
-                sentiment_score: summary_result.sentiment
-              }))
+          # Step 2: Generate AI summary (always succeeds in simulation)
+          {:ok, summary_result} = summarize_transcript(transcription_result.text, transcript.session_type)
 
-              # Mark as completed
-              {:ok, completed_transcript} = Repo.update(SessionTranscript.mark_completed(transcript))
+          # Update summary and key points
+          {:ok, transcript} = Repo.update(SessionTranscript.changeset(transcript, %{
+            ai_summary: summary_result.summary,
+            key_points: summary_result.key_points,
+            sentiment_score: summary_result.sentiment
+          }))
 
-              Logger.info("Transcript #{transcript_id} processed successfully")
+          # Mark as completed
+          {:ok, completed_transcript} = Repo.update(SessionTranscript.mark_completed(transcript))
 
-              # Broadcast completion event
-              Phoenix.PubSub.broadcast(
-                ViralEngine.PubSub,
-                "user:#{transcript.user_id}:transcripts",
-                {:transcript_completed, %{transcript: completed_transcript}}
-              )
+          Logger.info("Transcript #{transcript_id} processed successfully")
 
-              {:ok, completed_transcript}
+          # Broadcast completion event
+          Phoenix.PubSub.broadcast(
+            ViralEngine.PubSub,
+            "user:#{transcript.user_id}:transcripts",
+            {:transcript_completed, %{transcript: completed_transcript}}
+          )
 
-            {:error, reason} ->
-              Logger.error("Failed to summarize transcript #{transcript_id}: #{inspect(reason)}")
-              {:ok, _failed} = Repo.update(SessionTranscript.mark_failed(transcript, "Summarization failed: #{inspect(reason)}"))
-              {:error, reason}
-          end
+          {:ok, completed_transcript}
 
         {:error, reason} ->
           Logger.error("Failed to transcribe audio for transcript #{transcript_id}: #{inspect(reason)}")
