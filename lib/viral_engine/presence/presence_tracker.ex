@@ -1,1 +1,67 @@
-defmodule ViralEngine.Presence.PresenceTracker do\n  use Ecto.Schema\n  import Ecto.Changeset\n  import Ecto.Query\n  alias ViralEngine.Repo\n  alias ViralEngine.Accounts.User\n\n  schema \"presences\" do\n    field :session_id, :string\n    field :joined_at, :utc_datetime\n    field :left_at, :utc_datetime\n    belongs_to :user, User\n\n    timestamps()\n  end\n\n  def changeset(presence, attrs) do\n    presence\n    |> cast(attrs, [:user_id, :session_id, :joined_at, :left_at])\n    |> validate_required([:user_id, :session_id, :joined_at])\n    |> unique_constraint([:user_id, :session_id], name: :user_session_unique)\n  end\n\n  def track_user(user_id, session_id) do\n    attrs = %{\n      user_id: user_id,\n      session_id: session_id,\n      joined_at: DateTime.utc_now()\n    }\n\n    case Repo.insert(changeset(%__MODULE__{}, attrs)) do\n      {:ok, _} -> :ok\n      {:error, changeset} ->\n        if changeset.errors[:user_id] || changeset.errors[:session_id] do\n          update_existing(user_id, session_id)\n        else\n          :error\n        end\n    end\n  end\n\n  def untrack_user(user_id, session_id) do\n    from(p in __MODULE__, where: p.user_id == ^user_id and p.session_id == ^session_id and is_nil(p.left_at))\n    |> Repo.update_all(set: [left_at: DateTime.utc_now()])\n    |> case do\n      {1, _} -> :ok\n      _ -> :not_found\n    end\n  end\n\n  defp update_existing(user_id, session_id) do\n    from(p in __MODULE__, where: p.user_id == ^user_id and p.session_id == ^session_id)\n    |> Repo.update_all(set: [joined_at: DateTime.utc_now(), left_at: nil])\n  end\n\n  def list_active(session_id) do\n    from(p in __MODULE__, where: p.session_id == ^session_id and is_nil(p.left_at), preload: [:user])\n    |> Repo.all()\n  end\nend
+defmodule ViralEngine.Presence.PresenceTracker do
+  use Ecto.Schema
+  import Ecto.Changeset
+  import Ecto.Query
+  alias ViralEngine.Repo
+  alias ViralEngine.Accounts.User
+
+  schema "presences" do
+    field(:session_id, :string)
+    field(:joined_at, :utc_datetime)
+    field(:left_at, :utc_datetime)
+    belongs_to(:user, User)
+
+    timestamps()
+  end
+
+  def changeset(presence, attrs) do
+    presence
+    |> cast(attrs, [:user_id, :session_id, :joined_at, :left_at])
+    |> validate_required([:user_id, :session_id, :joined_at])
+    |> unique_constraint([:user_id, :session_id], name: :user_session_unique)
+  end
+
+  def track_user(user_id, session_id) do
+    attrs = %{
+      user_id: user_id,
+      session_id: session_id,
+      joined_at: DateTime.utc_now()
+    }
+
+    case Repo.insert(changeset(%__MODULE__{}, attrs)) do
+      {:ok, _} ->
+        :ok
+
+      {:error, changeset} ->
+        if changeset.errors[:user_id] || changeset.errors[:session_id] do
+          update_existing(user_id, session_id)
+        else
+          :error
+        end
+    end
+  end
+
+  def untrack_user(user_id, session_id) do
+    from(p in __MODULE__,
+      where: p.user_id == ^user_id and p.session_id == ^session_id and is_nil(p.left_at)
+    )
+    |> Repo.update_all(set: [left_at: DateTime.utc_now()])
+    |> case do
+      {1, _} -> :ok
+      _ -> :not_found
+    end
+  end
+
+  defp update_existing(user_id, session_id) do
+    from(p in __MODULE__, where: p.user_id == ^user_id and p.session_id == ^session_id)
+    |> Repo.update_all(set: [joined_at: DateTime.utc_now(), left_at: nil])
+  end
+
+  def list_active(session_id) do
+    from(p in __MODULE__,
+      where: p.session_id == ^session_id and is_nil(p.left_at),
+      preload: [:user]
+    )
+    |> Repo.all()
+  end
+end

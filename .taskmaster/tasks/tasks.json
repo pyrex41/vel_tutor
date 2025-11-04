@@ -158,7 +158,7 @@
         "description": "Create the AuditLogContext module to log all user actions, AI decisions, and system events with full context, including a 90-day retention policy and a query interface for administrators.",
         "details": "Implement the AuditLogContext module in lib/vel_tutor/audit_log_context.ex as an Elixir context module using Ecto for database interactions. Define an AuditLog schema with fields such as user_id (integer, nullable for system events), action (string, e.g., 'task_created', 'ai_call'), payload (map for detailed data), ip_address (string), user_agent (string), timestamp (datetime), task_id (integer, nullable), provider (string, nullable), model (string, nullable), tokens_used (integer, nullable), cost (decimal, nullable), latency_ms (integer, nullable), event_type (string for system events like 'circuit_breaker_trip', 'failover', 'error'), and consent_flag (boolean for PII handling). Use Ecto changesets for validation, ensuring no PII is logged without the consent_flag set to true. Implement functions like log_user_action/4 (user_id, action, payload, conn) to extract IP and user_agent from the Plug.Conn, log_ai_call/6 (task_id, provider, model, tokens, cost, latency) for AI provider interactions, and log_system_event/2 (event_type, details) for system events. Integrate logging into all controller actions (e.g., in TaskController, AgentController) by calling AuditLogContext.log_user_action in plugs or after actions. For AI calls, hook into the adapters (OpenAIAdapter, GroqAdapter, PerplexityAdapter) to log after each call. Enforce the 90-day retention policy using a background job (e.g., with Oban) to periodically delete old logs. Create a query interface in a new AdminController or extend an existing one with endpoints like GET /api/admin/audit_logs?user_id=X&action=Y&date_from=Z&date_to=W, using Ecto queries with filters and pagination. Ensure privacy by redacting sensitive data unless consent_flag is true. Consider using PostgreSQL's JSONB for payload storage and indexes on frequently queried fields like user_id, action, and timestamp for performance.",
         "testStrategy": "Write unit tests in test/vel_tutor/audit_log_context_test.exs to verify changeset validations, such as rejecting logs with PII without consent_flag, and correct insertion of logs for user actions, AI calls, and system events. Use ExUnit with fixtures for conn structs to test IP and user_agent extraction. Write integration tests in test/vel_tutor_web/controllers/ (e.g., task_controller_test.exs, agent_controller_test.exs) to assert that logging occurs on controller actions by checking the database after requests. Mock adapter calls in integration tests for adapters (e.g., openai_adapter_test.exs) to verify AI call logging with correct fields. Test the retention policy by inserting old logs and running the deletion job, asserting removal after 90 days. For the query interface, write controller tests in a new admin_controller_test.exs using Phoenix.ConnTest, testing filtered queries with various parameters, asserting correct JSON responses and pagination. Use database assertions to verify log entries are created correctly without PII leaks.",
-        "status": "done",
+        "status": "in-progress",
         "dependencies": [
           "1",
           "3",
@@ -308,8 +308,8 @@
         "id": 23,
         "title": "Implement Anomaly Detection and Alerting System",
         "description": "Develop an automated anomaly detection system using statistical methods to monitor key metrics such as error rate, latency, cost per task, and failures, with configurable alert triggers and a notification system including email, webhook, and in-app alerts, along with an alert history dashboard.",
-        "details": "Implement the anomaly detection functionality in lib/vel_tutor/anomaly_detection.ex as an Elixir module. Use the mean + 3σ (standard deviations) algorithm for detecting anomalies in monitored metrics: error rate (percentage of failed tasks), latency (response time in milliseconds), cost per task (monetary value), and failures (count of failures). Integrate with the MetricsContext module (from Task 20) to fetch real-time metrics data at regular intervals (e.g., every minute) for analysis. Define alert triggers as configurable thresholds: latency spike (e.g., >2x baseline), error rate >10%, cost anomaly (e.g., >3σ above mean). Implement a notification system supporting email (using Bamboo or similar), webhooks (HTTP POST to configured URLs), and in-app notifications (via Phoenix LiveView broadcasts). Create an Alert schema with fields like id, metric_type, value, threshold, triggered_at, status (active/resolved), and details (jsonb for context). Persist alerts in PostgreSQL with a migration. Build the alert history dashboard at /dashboard/alerts using Phoenix LiveView in lib/vel_tutor_web/live/alert_dashboard_live.ex, displaying a table of alerts with filters by metric, time range, and status, including pagination and real-time updates via LiveView subscriptions. Ensure the system logs alerts to the audit log (integrating with Task 12 if available) and includes manual alert resolution features. Optimize for low false positive rate (<5%) by tuning the σ multiplier and adding smoothing filters (e.g., moving averages). Handle edge cases like insufficient data for baseline calculation (e.g., require at least 100 data points). Include configuration options in config files for alert thresholds and notification endpoints.",
-        "testStrategy": "Write unit tests in test/vel_tutor/anomaly_detection_test.exs using ExUnit to verify the anomaly detection algorithm: mock metrics data and assert correct anomaly flags for values beyond mean + 3σ, test edge cases like low data volume, and validate false positive rates by simulating 1000 data points with known distributions (aim for <5% false positives). Write integration tests in test/vel_tutor/anomaly_detection_integration_test.exs to test end-to-end alerting: simulate metric spikes, verify alert creation and persistence, and mock notification sends (use Mox for email/webhook mocks) asserting correct payloads. Test the dashboard in test/vel_tutor_web/live/alert_dashboard_live_test.exs using Phoenix.LiveViewTest: assert rendering of alert history, simulate filter changes, and verify real-time updates on new alerts. Perform load testing to ensure anomaly detection runs efficiently on high-volume metrics without impacting system performance. Manually verify notification delivery in a staging environment and measure false positive rates over a week of simulated traffic.",
+        "details": "Implement the anomaly detection functionality in lib/vel_tutor/anomaly_detection.ex as an Elixir module. Use the mean + 3\u03c3 (standard deviations) algorithm for detecting anomalies in monitored metrics: error rate (percentage of failed tasks), latency (response time in milliseconds), cost per task (monetary value), and failures (count of failures). Integrate with the MetricsContext module (from Task 20) to fetch real-time metrics data at regular intervals (e.g., every minute) for analysis. Define alert triggers as configurable thresholds: latency spike (e.g., >2x baseline), error rate >10%, cost anomaly (e.g., >3\u03c3 above mean). Implement a notification system supporting email (using Bamboo or similar), webhooks (HTTP POST to configured URLs), and in-app notifications (via Phoenix LiveView broadcasts). Create an Alert schema with fields like id, metric_type, value, threshold, triggered_at, status (active/resolved), and details (jsonb for context). Persist alerts in PostgreSQL with a migration. Build the alert history dashboard at /dashboard/alerts using Phoenix LiveView in lib/vel_tutor_web/live/alert_dashboard_live.ex, displaying a table of alerts with filters by metric, time range, and status, including pagination and real-time updates via LiveView subscriptions. Ensure the system logs alerts to the audit log (integrating with Task 12 if available) and includes manual alert resolution features. Optimize for low false positive rate (<5%) by tuning the \u03c3 multiplier and adding smoothing filters (e.g., moving averages). Handle edge cases like insufficient data for baseline calculation (e.g., require at least 100 data points). Include configuration options in config files for alert thresholds and notification endpoints.",
+        "testStrategy": "Write unit tests in test/vel_tutor/anomaly_detection_test.exs using ExUnit to verify the anomaly detection algorithm: mock metrics data and assert correct anomaly flags for values beyond mean + 3\u03c3, test edge cases like low data volume, and validate false positive rates by simulating 1000 data points with known distributions (aim for <5% false positives). Write integration tests in test/vel_tutor/anomaly_detection_integration_test.exs to test end-to-end alerting: simulate metric spikes, verify alert creation and persistence, and mock notification sends (use Mox for email/webhook mocks) asserting correct payloads. Test the dashboard in test/vel_tutor_web/live/alert_dashboard_live_test.exs using Phoenix.LiveViewTest: assert rendering of alert history, simulate filter changes, and verify real-time updates on new alerts. Perform load testing to ensure anomaly detection runs efficiently on high-volume metrics without impacting system performance. Manually verify notification delivery in a staging environment and measure false positive rates over a week of simulated traffic.",
         "status": "done",
         "dependencies": [
           "20"
@@ -505,7 +505,7 @@
   "viral": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Implement Practice Session UI with Progress Tracking",
         "description": "Build a LiveView component for multi-step practice sessions with real-time feedback, progress bar, timer, and pause/resume functionality. The UI is 80% complete, with LiveView structure, state management, real-time feedback, and timer working; missing Ecto persistence and full integration with PracticeContext for actual session data.",
         "status": "in-progress",
@@ -1305,7 +1305,7 @@
         "dependencies": [
           "11"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1314,8 +1314,8 @@
             "dependencies": [
               11
             ],
-            "details": "Integrate Phoenix.PubSub for broadcasting feed updates, set up LiveView stream assigns to handle dynamic insertions of achievements and interactions, ensuring efficient real-time updates without full page reloads.",
-            "status": "pending",
+            "details": "Integrate Phoenix.PubSub for broadcasting feed updates, set up LiveView stream assigns to handle dynamic insertions of achievements and interactions, ensuring efficient real-time updates without full page reloads.\n<info added on 2025-11-04T04:14:29.705Z>\nImplemented Activity Ecto schema and migration; added context create functions that broadcast via Phoenix.PubSub; built ActivityFeedLive using LiveView streams for real-time inserts; wired route; verified new activities render instantly without reload. Ready to implement like/comment interaction buttons in subtask 12.2.\n</info added on 2025-11-04T04:14:29.705Z>",
+            "status": "done",
             "testStrategy": "Test stream insertions by simulating PubSub broadcasts and verifying feed updates in the UI.",
             "parentId": "undefined"
           },
@@ -1326,8 +1326,8 @@
             "dependencies": [
               1
             ],
-            "details": "Create LiveView event handlers for react and like actions, update the database with user interactions, broadcast changes via PubSub to reflect updates in real-time across all connected clients, and ensure buttons are mobile-responsive.",
-            "status": "pending",
+            "details": "Create LiveView event handlers for react and like actions, update the database with user interactions, broadcast changes via PubSub to reflect updates in real-time across all connected clients, and ensure buttons are mobile-responsive.\n<info added on 2025-11-04T04:15:12.966Z>\nImplemented like/react buttons with persistence; introduced toggle_like in the context to add/remove likes and emit PubSub events; LiveView event handler processes like/reaction events and refreshes the activity stream; UI reflects liked/unliked states with color-coded buttons; updates propagate to all connected clients in real time.\n</info added on 2025-11-04T04:15:12.966Z>",
+            "status": "done",
             "testStrategy": "Manual QA for interactions, including testing button clicks, database updates, and real-time UI reflections.",
             "parentId": "undefined"
           },
@@ -1338,8 +1338,8 @@
             "dependencies": [
               1
             ],
-            "details": "Add filter options in the UI (e.g., by type, date, or user), modify queries to apply filters server-side, dynamically update the LiveView stream with filtered results, and persist filter settings in user sessions for consistency.",
-            "status": "pending",
+            "details": "Add filter options in the UI (e.g., by type, date, or user), modify queries to apply filters server-side, dynamically update the LiveView stream with filtered results, and persist filter settings in user sessions for consistency.\n<info added on 2025-11-04T04:15:53.666Z>\nImplemented type-based personalization with categories all, achievements, and interactions; applied server-side filtering in queries; wired UI filter buttons to update the type_filter assign and refresh the LiveView stream; persisted the current filter in LiveView assigns to maintain state across events.\n</info added on 2025-11-04T04:15:53.666Z>",
+            "status": "done",
             "testStrategy": "Validate personalization by testing filter applications, ensuring correct data display, and checking edge cases like no results.",
             "parentId": "undefined"
           },
@@ -1353,7 +1353,7 @@
               3
             ],
             "details": "Integrate HTMX for pagination requests, set up server-side endpoints to fetch additional feed items on scroll, append them to the LiveView stream without disrupting existing interactions or filters, and handle loading states for smooth UX.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check HTMX pagination by simulating scroll events, verifying correct item loading, and ensuring no conflicts with real-time updates or filters.",
             "parentId": "undefined"
           }
@@ -2116,7 +2116,8 @@
         "viral"
       ],
       "created": "2025-11-04T04:10:42.461Z",
-      "description": "Tasks for viral context"
+      "description": "Tasks for viral context",
+      "updated": "2025-11-04T04:15:25.134Z"
     }
   }
 }
