@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-11-04T15:28:07.018Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Validate All Implementation Files Present",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "No expansion needed as this is a simple verification task.",
+			"reasoning": "This task involves basic file presence checks and compilation verification, with minimal technical challenges or dependencies. It requires manual inspection and running a single command, making it low effort and straightforward."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Add Unit Tests for GuardrailMetricsContext",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into subtasks for each function: one for detect_suspicious_clicks/1, one for detect_bot_behavior/1, one for compute_opt_out_rates/1, one for scan_for_pii/1, and one for compute_health_score/1, including edge cases and coverage verification.",
+			"reasoning": "Writing comprehensive unit tests for multiple functions in a context module requires understanding the logic, setting up test data, and ensuring high coverage. It involves technical challenges like mocking dependencies and testing edge cases, with moderate effort for implementation and testing."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Add Unit Tests for PerformanceReportContext",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into subtasks: one for generate_weekly_report/1, one for generate_monthly_report/1, one for determine_trend/2, and one for insights generation, including empty data scenarios.",
+			"reasoning": "Similar to task 2, this requires creating tests for report generation and trend calculations, with dependencies on data setup. Moderate complexity due to the need for accurate test cases and coverage checks, but less intensive than fraud detection tests."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Add Integration Tests for LiveViews",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into two subtasks: one for GuardrailDashboardLive testing mounting and rendering, and one for PerformanceReportLive testing similar functionality.",
+			"reasoning": "Integration testing for LiveViews involves simulating browser interactions and verifying rendering, which can be technically challenging with Phoenix.LiveViewTest. It requires setup for UI elements and dependencies on the implementation files, leading to moderate complexity."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Add Database Indexes for Fraud and Bot Detection",
+			"complexityScore": 5,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Create subtasks: one for AddFraudDetectionIndexes migration and one for AddBotDetectionIndexes migration, including benchmarking.",
+			"reasoning": "Creating Ecto migrations with concurrent indexes requires knowledge of database optimization and safety practices. Testing involves benchmarking queries, adding moderate technical challenges and effort for performance validation."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Add Health Score Query Indexes",
+			"complexityScore": 4,
+			"recommendedSubtasks": 1,
+			"expansionPrompt": "Focus on a single subtask for creating the AddHealthScoreIndexes migration and benchmarking compute_health_score/1 queries.",
+			"reasoning": "Similar to task 5 but scoped to fewer tables, this is a straightforward migration task with benchmarking. Lower complexity due to narrower scope, though still requires database expertise."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Externalize Configuration to runtime.exs",
+			"complexityScore": 3,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "No expansion needed as configuration changes are centralized.",
+			"reasoning": "This involves moving hardcoded values to config files and updating code to read from env vars, with minimal technical challenges. Testing is straightforward via unit tests, making it low complexity."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Optimize Oban Queue Configuration",
+			"complexityScore": 3,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "No expansion needed for config updates.",
+			"reasoning": "Updating queue configurations and adding retry policies is a simple config change with load simulation testing. Low effort and technical challenges."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement Email Delivery System with UI Feedback",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divide into subtasks: one for implementing EmailDeliveryWorker with Oban, and one for updating PerformanceReportLive UI elements and event handling.",
+			"reasoning": "Implementing a new worker and integrating UI feedback requires understanding Oban queues and LiveView events. Moderate complexity due to dependencies on queue config and testing worker insertion."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Add Telemetry Events and Documentation",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into subtasks: one for adding telemetry events in contexts, and one for creating documentation files.",
+			"reasoning": "Adding telemetry calls and writing docs is moderately complex, involving code instrumentation and documentation effort. Testing is log-based, with some technical challenge in event structuring."
+		}
+	]
+}
