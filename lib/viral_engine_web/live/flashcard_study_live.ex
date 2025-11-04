@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.FlashcardStudyLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{FlashcardContext, AchievementContext, ViralPrompts, StreakContext}
+  alias ViralEngine.{FlashcardContext, ViralPrompts, StreakContext}
+  # alias ViralEngine.AchievementContext  # Unused - commented for future use
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook

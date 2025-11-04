@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.TranscriptLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{TranscriptContext, SessionTranscript}
+  alias ViralEngine.TranscriptContext
+  # alias ViralEngine.SessionTranscript  # Unused - commented for future use
   require Logger
 
   @impl true

@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.DiagnosticAssessmentLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{DiagnosticContext, DiagnosticAssessment}
+  alias ViralEngine.DiagnosticContext
+  # alias ViralEngine.DiagnosticAssessment  # Unused - commented for future use
   require Logger
 
   @impl true

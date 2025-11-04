@@ -4,8 +4,8 @@ defmodule ViralEngineWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  alias Phoenix.LiveView.JS
-  import ViralEngineWeb.Gettext
+  # alias Phoenix.LiveView.JS  # Unused - commented for future use
+  # import ViralEngineWeb.Gettext  # Unused - commented for future use
 
   @doc """
   Renders a button.
