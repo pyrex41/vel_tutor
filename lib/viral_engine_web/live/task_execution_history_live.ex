@@ -124,7 +124,7 @@ defmodule ViralEngineWeb.TaskExecutionHistoryLive do
     # Refresh the specific task in the list
     updated_tasks =
       Enum.map(socket.assigns.tasks, fn
-        %{id: ^task_id} = task ->
+        %{id: ^task_id} = _task ->
           Repo.get(Task, task_id)
 
         task ->

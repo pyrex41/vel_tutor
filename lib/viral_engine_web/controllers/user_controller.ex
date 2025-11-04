@@ -1,7 +1,7 @@
 defmodule ViralEngineWeb.UserController do
   use ViralEngineWeb, :controller
 
-  alias ViralEngine.{RateLimitContext, RBACContext, OrganizationContext}
+  alias ViralEngine.{RateLimitContext, RBACContext}
 
   action_fallback(ViralEngineWeb.FallbackController)
 

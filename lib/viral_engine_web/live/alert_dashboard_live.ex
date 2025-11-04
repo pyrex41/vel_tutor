@@ -66,7 +66,7 @@ defmodule ViralEngineWeb.AlertDashboardLive do
           })
 
         case Repo.update(changeset) do
-          {:ok, updated_alert} ->
+          {:ok, _updated_alert} ->
             # Log the resolution to audit system
             ViralEngine.AuditLogContext.log_system_event("alert_resolved", %{
               alert_id: alert_id,

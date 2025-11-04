@@ -43,7 +43,7 @@ defmodule ViralEngine.WorkflowContext do
     end
   end
 
-  def update_workflow_state(workflow_id, new_state) do
+  def update_workflow_state(workflow_id, _new_state) do
     tenant_id = OrganizationContext.current_tenant_id()
 
     if tenant_id do

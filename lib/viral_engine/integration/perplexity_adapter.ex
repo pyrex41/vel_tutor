@@ -60,7 +60,7 @@ defmodule ViralEngine.Integration.PerplexityAdapter do
 
   # Private functions
 
-  defp do_chat_completion(_prompt, adapter, _cache_key, 0) do
+  defp do_chat_completion(_prompt, _adapter, _cache_key, 0) do
     {:error, :max_retries_exceeded}
   end
 

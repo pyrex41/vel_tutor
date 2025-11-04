@@ -58,7 +58,7 @@ defmodule ViralEngine.Agents.Orchestrator do
   # Server Callbacks
 
   @impl true
-  def init(opts) do
+  def init(_opts) do
     # Load configuration
     config = Application.get_env(:viral_engine, :mcp_orchestrator, [])
 
@@ -184,7 +184,7 @@ defmodule ViralEngine.Agents.Orchestrator do
       :practice_completed -> handle_practice_completed(event, state)
       :session_ended -> handle_session_ended(event, state)
       :diagnostic_completed -> handle_diagnostic_completed(event, state)
-      _ -> Logger.warn("Unknown event type: #{event_type}")
+      _ -> Logger.warning("Unknown event type: #{event_type}")
     end
 
     {:ok, decision}
@@ -211,7 +211,7 @@ defmodule ViralEngine.Agents.Orchestrator do
     # TODO: Route to Proud Parent loop
   end
 
-  defp log_decision(event, decision) do
+  defp log_decision(_event, decision) do
     agent_decision = %AgentDecision{
       agent_id: "orchestrator",
       decision_type: "event_routing",

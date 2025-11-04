@@ -119,18 +119,6 @@ defmodule ViralEngineWeb.Plugs.RateLimitPlug do
     DateTime.to_unix(next_hour)
   end
 
-  defp calculate_next_hour_timestamp do
-    now = DateTime.utc_now()
-    next_hour = %{now | minute: 0, second: 0, microsecond: {0, 0}}
-
-    next_hour =
-      if now.minute == 0 and now.second == 0,
-        do: next_hour,
-        else: Timex.shift(next_hour, hours: 1)
-
-    DateTime.to_unix(next_hour)
-  end
-
   # Helper function to send JSON response
   defp json(conn, data) do
     conn

@@ -4,8 +4,9 @@ defmodule ViralEngine.BatchContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Batch, Task, Repo}
+  alias ViralEngine.{Batch, Repo}
   alias ViralEngine.{AuditLogContext, WebhookContext}
+  alias ViralEngine.Task, as: VETask
   require Logger
 
   @doc """
@@ -205,7 +206,7 @@ defmodule ViralEngine.BatchContext do
         increment_completed_count(batch.id)
 
         # Store result
-        store_task_result(batch.id, task_def["id"] || UUID.uuid4(), task_result)
+        store_task_result(batch.id, task_def["id"] || Ecto.UUID.generate(), task_result)
 
         {:ok, task_result}
 
@@ -214,7 +215,7 @@ defmodule ViralEngine.BatchContext do
         increment_error_count(batch.id)
 
         # Store error
-        store_task_error(batch.id, task_def["id"] || UUID.uuid4(), reason)
+        store_task_error(batch.id, task_def["id"] || Ecto.UUID.generate(), reason)
 
         {:error, reason}
     end
@@ -223,7 +224,7 @@ defmodule ViralEngine.BatchContext do
   defp create_and_execute_task(attrs) do
     # This is a simplified execution - in production, integrate with Orchestrator
     # For now, just create the task record
-    changeset = Task.changeset(%Task{}, attrs)
+    changeset = VETask.changeset(%VETask{}, attrs)
 
     case Repo.insert(changeset) do
       {:ok, task} ->

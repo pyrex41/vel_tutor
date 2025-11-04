@@ -5,8 +5,7 @@ defmodule ViralEngineWeb.BenchmarksLive do
 
   use Phoenix.LiveView
   require Logger
-  alias ViralEngine.{BenchmarksContext, Benchmark, Repo}
-  import Ecto.Query
+  alias ViralEngine.BenchmarksContext
 
   @impl true
   def mount(_params, _session, socket) do
@@ -112,25 +111,29 @@ defmodule ViralEngineWeb.BenchmarksLive do
 
   @impl true
   def handle_info({:benchmark_completed, benchmark_id, results, stats}, socket) do
-    if socket.assigns.running_benchmark == benchmark_id do
-      socket =
+    socket =
+      if socket.assigns.running_benchmark == benchmark_id do
         socket
         |> assign(:running_benchmark, nil)
         |> assign(:benchmark_results, %{results: results, stats: stats})
         |> put_flash(:info, "Benchmark completed!")
-    end
+      else
+        socket
+      end
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_info({:benchmark_failed, benchmark_id, error}, socket) do
-    if socket.assigns.running_benchmark == benchmark_id do
-      socket =
+    socket =
+      if socket.assigns.running_benchmark == benchmark_id do
         socket
         |> assign(:running_benchmark, nil)
         |> put_flash(:error, "Benchmark failed: #{error}")
-    end
+      else
+        socket
+      end
 
     {:noreply, socket}
   end

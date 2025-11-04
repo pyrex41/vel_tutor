@@ -5,7 +5,7 @@ defmodule ViralEngineWeb.Plugs.TenantContextPlug do
 
   import Plug.Conn
   require Logger
-  alias ViralEngine.{OrganizationContext, Repo}
+  alias ViralEngine.OrganizationContext
 
   @doc """
   Initializes the plug with options.

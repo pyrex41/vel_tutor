@@ -401,12 +401,6 @@ defmodule ViralEngineWeb.PerformanceDashboardLive do
     """
   end
 
-  # Helper functions
-
-  defp format_datetime(dt) do
-    Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S UTC")
-  end
-
   # Private functions
 
   defp calculate_start_time("1h", end_time), do: DateTime.add(end_time, -3600, :second)

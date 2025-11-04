@@ -11,9 +11,6 @@ defmodule ViralEngineWeb.AgentController do
 
   alias ViralEngine.{Repo, AgentDecision, MetricsContext}
 
-  # 150ms SLA
-  @mcp_timeout 150
-
   def call_agent(conn, %{"agent" => agent, "method" => method} = params) do
     request_id = params["id"] || generate_request_id()
 
@@ -84,7 +81,7 @@ defmodule ViralEngineWeb.AgentController do
   end
 
   defp execute_agent_call(agent, method, _params) do
-    Logger.warn("Unknown agent/method: #{agent}/#{method}")
+    Logger.warning("Unknown agent/method: #{agent}/#{method}")
     {:error, %{code: -32601, message: "Method not found"}}
   end
 

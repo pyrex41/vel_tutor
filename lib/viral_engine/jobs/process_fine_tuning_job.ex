@@ -47,7 +47,7 @@ defmodule ViralEngine.Jobs.ProcessFineTuningJob do
 
   # Private functions
 
-  defp handle_file_upload(job, api_key) do
+  defp handle_file_upload(job, _api_key) do
     # For now, we assume the training file is already provided as a path or URL
     # In a real implementation, you might need to handle file uploads from users
     Logger.warning("File upload not implemented - training_file_id should be set",

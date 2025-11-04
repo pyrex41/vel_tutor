@@ -1,7 +1,7 @@
 defmodule ViralEngineWeb.RolesController do
   use ViralEngineWeb, :controller
 
-  alias ViralEngine.{RBACContext, OrganizationContext}
+  alias ViralEngine.RBACContext
   require Logger
 
   action_fallback(ViralEngineWeb.FallbackController)

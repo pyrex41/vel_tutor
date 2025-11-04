@@ -4,7 +4,7 @@ defmodule ViralEngine.NotificationSystem do
   """
 
   require Logger
-  alias ViralEngine.{PubSub, AuditLogContext}
+  alias ViralEngine.AuditLogContext
 
   @doc """
   Sends notifications for an alert via all configured channels.
