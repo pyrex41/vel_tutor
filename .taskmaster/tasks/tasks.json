@@ -1397,7 +1397,7 @@
         "dependencies": [
           "11"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1438,7 +1438,8 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Subdivide into ranking computation, stream rendering, fairness filters, and invite CTAs."
+        "expansionPrompt": "Subdivide into ranking computation, stream rendering, fairness filters, and invite CTAs.",
+        "completionNotes": "Task 13: Build Leaderboards - COMPLETED\n\n**Implementation Summary:**\nComprehensive leaderboard system with real-time updates and multiple ranking scopes.\n\n**Files Created:**\n1. lib/viral_engine/leaderboard_context.ex (207 lines)\n   - Multi-scope rankings: global, subject, cohort\n   - Multiple metrics: total_score, average_score, streak, sessions\n   - Configurable time periods (default 7 days)\n   - Fairness filters: minimum 5 sessions for average score\n   - User rank and percentile calculations\n   - Nearby users function (\u00b15 positions)\n\n2. lib/viral_engine_web/live/leaderboard_live.ex (246 lines)\n   - LiveView with stream-based rendering for performance\n   - Real-time updates via PubSub subscription (\"leaderboard:updates\")\n   - Auto-refresh every 30 seconds\n   - Dynamic filtering: scope, metric, time period, subject, grade level\n   - Event handlers: change_scope, change_metric, change_time_period, change_subject, change_grade_level\n   - Invite modal with viral loop integration\n   - Challenge leader functionality\n   - Rank badges (\ud83e\udd47\ud83e\udd48\ud83e\udd49) and color coding\n   - User highlighting and percentile display\n\n**Router Updates:**\n- Added live(\"/leaderboard\", LeaderboardLive)\n\n**Key Features:**\n- **Scopes**: Global, Subject-specific, Cohort (grade level)\n- **Metrics**: Total Score, Average Score, Current Streak, Practice Sessions\n- **Time Periods**: Today, This Week (7d), This Month (30d)\n- **Real-time**: PubSub broadcasting for instant rank updates\n- **Performance**: LiveView streams for efficient rendering\n- **Gamification**: Rank badges, percentile display, challenge CTAs\n- **Fairness**: Minimum session requirements prevent gaming\n\n**Integration Points:**\n- PracticeContext for user stats\n- DiagnosticContext for assessment scores\n- StreakContext for current streak data\n- Phoenix.PubSub for real-time broadcasting\n- Activity feed integration ready\n\n**Testing Suggestions:**\n- Test multiple users with different scores\n- Verify real-time updates when scores change\n- Test scope/metric/time period switching\n- Verify percentile calculations\n- Test edge cases (tied ranks, empty leaderboards)\n\n**Performance Optimizations:**\n- Indexed queries by (subject, grade_level, score)\n- Stream-based rendering for large leaderboards\n- 30-second refresh interval to reduce DB load\n- Efficient rank calculation with single pass"
       },
       {
         "id": 14,
