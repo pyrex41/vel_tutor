@@ -67,7 +67,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   @impl true
   def handle_event("toggle-like", %{"activity_id" => activity_id}, socket) do
     user_id = socket.assigns.current_user.id
-    {:ok, result} = ActivityContext.toggle_like(activity_id, user_id)
+    {:ok, _result} = ActivityContext.toggle_like(activity_id, user_id)
 
     # Refresh activities to show like state
     activities = ActivityContext.list_activities_for_user(user_id)
@@ -163,8 +163,8 @@ defmodule ViralEngineWeb.ActivityFeedLive do
     """
   end
 
-  defp has_user_liked?(assigns, activity_id) do
+  defp has_user_liked?(_assigns, _activity_id) do
     # Simple check - in production you'd query the DB
     false
-end
+  end
 end

@@ -30,7 +30,7 @@ defmodule ViralEngine.ExperimentContext do
           }
 
           case Repo.insert(ExperimentAssignment.changeset(%ExperimentAssignment{}, assignment_attrs)) do
-            {:ok, assignment} ->
+            {:ok, _assignment} ->
               Logger.info("User #{user_id} assigned to #{experiment_key}: #{variant}")
               {:ok, variant}
 

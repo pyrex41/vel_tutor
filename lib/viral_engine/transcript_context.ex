@@ -116,13 +116,13 @@ defmodule ViralEngine.TranscriptContext do
 
             {:error, reason} ->
               Logger.error("Failed to summarize transcript #{transcript_id}: #{inspect(reason)}")
-              {:ok, failed} = Repo.update(SessionTranscript.mark_failed(transcript, "Summarization failed: #{inspect(reason)}"))
+              {:ok, _failed} = Repo.update(SessionTranscript.mark_failed(transcript, "Summarization failed: #{inspect(reason)}"))
               {:error, reason}
           end
 
         {:error, reason} ->
           Logger.error("Failed to transcribe audio for transcript #{transcript_id}: #{inspect(reason)}")
-          {:ok, failed} = Repo.update(SessionTranscript.mark_failed(transcript, "Transcription failed: #{inspect(reason)}"))
+          {:ok, _failed} = Repo.update(SessionTranscript.mark_failed(transcript, "Transcription failed: #{inspect(reason)}"))
           {:error, reason}
       end
     end
@@ -167,7 +167,7 @@ defmodule ViralEngine.TranscriptContext do
     end
   end
 
-  defp transcribe_with_openai(audio_file_path, language) do
+  defp transcribe_with_openai(audio_file_path, _language) do
     # OpenAI Whisper API transcription
     Logger.info("Transcribing audio with OpenAI Whisper: #{audio_file_path}")
 
@@ -221,7 +221,7 @@ defmodule ViralEngine.TranscriptContext do
     Logger.info("Generating AI summary for #{session_type} transcript")
 
     # Build prompt based on session type
-    prompt = build_summary_prompt(transcript_text, session_type)
+    _prompt = build_summary_prompt(transcript_text, session_type)
 
     # In production, call AI service
     # For now, simulate AI summary

@@ -352,7 +352,7 @@ defmodule ViralEngine.DiagnosticContext do
     end)
   end
 
-  defp generate_question_data("science", difficulty, count) do
+  defp generate_question_data("science", _difficulty, count) do
     Enum.map(1..count, fn _ ->
       %{
         content: "Which organ pumps blood through the body?",

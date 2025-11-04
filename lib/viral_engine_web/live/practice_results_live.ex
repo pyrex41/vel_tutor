@@ -174,7 +174,7 @@ defmodule ViralEngineWeb.PracticeResultsLive do
     }
   end
 
-  defp find_user_rank(entries, user_id) do
+  defp find_user_rank(entries, _user_id) do
     entry = Enum.find(entries, fn e -> e.is_current_user end)
     entry && entry.rank
   end

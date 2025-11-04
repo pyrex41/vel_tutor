@@ -135,7 +135,7 @@ defmodule ViralEngineWeb.AutoChallengeLive do
 
   # Helper functions
 
-  defp get_user_auto_challenges(user_id) do
+  defp get_user_auto_challenges(_user_id) do
     # Get all pending self-challenges that are auto-generated
     # In production:
     # from(c in Challenge,

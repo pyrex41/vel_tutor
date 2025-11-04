@@ -35,7 +35,7 @@ defmodule ViralEngine.XPContext do
     final_xp = round(xp_amount * xp_multiplier)
 
     # Update XP
-    new_current_xp = user_xp.current_xp + final_xp
+    _new_current_xp = user_xp.current_xp + final_xp
     new_total_xp = user_xp.total_xp + final_xp
 
     # Calculate new level
@@ -290,7 +290,7 @@ defmodule ViralEngine.XPContext do
 
   # Private functions
 
-  defp validate_claim(user_xp, nil), do: {:error, :reward_not_found}
+  defp validate_claim(_user_xp, nil), do: {:error, :reward_not_found}
   defp validate_claim(user_xp, reward) do
     cond do
       !reward.is_active ->

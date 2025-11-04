@@ -10,7 +10,7 @@ defmodule ViralEngineWeb.PresenceSubjectComponent do
     """
   end
 
-  def update(%{subject_id: subject_id} = assigns, socket) do
+  def update(%{subject_id: subject_id} = _assigns, socket) do
     topic = "subject:#{subject_id}"
     users = Map.keys(PresenceTracker.list_presence(topic))
     {:ok, assign(socket, subject_id: subject_id, users: users)}

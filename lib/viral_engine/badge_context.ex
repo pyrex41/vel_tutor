@@ -317,16 +317,16 @@ defmodule ViralEngine.BadgeContext do
         # TODO: Integrate with RallyContext when check is needed
         false
 
-      %{"type" => "social_interactions", "threshold" => threshold} ->
+      %{"type" => "social_interactions", "threshold" => _threshold} ->
         # TODO: Integrate with social contexts
         false
 
-      %{"type" => "practice_before_hour", "threshold" => hour} ->
+      %{"type" => "practice_before_hour", "threshold" => _hour} ->
         # Check if any practice session completed before specified hour
         # This would need to be triggered at session completion
         false
 
-      %{"type" => "practice_after_hour", "threshold" => hour} ->
+      %{"type" => "practice_after_hour", "threshold" => _hour} ->
         # Check if any practice session completed after specified hour
         # This would need to be triggered at session completion
         false

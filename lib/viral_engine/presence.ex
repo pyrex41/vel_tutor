@@ -13,7 +13,9 @@ defmodule ViralEngine.Presence do
         socket,
         "global_users",
         user_id,
-        Map.put(meta, :name, user.name || "Anonymous", :user_id, user_id)
+        meta
+        |> Map.put(:name, user.name || "Anonymous")
+        |> Map.put(:user_id, user_id)
       )
 
       ViralEngine.PresenceTracker.track_user(user_id, nil, "global_users", meta)
@@ -30,7 +32,9 @@ defmodule ViralEngine.Presence do
         socket,
         topic,
         user_id,
-        Map.put(meta, :name, user.name || "Anonymous", :user_id, user_id)
+        meta
+        |> Map.put(:name, user.name || "Anonymous")
+        |> Map.put(:user_id, user_id)
       )
 
       ViralEngine.PresenceTracker.track_user(user_id, subject_id, topic, meta)

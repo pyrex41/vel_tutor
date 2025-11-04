@@ -18,7 +18,7 @@ defmodule ViralEngine.Workers.TranscriptProcessingWorker do
     Logger.info("Processing transcript #{transcript_id} with audio file: #{audio_file_path}")
 
     case TranscriptContext.process_audio_file(transcript_id, audio_file_path) do
-      {:ok, transcript} ->
+      {:ok, _transcript} ->
         Logger.info("Successfully processed transcript #{transcript_id}")
         :ok
 

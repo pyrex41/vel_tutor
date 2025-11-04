@@ -105,7 +105,7 @@ defmodule ViralEngineWeb.RewardsLive do
     reward_id = String.to_integer(reward_id_str)
 
     case XPContext.claim_reward(socket.assigns.user_id, reward_id) do
-      {:ok, user_reward, updated_user_xp} ->
+      {:ok, _user_reward, updated_user_xp} ->
         # Refresh data
         user_rewards = XPContext.get_user_rewards(socket.assigns.user_id)
         claimed_ids = MapSet.new(Enum.map(user_rewards, & &1.user_reward.reward_id))
@@ -214,7 +214,7 @@ defmodule ViralEngineWeb.RewardsLive do
   end
 
   @impl true
-  def handle_info({:reward_claimed, %{reward: reward}}, socket) do
+  def handle_info({:reward_claimed, %{reward: _reward}}, socket) do
     # Already handled in claim_reward event
     {:noreply, socket}
   end

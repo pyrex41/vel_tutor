@@ -22,7 +22,7 @@ defmodule ViralEngine.PerformanceReportContext do
     k_factor_data = ViralMetricsContext.compute_k_factor(days: days)
     k_by_source = ViralMetricsContext.compute_k_factor_by_source(days)
     top_referrers = ViralMetricsContext.get_top_referrers(days: days, limit: 10)
-    timeline = ViralMetricsContext.get_growth_timeline(days)
+    _timeline = ViralMetricsContext.get_growth_timeline(days)
     health_data = GuardrailMetricsContext.compute_health_score(days: days)
 
     # Compare with previous period for trends
