@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, ViralPrompts}
+  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext}
   require Logger
 
   on_mount ViralEngineWeb.Live.ViralPromptsHook
@@ -135,8 +135,17 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       # Session complete
       {:ok, completed_session} = PracticeContext.complete_session(socket.assigns.session.id)
 
-      # Trigger viral prompt
-      viral_prompt = trigger_completion_prompt(socket.assigns.user_id, completed_session)
+      # Check if this was a buddy challenge session
+      if completed_session.metadata["challenge_id"] do
+        handle_challenge_completion(completed_session)
+      end
+
+      # Trigger viral prompt (only if not a challenge session)
+      viral_prompt = if completed_session.metadata["challenge_id"] do
+        nil  # Don't show viral prompt for challenge sessions
+      else
+        trigger_completion_prompt(socket.assigns.user_id, completed_session)
+      end
 
       socket =
         socket
@@ -251,5 +260,20 @@ defmodule ViralEngineWeb.PracticeSessionLive do
         # Fallback to default prompt
         ViralPrompts.get_default_prompt(:practice_completed)
     end
+  end
+
+  defp handle_challenge_completion(session) do
+    # Complete the buddy challenge
+    challenge_id = session.metadata["challenge_id"]
+
+    Task.start(fn ->
+      case ChallengeContext.complete_challenge(challenge_id, session.id) do
+        {:ok, challenge} ->
+          Logger.info("Buddy challenge #{challenge_id} completed! Winner: #{challenge.winner_id}")
+
+        {:error, reason} ->
+          Logger.error("Failed to complete challenge #{challenge_id}: #{reason}")
+      end
+    end)
   end
 end

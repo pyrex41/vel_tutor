@@ -126,6 +126,9 @@ defmodule ViralEngineWeb.Router do
   live("/flashcards", FlashcardStudyLive)
   live("/flashcards/study/:deck_id", FlashcardStudyLive)
 
+  # Buddy challenge routes
+  live("/challenge/:token", ChallengeLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
