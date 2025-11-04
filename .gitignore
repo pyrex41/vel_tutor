@@ -23,3 +23,22 @@ node_modules/
 
 # OS specific
 .DS_Store
+
+# Elixir build artifacts
+/_build
+/cover
+/deps
+/doc
+/.fetch
+erl_crash.dump
+*.ez
+*.beam
+/config/*.secret.exs
+.elixir_ls/
+
+# Phoenix build artifacts
+/priv/static/
+/priv/repo/*.secret.exs
+
+# Claude Code local settings
+.claude/settings.local.json
