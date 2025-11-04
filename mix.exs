@@ -37,14 +37,14 @@ defmodule ViralEngine.MixProject do
     ]
 
     [
-      {:phoenix, "~> 1.7.10"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.10"},
-      {:postgrex, "~> 0.17"},
-      {:phoenix_html, "~> 4.0"},
+      {:phoenix, "~> 1.8.1"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:ecto_sql, "~> 3.12"},
+      {:postgrex, "~> 0.19"},
+      {:phoenix_html, "~> 4.1"},
       {:phoenix_html_helpers, "~> 1.0"},
-      {:phoenix_live_reload, "~> 1.2"},
-      {:phoenix_live_view, "~> 0.20.1"},
+      {:phoenix_live_reload, "~> 1.5"},
+      {:phoenix_live_view, "~> 1.0"},
       {:phoenix_live_dashboard, "~> 0.8"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},

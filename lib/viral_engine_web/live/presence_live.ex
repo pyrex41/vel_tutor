@@ -32,7 +32,7 @@ defmodule ViralEngineWeb.PresenceLive do
       if key == :global_count do
         assign(socket, :global_count, map_size(count))
       else
-        update_assign(socket, :subject_counts, &Map.put(&1, key, map_size(count)))
+        update(socket, :subject_counts, &Map.put(&1, key, map_size(count)))
       end
 
     {:noreply, socket}

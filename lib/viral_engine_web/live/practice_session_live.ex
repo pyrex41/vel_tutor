@@ -130,7 +130,7 @@ defmodule ViralEngineWeb.PracticeSessionLive do
         timer_seconds: socket.assigns.timer
       })
 
-      {:noreply, assign(socket, :current_step, new_step, :feedback, "")}
+      {:noreply, assign(socket, current_step: new_step, feedback: "")}
     else
       # Session complete
       {:ok, completed_session} = PracticeContext.complete_session(socket.assigns.session.id)

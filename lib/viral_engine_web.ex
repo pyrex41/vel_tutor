@@ -91,6 +91,9 @@ defmodule ViralEngineWeb do
       # Note: Phoenix.View removed in Phoenix 1.7+ - using Phoenix.Component instead
       # import Phoenix.View
 
+      # Import core components (Phoenix 1.8+)
+      import ViralEngineWeb.CoreComponents
+
       import ViralEngineWeb.ErrorHelpers
       import ViralEngineWeb.Gettext
       alias ViralEngineWeb.Router.Helpers, as: Routes

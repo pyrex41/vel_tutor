@@ -1,11 +1,16 @@
 defmodule ViralEngine.Metrics do
-  use Prometheus
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  def record_presence_broadcast(topic, latency_ms) do
-    :prometheus_histogram.observe(
-      [name: :presence_broadcast_latency_ms, labels: [topic: topic]],
-      latency_ms
-    )
+  # TODO: Add prometheus dependency and re-enable metrics
+  # use Prometheus
+
+  def record_presence_broadcast(_topic, _latency_ms) do
+    # :prometheus_histogram.observe(
+    #   [name: :presence_broadcast_latency_ms, labels: [topic: topic]],
+    #   latency_ms
+    # )
+    :ok
   end
 
   # Existing Ecto schema...
