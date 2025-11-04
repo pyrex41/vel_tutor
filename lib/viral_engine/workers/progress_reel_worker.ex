@@ -103,7 +103,7 @@ defmodule ViralEngine.Workers.ProgressReelWorker do
   Checks and enqueues streak reels.
   """
   def check_and_enqueue_streak_reel(student_id) do
-    case StreakContext.get_user_streak(student_id) do
+    case StreakContext.get_or_create_streak(student_id) do
       {:ok, streak} ->
         streak_days = streak.current_streak || 0
 

@@ -269,7 +269,7 @@ defmodule ViralEngine.BadgeContext do
         min(100, div(sessions * 100, threshold))
 
       %{"type" => "streak_reached", "threshold" => threshold} ->
-        case StreakContext.get_user_streak(user_id) do
+        case StreakContext.get_or_create_streak(user_id) do
           {:ok, streak} ->
             current = streak.current_streak || 0
             min(100, div(current * 100, threshold))
@@ -290,7 +290,7 @@ defmodule ViralEngine.BadgeContext do
         (stats.total_sessions || 0) >= threshold
 
       %{"type" => "streak_reached", "threshold" => threshold} ->
-        case StreakContext.get_user_streak(user_id) do
+        case StreakContext.get_or_create_streak(user_id) do
           {:ok, streak} ->
             (streak.current_streak || 0) >= threshold
 

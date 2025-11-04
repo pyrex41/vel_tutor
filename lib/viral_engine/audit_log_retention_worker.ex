@@ -43,6 +43,13 @@ defmodule ViralEngine.AuditLogRetentionWorker do
     GenServer.call(__MODULE__, :run_now)
   end
 
+  # Get worker stats
+  def get_stats do
+    GenServer.call(__MODULE__, :get_stats)
+  end
+
+  # GenServer callbacks
+
   @impl true
   def handle_call(:run_now, _from, state) do
     Logger.info("Running manual audit log retention cleanup")
@@ -57,12 +64,5 @@ defmodule ViralEngine.AuditLogRetentionWorker do
   @impl true
   def handle_call(:get_stats, _from, state) do
     {:reply, state, state}
-  end
-
-  # Public API
-
-  # Get worker stats
-  def get_stats do
-    GenServer.call(__MODULE__, :get_stats)
   end
 end

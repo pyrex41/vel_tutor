@@ -32,16 +32,19 @@ defmodule ViralEngine.Jobs.ResetHourlyLimits do
   defp schedule_next_reset do
     # Calculate milliseconds until next hour
     now = DateTime.utc_now()
-    next_hour = %{now | minute: 0, second: 0, microsecond: {0, 0}}
 
-    next_hour =
-      if now.minute == 0 and now.second == 0,
-        do: next_hour,
-        else: DateTime.add(next_hour, 3600, :second)
+    # Always calculate the next hour boundary
+    next_hour = %{now | minute: 0, second: 0, microsecond: {0, 0}}
+    next_hour = DateTime.add(next_hour, 3600, :second)
 
     milliseconds_until_next_hour = DateTime.diff(next_hour, now, :millisecond)
 
+    # Ensure we always have a positive delay (minimum 1 second if somehow we're negative)
+    delay = max(milliseconds_until_next_hour, 1000)
+
+    Logger.debug("Scheduling next hourly reset in #{delay}ms (#{Float.round(delay / 1000 / 60, 2)} minutes)")
+
     # Schedule the reset
-    Process.send_after(self(), :reset_hourly_limits, milliseconds_until_next_hour)
+    Process.send_after(self(), :reset_hourly_limits, delay)
   end
 end

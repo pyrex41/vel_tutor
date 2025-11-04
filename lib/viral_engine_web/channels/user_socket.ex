@@ -7,7 +7,8 @@ defmodule ViralEngineWeb.UserSocket do
   ## Transports are configured in config/config.exs via Phoenix.Endpoint
 
   def connect(params, socket, _connect_info) do
-    socket = assign(socket, :user_id, get_user_id(params))
+    user_id = get_user_id(params)
+    socket = assign(socket, :user_id, user_id)
     {:ok, socket}
   end
 

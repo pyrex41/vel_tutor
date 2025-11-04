@@ -101,7 +101,9 @@ defmodule ViralEngineWeb.AutoChallengeLive do
     challenge_id = String.to_integer(challenge_id_str)
 
     # Mark challenge as dismissed (update status to cancelled)
-    case ChallengeContext.cancel_challenge(challenge_id) do
+    challenge = ChallengeContext.get_challenge(challenge_id)
+
+    case ChallengeContext.update_challenge(challenge, %{status: "cancelled"}) do
       {:ok, _challenge} ->
         # Remove from list
         updated_challenges = Enum.reject(socket.assigns.auto_challenges, & &1.id == challenge_id)

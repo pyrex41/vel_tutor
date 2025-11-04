@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.RewardsLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{XPContext, UserXP}
+  alias ViralEngine.XPContext
   require Logger
 
   @impl true

@@ -85,23 +85,15 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
           {:skip, :already_has_challenge}
         else
           # Create self-challenge to beat their own score
-          challenge_attrs = %{
-            challenger_id: user_id,
-            target_user_id: user_id,  # Self-challenge
+          metadata = %{
+            auto_generated: true,
+            original_session_id: best_session.id,
+            gap_days: @session_gap_days,
             challenge_type: "beat_my_skill",
-            subject: best_session.subject,
-            grade_level: best_session.grade_level,
-            target_score: best_session.score,
-            message: "Can you beat your best score of #{best_session.score}?",
-            expires_at: DateTime.add(DateTime.utc_now(), 7 * 24 * 60 * 60, :second),  # 7 days
-            metadata: %{
-              auto_generated: true,
-              original_session_id: best_session.id,
-              gap_days: @session_gap_days
-            }
+            message: "Can you beat your best score of #{best_session.score}?"
           }
 
-          case ChallengeContext.create_challenge(challenge_attrs) do
+          case ChallengeContext.create_challenge(user_id, best_session.id, challenged_user_id: user_id, metadata: metadata) do
             {:ok, challenge} ->
               # Mark as auto-generated in metadata
               {:ok, challenge}

@@ -196,7 +196,8 @@ defmodule ViralEngineWeb.RallyLive do
   end
 
   defp get_active_users(rally_id) do
-    ViralEngine.Presence.list_rally(rally_id)
+    topic = "rally:#{rally_id}"
+    ViralEngine.Presence.list(topic)
     |> Map.keys()
     |> length()
   end

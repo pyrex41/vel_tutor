@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.StreakRescueLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{StreakContext, PracticeContext, FlashcardContext}
+  alias ViralEngine.{StreakContext, PracticeContext}
   require Logger
 
   @impl true
@@ -128,7 +128,7 @@ defmodule ViralEngineWeb.StreakRescueLive do
   # Helper functions
 
   defp get_active_users do
-    ViralEngine.Presence.list_room("streak_rescue")
+    ViralEngine.Presence.list("streak_rescue")
     |> Map.values()
     |> Enum.map(fn %{metas: metas} -> hd(metas) end)
   end
