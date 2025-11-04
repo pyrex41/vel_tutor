@@ -2103,7 +2103,7 @@
         "dependencies": [
           "22"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2142,7 +2142,9 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Subtasks for report scheduling with Oban, AI trend analysis, and PDF email delivery."
+        "expansionPrompt": "Subtasks for report scheduling with Oban, AI trend analysis, and PDF email delivery.",
+        "completedAt": "2025-11-04T21:00:00Z",
+        "notes": "Created comprehensive weekly performance report system: PerformanceReport schema with K-factor, conversions, loop performance, insights and recommendations; PerformanceReportContext with trend analysis and email formatting; PerformanceReportWorker (Oban) for automated weekly/monthly generation; PerformanceReportLive with list and detail views, delivery actions; Migration for performance_reports table; Routes at /dashboard/reports and /dashboard/reports/:id. Generates actionable insights and recommendations based on viral loop performance, health metrics, and COPPA compliance."
       }
     ],
     "metadata": {
