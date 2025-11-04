@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Implement MCP Orchestrator Agent",
         "description": "Create a core MCP orchestrator module in Elixir that routes tasks to AI providers like GPT-4o or Llama 3.1, tracks task statuses, and handles errors with fallbacks to ensure balanced performance, cost, and reliability.",
         "details": "Implement the MCPOrchestrator context module in lib/vel_tutor/mcp_orchestrator.ex. Define a struct for tasks with fields like id, provider, status (pending, in_progress, completed, failed), and payload. Create functions for routing logic: select_provider/1 that chooses between GPT-4o and Llama 3.1 based on criteria such as cost, reliability, or load balancing (e.g., round-robin or priority-based). Implement task lifecycle management: start_task/1 to set status to in_progress and call the provider API, update_status/2 to transition states, and handle errors by attempting fallback to another provider. Use GenServer or similar for state management if needed for concurrent task handling. Ensure error handling includes retries, timeouts, and logging. Integrate with existing project structure, assuming dependencies on any API client modules for providers. Consider configuration for provider endpoints, API keys, and thresholds via application environment variables. Add basic logging for routing decisions and status changes.",
@@ -13,7 +13,7 @@
         "subtasks": []
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Implement Provider Routing Logic",
         "description": "Implement the routing logic in the MCP Orchestrator to select between AI providers like GPT-4o and Llama 3.1 based on criteria such as performance, cost, and reliability.",
         "details": "In the MCPOrchestrator context module located at lib/vel_tutor/mcp_orchestrator.ex, create a select_provider/1 function that takes a task struct or relevant criteria as input and returns the selected provider (e.g., :gpt_4o or :llama_3_1). Implement the selection logic to balance factors like cost (prioritize Llama 3.1 for lower cost), reliability (prioritize GPT-4o for high-reliability tasks), and load balancing (use round-robin or simple alternation for even distribution). Define configurable thresholds or weights for these criteria, possibly using application environment variables. Ensure the function handles different task types or payloads appropriately. Integrate this function into the task lifecycle, such as calling it during task initialization or routing. Consider adding logging for provider selections to aid in monitoring and debugging.",
@@ -26,7 +26,7 @@
         "subtasks": []
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Implement OpenAI Integration Adapter",
         "description": "Develop a robust OpenAI API integration adapter module with retry logic, error handling, and streaming support for chat completions, including token tracking and circuit breaker pattern.",
         "details": "Create the OpenAIAdapter module in lib/vel_tutor/integration/openai_adapter.ex that implements the AdapterBehaviour. Implement the chat completion API with streaming support using the OpenAI Elixir client or HTTPoison for direct API calls. Add retry logic with exponential backoff for up to 3 attempts on failures, using libraries like Tesla or custom implementation. Incorporate a circuit breaker pattern that opens after 5 failures within 60 seconds, preventing further requests until reset. Track token usage and estimate costs based on OpenAI's pricing model, storing metrics in a struct or ETS table. Validate the API key during module initialization, raising errors if invalid. Ensure the adapter handles rate limits and common errors like 429 (rate limit exceeded) or 500 (server errors). Consider using Mox for mocking in tests and integrate with the MCP Orchestrator for provider selection. Follow Elixir best practices for error handling with {:ok, result} | {:error, reason} tuples.",
@@ -39,7 +39,7 @@
         "subtasks": []
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Implement Groq Integration Adapter",
         "description": "Develop a high-performance Groq API integration adapter that supports Llama 3.1 70B and Mixtral 8x7B models, with OpenAI-compatible client, retry logic, circuit breaker, performance metrics, and automatic fallback to OpenAI.",
         "details": "Create the GroqAdapter module in lib/vel_tutor/integration/groq_adapter.ex, implementing the AdapterBehaviour similar to the OpenAI adapter. Use an OpenAI-compatible client configured with the Groq base URL (e.g., 'https://api.groq.com/openai/v1'). Support Llama 3.1 70B and Mixtral 8x7B models by mapping them in the adapter's configuration. Reuse the retry logic with exponential backoff (up to 3 attempts) and circuit breaker pattern (opens after 5 failures in 60 seconds) from the OpenAI adapter. Implement performance metrics tracking using libraries like Telemetry or custom counters for P50/P95 response times. Add integration tests for Groq-specific error codes (e.g., rate limits, model unavailable). Ensure automatic fallback to OpenAI by checking Groq response failures and delegating to the OpenAIAdapter module. Handle streaming support if needed, and integrate with the MCP Orchestrator for provider selection. Consider configuration via environment variables for API keys and model preferences. Ensure the adapter is thread-safe and handles concurrent requests efficiently.",
@@ -53,7 +53,7 @@
         "subtasks": []
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Implement Perplexity Integration Adapter",
         "description": "Develop a Perplexity Sonar integration adapter for web-connected research tasks, enabling the platform to leverage Perplexity's AI models with web search capabilities, custom HTTP client, result caching, and cost tracking.",
         "details": "Create the PerplexityAdapter module in lib/vel_tutor/integration/perplexity_adapter.ex, implementing the AdapterBehaviour to integrate with the MCP Orchestrator. Utilize the Sonar Large model with web search functionality by configuring the adapter to make API calls to Perplexity's endpoints, ensuring the model supports web-connected research tasks. Implement a custom HTTP client tailored to Perplexity's API format, using libraries like Tesla or HTTPoison for handling requests and responses, including authentication via API keys stored securely in configuration. Add result caching with a 24-hour expiration period, targeting an 87% hit rate; use a caching library like Cachex or Nebulex to store query results based on hashed inputs, checking cache before API calls to reduce costs and latency. Incorporate cost tracking mechanisms to monitor API usage and implement budget warnings, such as logging alerts when approaching predefined limits. Ensure the adapter handles errors gracefully with retry logic (e.g., exponential backoff for up to 3 attempts) and integrates seamlessly with the provider routing logic in the MCP Orchestrator. Consider performance optimizations like asynchronous processing for web search results and ensure compatibility with the overall system architecture, referencing docs/epics.md lines 95-110 for detailed requirements.",
@@ -67,7 +67,7 @@
         "subtasks": []
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Add Task Creation and Submission API Endpoint",
         "description": "Implement a REST API endpoint to allow users to submit AI tasks with descriptions, ensuring proper validation, database persistence, and rate limiting.",
         "details": "Create a new POST /api/tasks endpoint in the TaskController located at lib/vel_tutor_web/controllers/task_controller.ex. The endpoint should accept JSON requests with fields: description (string, required), agent_id (string, required, referencing an AI provider like GPT-4o or Llama 3.1), and authorization headers for user authentication. Implement request validation using Ecto changesets or similar, ensuring description is non-empty and agent_id is valid. Upon validation, create a new task record in PostgreSQL with a pending status, using the Task schema (assuming it exists or needs to be defined with fields like id, description, agent_id, user_id, status, created_at). Return a JSON response containing the task ID and a status URL (e.g., /api/tasks/{id}/status). Enforce rate limiting to 10 concurrent tasks per user, using libraries like Hammer or custom middleware to track and limit based on user ID. Ensure the controller integrates with the MCP Orchestrator (from Task 1) to queue or route the task after creation. Update API documentation in docs/api.md or similar to include the new endpoint with request/response examples. Handle errors gracefully, such as invalid agent_id or rate limit exceeded, returning appropriate HTTP status codes (e.g., 400 for bad request, 429 for rate limit).",
@@ -80,7 +80,7 @@
         "subtasks": []
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Add Task Status Tracking API Endpoints",
         "description": "Implement REST API endpoints to allow users to retrieve individual task statuses and lists of tasks with pagination, including metadata like provider, latency, tokens, cost, and execution history.",
         "details": "In the TaskController at lib/vel_tutor_web/controllers/task_controller.ex, add two GET endpoints: /api/tasks/:id to fetch a single task by ID, and /api/tasks for a paginated list (default 20 per page, with query params for page and limit). Ensure responses include task metadata such as provider (e.g., GPT-4o), latency (in ms), tokens used, cost (in USD), and execution history stored in a JSONB field. Sanitize any error messages in responses to prevent information leakage. Use Ecto queries for efficient database retrieval, including preloading related data. Implement pagination using Scrivener or similar library. Handle authentication via authorization headers. Consider caching for performance to meet P95 <200ms requirement. Update the task schema if needed to include JSONB for execution history. Ensure the endpoints integrate with the MCP Orchestrator for real-time status updates.",
@@ -93,7 +93,7 @@
         "subtasks": []
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Implement Real-Time Task Progress via Server-Sent Events",
         "description": "Implement a Server-Sent Events (SSE) endpoint to provide real-time progress updates for long-running tasks, allowing users to receive live status changes via streaming connections.",
         "details": "In the TaskController located at lib/vel_tutor_web/controllers/task_controller.ex, add a new GET endpoint at /api/tasks/:id/stream that establishes an SSE connection for streaming task progress. Utilize Phoenix.PubSub to subscribe to task-specific channels (e.g., \"task:#{task_id}\") where the MCP Orchestrator (from Task 1) publishes status updates. Implement the SSE stream using Phoenix's ServerSentEvent module or a custom implementation to send events like {\"event\": \"progress\", \"data\": {\"status\": \"in_progress\", \"progress\": 50}} until the task completes or fails. Ensure the connection latency is under 1 second by optimizing the endpoint for low overhead. Support up to 50 concurrent SSE connections per user by implementing connection limits and cleanup mechanisms in the controller or via a GenServer supervisor. Handle graceful closure by detecting task completion/failure from PubSub messages and ending the stream with appropriate events (e.g., {\"event\": \"complete\", \"data\": {\"status\": \"completed\"}}). For automatic reconnection, include client-side guidance in the response headers or initial event, recommending exponential backoff. Integrate with the existing task lifecycle from Task 7, ensuring the stream pulls initial status and metadata (provider, latency, tokens, cost) from the database. Consider security by validating user ownership of the task and using authentication tokens. Use Elixir's Stream module for efficient data streaming and handle errors by logging and closing connections without crashing the server.",
@@ -108,7 +108,7 @@
         "updatedAt": "2025-11-03T22:39:26.192Z"
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Add Task Cancellation Support",
         "description": "Implement a POST endpoint to cancel running tasks, ensuring graceful termination, status updates, partial result saving, refund logic, and audit logging.",
         "details": "In the TaskController at lib/vel_tutor_web/controllers/task_controller.ex, add a new POST /api/tasks/:id/cancel endpoint that accepts the task ID as a parameter. Validate that the task exists and is in a cancellable state (e.g., running or pending). To achieve graceful termination, integrate with the MCP Orchestrator (from Task 1) to send a cancellation signal to the provider adapter, allowing it to abort ongoing requests without data loss. Update the task status to 'cancelled' in the database with a timestamp, and save any partial results if available (e.g., store incomplete responses in the execution_history JSONB field). Implement refund or credit logic by calculating prorated costs based on task progress and updating the user's balance or logging credits. Add an audit log entry for the cancellation event, including user ID, task ID, timestamp, and reason. Ensure proper error handling for invalid task IDs or non-cancellable states, returning appropriate HTTP status codes (e.g., 404 for not found, 409 for conflict). Use Ecto for database operations and consider adding background job processing if cancellation involves complex logic. Coordinate with provider adapters (e.g., from Tasks 4 and 5) to support cancellation at the adapter level if needed.",
@@ -124,7 +124,7 @@
         "updatedAt": "2025-11-03T22:39:27.354Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Implement Agent Configuration Management",
         "description": "Implement a REST API for managing AI agent configurations, allowing users to create, update, and delete agents with custom settings like provider preferences, models, and prompts, while ensuring data validation and history preservation.",
         "details": "In the AgentController located at lib/vel_tutor_web/controllers/agent_controller.ex, implement the following endpoints based on the acceptance criteria: 1. POST /api/agents to create a new agent, accepting a JSON payload with config fields (provider, model, temperature, max_tokens, system_prompt) stored in a JSONB column; validate inputs using Ecto changesets, ensuring provider is one of the supported ones (e.g., 'openai', 'groq'), model is valid for the provider, temperature is a float between 0.0 and 2.0, max_tokens is an integer between 1 and 4096, and system_prompt is a non-empty string. 2. PUT /api/agents/:id to update an existing agent, preserving history by storing previous configs in a separate history table or JSONB array; validate updates similarly. 3. DELETE /api/agents/:id for soft deletion, setting a deleted_at timestamp and cascading to archive related tasks (update task statuses to 'archived' if associated with the agent). Implement config validation logic in a separate module or within the controller, checking for field presence, provider-model compatibility (e.g., ensure GPT-4o is only for OpenAI), and numeric ranges. Create a database migration to add the agents table with columns: id (primary key), name (string), config (jsonb), created_at, updated_at, deleted_at (nullable). For history preservation, add an agent_config_histories table with agent_id, config, changed_at. Ensure the controller uses Phoenix authentication and authorization to restrict access. Handle errors gracefully, returning appropriate HTTP status codes and messages.",
@@ -137,7 +137,7 @@
         "subtasks": []
       },
       {
-        "id": "11",
+        "id": 11,
         "title": "Add Agent Testing and Dry-Run Capability",
         "description": "Implement a POST /api/agents/:id/test endpoint that allows users to perform dry-run tests on agent configurations, including provider connectivity checks, sample prompts with estimations, and storing results in metadata.",
         "details": "In the AgentController located at lib/vel_tutor_web/controllers/agent_controller.ex, add a new POST /api/agents/:id/test endpoint that accepts a JSON payload with a 'dry_run' boolean flag (defaulting to true for safety). Validate that the agent exists and is owned by the authenticated user. For the dry-run, perform the following checks without executing real tasks: 1. Provider connectivity check by attempting a lightweight API call (e.g., model list or a minimal completion) using the agent's configured provider (e.g., via OpenAIAdapter, GroqAdapter, or PerplexityAdapter), verifying API key validity and model availability. 2. Sample prompt execution with token/cost estimation by sending a predefined test prompt (e.g., 'Hello, world!') to the provider adapter, capturing estimated tokens used, cost in USD, and response time in milliseconds. 3. Response time measurement by timing the sample prompt call. 4. Configuration optimization suggestions based on the test results, such as recommending lower temperature for faster responses or alternative models if connectivity fails. Store the test results (connectivity status, estimated tokens, cost, response time, suggestions) in the agent's metadata JSONB field, updating a 'last_tested_at' timestamp. Ensure error handling for failed connectivity (e.g., invalid API key) with appropriate HTTP status codes (e.g., 400 for bad config, 500 for provider errors). Implement rate limiting to prevent abuse, allowing one test per agent per minute. Use the existing adapter modules for provider interactions, ensuring they support dry-run modes if needed. For integration, leverage the MCP Orchestrator if required for orchestrating the test calls.",
@@ -153,7 +153,7 @@
         "subtasks": []
       },
       {
-        "id": "12",
+        "id": 12,
         "title": "Implement Comprehensive Audit Logging",
         "description": "Create the AuditLogContext module to log all user actions, AI decisions, and system events with full context, including a 90-day retention policy and a query interface for administrators.",
         "details": "Implement the AuditLogContext module in lib/vel_tutor/audit_log_context.ex as an Elixir context module using Ecto for database interactions. Define an AuditLog schema with fields such as user_id (integer, nullable for system events), action (string, e.g., 'task_created', 'ai_call'), payload (map for detailed data), ip_address (string), user_agent (string), timestamp (datetime), task_id (integer, nullable), provider (string, nullable), model (string, nullable), tokens_used (integer, nullable), cost (decimal, nullable), latency_ms (integer, nullable), event_type (string for system events like 'circuit_breaker_trip', 'failover', 'error'), and consent_flag (boolean for PII handling). Use Ecto changesets for validation, ensuring no PII is logged without the consent_flag set to true. Implement functions like log_user_action/4 (user_id, action, payload, conn) to extract IP and user_agent from the Plug.Conn, log_ai_call/6 (task_id, provider, model, tokens, cost, latency) for AI provider interactions, and log_system_event/2 (event_type, details) for system events. Integrate logging into all controller actions (e.g., in TaskController, AgentController) by calling AuditLogContext.log_user_action in plugs or after actions. For AI calls, hook into the adapters (OpenAIAdapter, GroqAdapter, PerplexityAdapter) to log after each call. Enforce the 90-day retention policy using a background job (e.g., with Oban) to periodically delete old logs. Create a query interface in a new AdminController or extend an existing one with endpoints like GET /api/admin/audit_logs?user_id=X&action=Y&date_from=Z&date_to=W, using Ecto queries with filters and pagination. Ensure privacy by redacting sensitive data unless consent_flag is true. Consider using PostgreSQL's JSONB for payload storage and indexes on frequently queried fields like user_id, action, and timestamp for performance.",
@@ -170,7 +170,7 @@
         "updatedAt": "2025-11-03T22:50:24.914Z"
       },
       {
-        "id": "13",
+        "id": 13,
         "title": "Add Health Check and System Monitoring Endpoint",
         "description": "Implement a GET /api/health endpoint in the HealthController that performs system health checks, including database connectivity and AI provider reachability, returning status information like uptime, version, and active provider count.",
         "details": "Create a new HealthController module at lib/vel_tutor_web/controllers/health_controller.ex with a single GET /api/health endpoint that is public (no authentication required). Implement health checks by: 1) Testing database connectivity using Ecto.Repo (e.g., a simple query like Repo.all(from u in User, limit: 1) to verify connection without exposing data); 2) Checking at least one AI provider by attempting a lightweight API call (e.g., model list or minimal completion) through the respective adapters (OpenAI, Groq, Perplexity) and counting reachable ones; 3) Collecting system metrics such as uptime (using Erlang's :erlang.system_info(:uptime) or a custom start time), version (from application config or mix.exs), and active provider count. Ensure the response is JSON with fields like {\"status\": \"healthy\", \"uptime\": \"12345s\", \"version\": \"1.0.0\", \"active_providers\": 2} for 200 OK, or {\"status\": \"unhealthy\", \"errors\": [\"Database unreachable\", \"No providers reachable\"]} for 503. Optimize for <500ms response time by running checks concurrently using Task.async_stream or similar. Handle errors gracefully, logging issues without exposing sensitive details. Add the route to the router.ex file under the API scope. Consider caching health status briefly (e.g., 30s) to avoid overloading providers during frequent checks, but ensure real-time accuracy for monitoring tools.",
@@ -186,7 +186,7 @@
         "updatedAt": "2025-11-03T22:50:33.560Z"
       },
       {
-        "id": "14",
+        "id": 14,
         "title": "Implement Workflow State Management",
         "description": "Create a WorkflowContext module to manage multi-step workflows with persistent state storage in PostgreSQL, ensuring immutability through versioning and providing an API for state access in downstream tasks.",
         "details": "Implement the WorkflowContext module in lib/vel_tutor/workflow_context.ex as an Elixir context using Ecto for database interactions. Define a Workflow schema with fields including id (primary key), name (string), state (jsonb for flexible state data), version (integer for immutability, incremented on updates), created_at and updated_at timestamps. Ensure state immutability by creating new versions on state changes rather than updating in place. Implement database persistence with a migration file (e.g., priv/repo/migrations/20231001120000_create_workflows.exs) to create the workflows table with the specified fields, using PostgreSQL's JSONB for the state field to store complex data structures. Provide a state access API with functions like get_workflow_state/1 (by workflow ID), update_workflow_state/2 (creates new version), and list_workflow_versions/1 for retrieving historical states. Integrate with the MCP Orchestrator (from Task 1) to allow workflows to maintain state across AI operations, such as storing intermediate results or decision points. Consider error handling for invalid state updates and ensure the API is thread-safe for concurrent access. Use Ecto.Multi for transactional updates to maintain data consistency.",
@@ -199,7 +199,7 @@
         "subtasks": []
       },
       {
-        "id": "15",
+        "id": 15,
         "title": "Add Conditional Workflow Routing",
         "description": "Implement conditional routing in workflows to dynamically select next steps based on AI output or predefined conditions, enhancing workflow flexibility and decision-making capabilities.",
         "details": "Extend the WorkflowContext module in lib/vel_tutor/workflow_context.ex to support conditional routing. Add a new schema field or configuration for routing rules, such as a JSONB column storing if/then/else logic (e.g., {\"conditions\": [{\"if\": \"sentiment == 'positive'\", \"then\": \"step_approval\", \"else\": \"step_rejection\"}]}). Implement a condition evaluator function that parses and executes rules using text matching (regex or keyword checks), sentiment analysis (integrate with an AI provider for sentiment scoring), and confidence thresholds (compare AI response confidence scores against configurable thresholds). For dynamic next-step selection, modify the workflow execution logic to evaluate conditions after each step's AI call and update the workflow state accordingly. Ensure routing rules are validated during workflow creation or updates to prevent invalid configurations. For routing visualization, extend the status API (likely in a WorkflowController) to include a 'routing_path' or 'next_steps' field in the response, showing possible branches based on current state. Handle edge cases like circular routing or missing conditions by defaulting to a safe next step. Consider performance by caching evaluated conditions where possible. Integrate with existing AI provider calls to extract necessary data (e.g., sentiment from response text, confidence from provider metadata).",
@@ -212,7 +212,7 @@
         "subtasks": []
       },
       {
-        "id": "16",
+        "id": 16,
         "title": "Implement Human-in-the-Loop Approval Gates",
         "description": "Implement approval gates in workflows that allow pausing at critical decision points for human approval, including configuration, status management, API endpoints for approval/rejection, notifications, timeouts, and history tracking.",
         "details": "In the WorkflowContext module at lib/vel_tutor/workflow_context.ex, extend the workflow schema and functions to support approval gates. Add fields to the Workflow schema: approval_gates (jsonb array defining gates with keys like step_id, description, timeout_hours), status (enum including 'awaiting_approval'), approval_history (jsonb array of approval records with timestamp, user_id, decision, comments). Implement functions: define_approval_gate/3 to add gates to workflow config, pause_workflow/2 to set status to awaiting_approval and trigger notifications, approve_workflow/3 to update status and history on approval/rejection, check_timeout/1 to auto-reject after timeout. For the API, create or extend a WorkflowController at lib/vel_tutor_web/controllers/workflow_controller.ex with POST /api/workflows/:id/approve endpoint accepting JSON payload {decision: 'approve'|'reject', comments: string}, validating user permissions and updating workflow state. Integrate notification webhooks by adding a webhook_url field to gates and using HTTPoison to send POST requests with workflow details on pause. Ensure timeout is checked via a background job (e.g., using Oban) that runs periodically. Store approval history immutably in the jsonb field. Consider security: authenticate users for approval, log actions in audit (integrate with Task 12 if available). Handle edge cases like multiple gates, concurrent approvals, and workflow resumption.",
@@ -225,7 +225,7 @@
         "subtasks": []
       },
       {
-        "id": "17",
+        "id": 17,
         "title": "Add Workflow Template System",
         "description": "Implement a workflow template system that allows users to save successful workflows as reusable templates, including creation, instantiation, marketplace, and versioning features.",
         "details": "Create a new WorkflowTemplateContext module in lib/vel_tutor/workflow_template_context.ex as an Elixir context using Ecto for database interactions. Define a WorkflowTemplate schema with fields: id (primary key), name (string), description (text), version (integer, default 1), is_public (boolean for marketplace), template_data (jsonb containing step definitions, routing rules, approval gates, prompts), created_by (user_id), created_at and updated_at timestamps. Implement functions: create_template/2 to save a workflow as a template (extracting data from WorkflowContext), get_template/1, list_public_templates/0, instantiate_workflow/1 (creating a new workflow from template with variable substitution, e.g., replacing placeholders like {{user_name}} in prompts). For versioning, add update_template/2 that increments version and creates a new record. Implement API endpoints in a new WorkflowTemplateController at lib/vel_tutor_web/controllers/workflow_template_controller.ex: POST /api/workflow-templates for creation (accepting JSON with name, description, template_data), POST /api/workflows/from-template/:id for instantiation (with optional variable map for substitution). Ensure template_data validation to match workflow structures from WorkflowContext. For marketplace, add a public listing endpoint GET /api/workflow-templates/public. Handle variable substitution in instantiation by parsing template_data and replacing keys. Consider security: only allow template creators or admins to update/delete; public templates should be read-only for non-owners. Integrate with existing audit logging (Task 12) for template creation and instantiation events. Use Ecto migrations to add the workflow_templates table.",
@@ -238,7 +238,7 @@
         "subtasks": []
       },
       {
-        "id": "18",
+        "id": 18,
         "title": "Implement Parallel Task Execution in Workflows",
         "description": "Implement functionality to allow workflows to execute multiple independent AI tasks in parallel, including configuration of parallel task groups, spawning tasks using Elixir's Task.async_stream, aggregating results upon completion, handling failures with options to continue or abort, enforcing concurrency limits, and providing workflow visualization for parallel branches.",
         "details": "In the WorkflowContext module at lib/vel_tutor/workflow_context.ex, extend the workflow schema and functions to support parallel task execution. Add fields to the Workflow schema: parallel_groups (jsonb array defining groups of tasks that can run in parallel, each group with task_ids, max_concurrency defaulting to 5), execution_mode (enum including 'parallel' for groups), and results_aggregation (jsonb for storing aggregated results from parallel tasks). Implement functions: define_parallel_group/3 to configure parallel task groups in workflow config, ensuring tasks within a group are independent; execute_parallel_tasks/2 using Task.async_stream to spawn tasks concurrently, respecting the max_concurrency limit (e.g., via Task.async_stream with max_concurrency: 5), and aggregating results into a map keyed by task_id; handle_failures/3 with options to continue on failure (log and proceed) or abort (cancel remaining tasks and mark workflow as failed); integrate with existing task routing from MCP Orchestrator (Task 1) for individual task execution. For workflow visualization, extend the workflow visualization API (potentially in a separate controller) to render parallel branches as forked paths in a graph representation. Ensure thread safety and resource management, using Elixir's supervision trees if needed. Consider performance implications: benchmark parallel vs sequential execution in tests, aiming for at least 2x speedup for independent tasks. Update workflow state management (from Task 14) to track parallel execution status, ensuring state immutability across versions.",
@@ -251,7 +251,7 @@
         "subtasks": []
       },
       {
-        "id": "19",
+        "id": 19,
         "title": "Add Workflow Error Handling and Recovery",
         "description": "Implement comprehensive error handling and recovery mechanisms for workflows, including retry configurations, error categorization, rollback capabilities, notifications, manual recovery endpoints, and analytics.",
         "details": "Extend the WorkflowContext module in lib/vel_tutor/workflow_context.ex to add error handling features. Add new schema fields to the Workflow schema: retry_config (jsonb with per-step settings like max_attempts, backoff_strategy), error_categories (jsonb mapping errors to 'retryable' or 'terminal'), rollback_steps (jsonb defining undo actions for state changes), notification_webhooks (jsonb array of URLs for error notifications), and error_history (jsonb array logging errors with timestamps, step_ids, and details). Implement functions: configure_retry/3 to set per-step retry logic with exponential backoff; categorize_error/2 to classify errors; execute_rollback/2 to undo state changes by reverting to previous versions; send_error_notification/2 to POST to configured webhooks; retry_from_step/3 for manual recovery. For the API endpoint, create a new controller in lib/vel_tutor_web/controllers/workflow_controller.ex with a retry_from_step action handling POST /api/workflows/:id/retry-from-step/:step_id, validating permissions and triggering retry logic. Integrate with audit logging (assuming Task 12 is completed) to log errors. For analytics, add a dashboard endpoint querying error_history for common failure points. Ensure concurrency safety for parallel workflows (coordinate with Task 18 if applicable). Handle edge cases like infinite retries by enforcing limits and timeouts.",
@@ -264,7 +264,7 @@
         "subtasks": []
       },
       {
-        "id": "20",
+        "id": 20,
         "title": "Implement Real-Time Metrics Collection",
         "description": "Create a MetricsContext module to collect and store comprehensive real-time metrics for all AI operations, including task counts, latency percentiles, costs, token usage, and provider details, with time-series data stored in PostgreSQL at 1-minute granularity, background aggregation jobs for rollups, and date-partitioned tables.",
         "details": "Implement the MetricsContext module in lib/vel_tutor/metrics_context.ex as an Elixir context using Ecto for database interactions. Define a Metrics schema with fields such as id (primary key), timestamp (datetime with 1-minute granularity), task_count (integer), latency_p50 (float), latency_p95 (float), latency_p99 (float), total_cost (decimal), total_tokens (integer), provider (string, e.g., 'openai' or 'groq'), and partition_key (date for partitioning). Create a database migration to set up the metrics table with date-based partitioning (e.g., using PostgreSQL's table partitioning by month or day). Implement functions for collecting metrics: collect_metrics/1 that takes an AI operation result (e.g., from MCPOrchestrator or adapters) and inserts aggregated data into the database. Use Elixir's Task or a background job library like Oban to run aggregation jobs that compute hourly and daily rollups (e.g., sum task_count, average latencies, total cost) and store them in separate rollup tables or the same table with a rollup flag. Ensure metrics are collected in real-time by hooking into the completion of AI tasks in the MCPOrchestrator (e.g., after update_status/2). Handle high-volume data by optimizing inserts and considering batching. For latency calculations, use libraries like Telemetry or custom percentile computations on collected samples. Store time-series data efficiently, perhaps using TimescaleDB if available, but stick to standard PostgreSQL partitioning. Include error handling for metric collection failures without disrupting AI operations.",
@@ -279,7 +279,7 @@
         "subtasks": []
       },
       {
-        "id": "21",
+        "id": 21,
         "title": "Build Provider Performance Dashboard",
         "description": "Develop a Phoenix LiveView dashboard at /dashboard/performance to visualize provider performance metrics over time, including charts for latency, success rate, and fallback frequency, with features for time range selection, provider comparison, real-time updates, and CSV export.",
         "details": "Implement the PerformanceDashboardLive module in lib/vel_tutor_web/live/performance_dashboard_live.ex as a Phoenix LiveView. Use LiveView's mount/3 and handle_params/3 to initialize the dashboard with default time range (e.g., last 24 hours) and provider filters. Integrate charting libraries like Chart.js or Phoenix LiveView's built-in charting with SVG for rendering latency by provider (line chart), success rate (bar chart), and fallback frequency (pie chart). Implement a time range selector using form inputs or dropdowns for hour, day, week, month options, updating the view via handle_event/3 to query filtered data. For provider comparison, add toggles or multi-select for OpenAI, Groq, Perplexity, displaying side-by-side charts. Enable real-time updates by subscribing to Phoenix PubSub topics in mount/3 (e.g., 'metrics_updates') and handling broadcasts in handle_info/2 to push updates to the socket. Add CSV export functionality via a button that triggers a download link generated from queried data, using Elixir's CSV library to format metrics. Ensure the dashboard is responsive and accessible, with proper error handling for data fetching. Consider performance by limiting data points (e.g., aggregate hourly for longer ranges) and using database indexes on timestamp and provider fields in the Metrics schema.",
@@ -292,7 +292,7 @@
         "subtasks": []
       },
       {
-        "id": "22",
+        "id": 22,
         "title": "Implement Cost Tracking and Budget Dashboard",
         "description": "Develop a Phoenix LiveView dashboard at /dashboard/costs that provides detailed cost breakdowns by provider, agent, and time period, including charts for cost trends and budget burn rate, budget alerts, cost projections, and per-agent breakdowns.",
         "details": "Implement the cost dashboard in lib/vel_tutor_web/live/cost_dashboard_live.ex using Phoenix LiveView. Start by defining a LiveView module that mounts with initial data fetching from the MetricsContext (assuming Task 20 provides the necessary metrics schema with fields like total_cost, total_tokens, provider, etc.). For cost calculations, create helper functions in the LiveView or a separate CostCalculator module to compute costs per task using token usage multiplied by provider-specific pricing (e.g., retrieve pricing from configuration or a pricing table). Implement real-time updates by subscribing to PubSub channels for metrics updates. For charts, integrate a charting library like Chart.js or Phoenix LiveView's built-in support with SVG, creating components for: cost by provider (bar chart), trends over time (line chart), and budget burn rate (progress bar or gauge). Add budget alert logic that checks against a configurable monthly limit (stored in user settings or database), triggering notifications (e.g., via email or in-app flash) at 80% and 100% thresholds. For cost projections, calculate estimated month-end costs based on current usage rates (e.g., average daily cost * remaining days). Provide per-agent breakdowns by querying metrics aggregated by agent ID. Ensure the dashboard is responsive and handles large datasets efficiently, possibly with pagination or lazy loading. Consider security by ensuring only authorized users can access the dashboard, and validate all inputs to prevent injection attacks.",
@@ -305,7 +305,7 @@
         "subtasks": []
       },
       {
-        "id": "23",
+        "id": 23,
         "title": "Implement Anomaly Detection and Alerting System",
         "description": "Develop an automated anomaly detection system using statistical methods to monitor key metrics such as error rate, latency, cost per task, and failures, with configurable alert triggers and a notification system including email, webhook, and in-app alerts, along with an alert history dashboard.",
         "details": "Implement the anomaly detection functionality in lib/vel_tutor/anomaly_detection.ex as an Elixir module. Use the mean + 3σ (standard deviations) algorithm for detecting anomalies in monitored metrics: error rate (percentage of failed tasks), latency (response time in milliseconds), cost per task (monetary value), and failures (count of failures). Integrate with the MetricsContext module (from Task 20) to fetch real-time metrics data at regular intervals (e.g., every minute) for analysis. Define alert triggers as configurable thresholds: latency spike (e.g., >2x baseline), error rate >10%, cost anomaly (e.g., >3σ above mean). Implement a notification system supporting email (using Bamboo or similar), webhooks (HTTP POST to configured URLs), and in-app notifications (via Phoenix LiveView broadcasts). Create an Alert schema with fields like id, metric_type, value, threshold, triggered_at, status (active/resolved), and details (jsonb for context). Persist alerts in PostgreSQL with a migration. Build the alert history dashboard at /dashboard/alerts using Phoenix LiveView in lib/vel_tutor_web/live/alert_dashboard_live.ex, displaying a table of alerts with filters by metric, time range, and status, including pagination and real-time updates via LiveView subscriptions. Ensure the system logs alerts to the audit log (integrating with Task 12 if available) and includes manual alert resolution features. Optimize for low false positive rate (<5%) by tuning the σ multiplier and adding smoothing filters (e.g., moving averages). Handle edge cases like insufficient data for baseline calculation (e.g., require at least 100 data points). Include configuration options in config files for alert thresholds and notification endpoints.",
@@ -318,7 +318,7 @@
         "subtasks": []
       },
       {
-        "id": "24",
+        "id": 24,
         "title": "Build Task Execution History Explorer",
         "description": "Develop a Phoenix LiveView interface at /dashboard/tasks that allows users to search, filter, and explore their task execution history, including detailed drill-down views and export capabilities.",
         "details": "Implement the TaskHistoryLive module in lib/vel_tutor_web/live/task_history_live.ex using Phoenix LiveView. The LiveView should mount with initial data fetching from the AuditLogContext (assuming Task 12 provides the necessary schema with fields like task_id, user_id, action, payload, timestamp, provider, model, tokens_used, etc., which can be mapped to task executions). For search and filtering, implement handle_event/3 functions to handle form submissions for filters: description (search in payload or a derived field), date range (start_date to end_date), status (map action to statuses like 'completed', 'failed'), provider, and agent (user_id). Use Ecto queries with dynamic where clauses for efficient filtering, ensuring pagination with 50 tasks per page using Scrivener or similar. For task detail drill-down, add a modal or separate view that displays full request/response (from payload), timing (calculate from timestamps or add latency if available), and other metadata. Implement export functionality by generating JSON or CSV from filtered results, using libraries like CSV for encoding and sending as downloads via Phoenix responses. Ensure query optimization by adding database indexes on filter fields (e.g., timestamp, provider, user_id, action) via a migration. Handle real-time updates if needed, but focus on static history. Consider security: ensure users only see their own task history, filtering by user_id. Integrate with existing routing in router.ex to add the /dashboard/tasks route.",
@@ -331,7 +331,7 @@
         "subtasks": []
       },
       {
-        "id": "25",
+        "id": 25,
         "title": "Implement Performance Benchmarking Tool",
         "description": "Develop a comprehensive benchmarking tool that allows users to run the same prompt across multiple AI providers and configurations, compare results including latency, cost, and user-rated output quality, perform statistical significance testing, maintain benchmark history, and provide pre-configured suites via a Phoenix LiveView dashboard.",
         "details": "Implement the benchmarking functionality in the BenchmarksLive module at lib/vel_tutor_web/live/benchmarks_live.ex. Start by defining a Benchmark schema with fields such as id, name, prompt, providers (array of provider IDs), results (jsonb for storing latency, cost, quality scores), stats (jsonb for significance tests), history (jsonb array for tracking runs), suite (string for pre-configured types like 'code_generation'), created_at, and updated_at. Create database migrations for the benchmark table. In the LiveView, implement mount/3 to fetch existing benchmarks and suites, handle_event/3 for starting benchmarks (e.g., 'run_benchmark' event that uses the MCP Orchestrator to execute the prompt against selected providers via Task.async_stream for parallelism). For results comparison, aggregate data from MetricsContext (latency percentiles, costs) and add user rating inputs (1-5 scale) with form submissions. Implement statistical significance testing using libraries like Statistics or custom functions for t-tests on latency/cost differences. Store benchmark history as immutable versions. Pre-configure suites as static data or configurable JSON. Ensure the LiveView renders at /dashboard/benchmarks with tables for comparisons, charts for trends (using libraries like Chartkick), and forms for new benchmarks. Handle errors gracefully, such as provider failures, and integrate with existing audit logging if applicable. Consider concurrency limits to avoid overwhelming providers.",
@@ -345,7 +345,7 @@
         "subtasks": []
       },
       {
-        "id": "26",
+        "id": 26,
         "title": "Implement Multi-Tenant Architecture",
         "description": "Implement a multi-tenant architecture to support multiple organizations with isolated data, including database schema modifications, row-level security, tenant context management, and an onboarding API.",
         "details": "Implement the multi-tenant architecture in the OrganizationContext module at lib/vel_tutor/organization_context.ex. Start by defining an Organization schema with fields such as id (primary key), name (string), tenant_id (uuid, unique identifier for each tenant), created_at and updated_at timestamps. Ensure tenant_id is used as a foreign key in all relevant tables for data isolation. Create database migrations to add tenant_id columns to existing tables (e.g., users, tasks, workflows) with appropriate defaults and indexes for performance. Implement Row-Level Security (RLS) policies in PostgreSQL using Ecto migrations to enforce tenant isolation, such as policies that filter queries by current_tenant_id. Integrate with Guardian for authentication to set tenant context per request by extracting tenant_id from JWT claims and storing it in the process dictionary or a context module. Modify database queries in relevant contexts (e.g., via Ecto query macros or plugs) to automatically scope queries by tenant_id, ensuring all data access is filtered. Develop a tenant onboarding API endpoint POST /api/organizations in the OrganizationController at lib/vel_tutor_web/controllers/organization_controller.ex, which accepts JSON payload with organization details, validates inputs, creates the organization record, and returns the tenant_id. Include security measures like rate limiting and input sanitization. Perform a security audit to verify no cross-tenant data leakage by testing queries with different tenant contexts and ensuring RLS policies are enforced. Consider edge cases such as tenant deletion (soft delete with data retention) and migration rollback strategies.",
@@ -358,7 +358,7 @@
         "subtasks": []
       },
       {
-        "id": "27",
+        "id": 27,
         "title": "Build Advanced RBAC System",
         "description": "Implement a granular role-based access control (RBAC) system for organization administrators, defining permissions, roles, and checks across controller and context layers, with an API endpoint for role assignment and audit logging.",
         "details": "Implement the RBAC system in a new RBACContext module at lib/vel_tutor/rbac_context.ex as an Elixir context using Ecto for database interactions. Define schemas: Permission with fields id (primary key), name (string, e.g., 'create_agent'), description (text); Role with fields id, name (string, e.g., 'org_admin'), permissions (many-to-many association with Permission); UserRole with fields user_id, role_id, organization_id (for multi-tenancy), assigned_at (datetime). Create database migrations to add roles_permissions (join table), user_roles, and permissions tables, ensuring tenant_id from Task 26 is included for isolation. Implement functions: assign_role/3 (user_id, role_id, org_id), revoke_role/3, check_permission/3 (user_id, permission, org_id) that queries roles and permissions. In controllers (e.g., UserController), add plugs for permission checks before actions, using RBACContext.check_permission/3. Implement PUT /api/users/:id/roles endpoint in a new RolesController at lib/vel_tutor_web/controllers/roles_controller.ex, handling role assignment with validation for org_admin permissions. Integrate audit logging using AuditLogContext from Task 12 to log permission changes (e.g., action: 'role_assigned', payload: %{user_id: id, role_id: role_id}). Ensure permission checks at context layers by adding guards in functions like create_agent/2. Handle role definitions statically or via seeds: org_admin (all permissions), agent_manager (create_agent, manage_users), task_executor (execute_task), viewer (view_analytics).",
@@ -372,7 +372,7 @@
         "subtasks": []
       },
       {
-        "id": "28",
+        "id": 28,
         "title": "Add Batch Task Operations",
         "description": "Implement batch task operations allowing users to submit and manage multiple tasks as a batch, including endpoints for submission, concurrency control, status tracking, cancellation, and results aggregation.",
         "details": "Implement the batch functionality in a new BatchContext module at lib/vel_tutor/batch_context.ex as an Elixir context using Ecto for database interactions. Define a Batch schema with fields such as id (primary key), user_id (integer), organization_id (integer for multi-tenancy), name (string), tasks (jsonb array of task definitions), status (string enum: 'pending', 'running', 'completed', 'cancelled'), concurrency_limit (integer, default 20), completed_count (integer), total_count (integer), results (jsonb for aggregated results), created_at and updated_at timestamps. Create database migrations to add the batch table. Implement the POST /api/batches endpoint in a BatchesController at lib/vel_tutor_web/controllers/batches_controller.ex to accept a JSON payload with task array, validate inputs, create the batch record, and enqueue tasks for execution using a background job system like Oban. For concurrency control, use a job queue with a concurrency limit of 20 parallel tasks per batch. Implement batch status tracking by updating the batch record as tasks complete, using a progress counter (e.g., X/Y tasks complete). Handle partial successes by continuing execution on individual task failures, logging errors in the results jsonb. Add a POST /api/batches/:id/cancel endpoint to mark the batch as cancelled and halt any running tasks. For results aggregation, provide endpoints to fetch batch results in JSON or CSV format, aggregating task outputs into a downloadable file. Ensure integration with audit logging (from Task 12) to log batch creation, task executions, and cancellations. Consider error handling for invalid task definitions, rate limiting, and resource constraints. Use Phoenix channels or LiveView for real-time status updates if needed for dashboards.",
@@ -387,7 +387,7 @@
         "updatedAt": "2025-11-03T23:07:51.395Z"
       },
       {
-        "id": "29",
+        "id": 29,
         "title": "Implement Streaming Response Support",
         "description": "Implement support for streaming AI responses from providers like OpenAI and Groq, allowing users to receive responses token-by-token via a dedicated API endpoint with buffering, interruption handling, and performance optimizations.",
         "details": "Focus implementation in lib/vel_tutor/integration/openai_adapter.ex to integrate OpenAI's streaming API using Server-Sent Events (SSE) from the provider. Extend the adapter to support Groq's OpenAI-compatible streaming. Create a new GET endpoint at /api/tasks/:id/stream-response in the TaskController (lib/vel_tutor_web/controllers/task_controller.ex) to deliver responses token-by-token. Implement response buffering logic to send updates every 10 tokens or every 100ms, whichever comes first, using Elixir's Stream or GenServer for state management. Handle stream interruptions gracefully by detecting disconnections, logging errors, and allowing resumption or fallback to non-streaming mode. Ensure performance optimization for <50ms time-to-first-token by minimizing latency in provider calls and SSE setup. Integrate with existing provider routing (from dependencies) to select appropriate providers. Use Phoenix.PubSub for broadcasting stream events if needed for real-time updates. Consider security: authenticate requests, rate-limit streams, and avoid exposing sensitive data in streams. For Groq, leverage OpenAI-compatible SDK methods. Update any relevant schemas or contexts to track streaming state if necessary, but keep it lightweight.",
@@ -401,7 +401,7 @@
         "updatedAt": "2025-11-03T22:59:49.702Z"
       },
       {
-        "id": "30",
+        "id": 30,
         "title": "Add Custom Model Fine-Tuning Support",
         "description": "Implement support for fine-tuning OpenAI models on user data, including job creation, data upload, status tracking, model registration, cost tracking, and integration with the OpenAI fine-tuning API.",
         "details": "Implement the fine-tuning functionality in a new FineTuningContext module at lib/vel_tutor/fine_tuning_context.ex as an Elixir context using Ecto for database interactions. Define a FineTuningJob schema with fields such as id (primary key), user_id (integer), organization_id (integer for multi-tenancy), name (string), training_file_id (string from OpenAI), model (string, e.g., 'gpt-3.5-turbo'), status (string enum: 'pending', 'running', 'completed', 'failed'), fine_tuned_model_id (string, nullable), cost (decimal), created_at, updated_at. Create database migrations to add the fine_tuning_jobs table with appropriate indexes and foreign keys. Implement API endpoints in FineTuningController at lib/vel_tutor_web/controllers/fine_tuning_controller.ex: POST /api/fine-tuning-jobs for job creation (accepting JSON with name, model, training_file_url or upload), GET /api/fine-tuning-jobs/:id for status tracking, and POST /api/fine-tuning-jobs/:id/register to add the fine-tuned model to agent config. For training data upload, support JSONL format via a file upload endpoint or direct URL submission, validating the format and uploading to OpenAI's API. Integrate with OpenAI's fine-tuning API using the openai Elixir library or HTTPoison for job submission, status polling (via background jobs with Oban), and retrieval of fine-tuned model IDs. Implement cost tracking by querying OpenAI's usage API and storing in the database. Ensure multi-tenancy by scoping queries to organization_id. For agent config integration, update the AgentContext (assuming from earlier tasks) to allow selecting fine-tuned models. Handle errors gracefully, such as invalid data or API failures, with proper logging and user feedback. Consider rate limiting for API calls and background job scheduling for status updates.",
@@ -417,7 +417,7 @@
         "updatedAt": "2025-11-03T23:42:33.661Z"
       },
       {
-        "id": "31",
+        "id": 31,
         "title": "Implement Rate Limit Customization",
         "description": "Implement customizable rate limits per user or organization, including configuration, enforcement via Plug middleware, API endpoints for admins, error responses, a usage dashboard, and background resets.",
         "details": "Focus implementation in lib/vel_tutor/rate_limit_plug.ex as a Plug middleware to enforce rate limits at the API layer. Define a RateLimit schema with fields such as id, user_id or org_id (foreign key to users or organizations), tasks_per_hour (integer), concurrent_tasks (integer), current_hourly_count (integer, reset by background job), current_concurrent_count (integer), updated_at (timestamp). Use Ecto for database persistence with a migration to create the rate_limits table, ensuring tenant isolation via tenant_id from Task 26. Implement the Plug to check limits on each request: increment counters, enforce hourly limits by comparing current_hourly_count against tasks_per_hour, enforce concurrent limits by tracking active tasks (e.g., via a GenServer or ETS for in-memory concurrent count, persisted to DB periodically). For the PUT /api/users/:id/rate-limits endpoint in UserController (lib/vel_tutor_web/controllers/user_controller.ex), add admin-only access (using Guardian or similar auth plug), validate inputs with Ecto changesets (e.g., tasks_per_hour > 0, concurrent_tasks > 0), and update or create rate limit configs. Return 429 Too Many Requests with Retry-After header when limits are exceeded, calculating retry-after based on hourly reset time (e.g., seconds until next hour). For the rate limit usage dashboard, create a LiveView at lib/vel_tutor_web/live/rate_limits_live.ex to display current vs limit for users/orgs, fetching data from RateLimit context. Implement a background job using Oban or similar (e.g., in lib/vel_tutor/jobs/reset_hourly_limits.ex) to reset hourly counters at the start of each hour, querying and updating rate_limits table. Ensure concurrency handling with database locks or optimistic locking to prevent race conditions. Consider caching rate limits in Redis or ETS for performance, but persist to DB for durability. Handle edge cases like org-level overrides user-level, and default limits if none set.",
@@ -430,7 +430,7 @@
         "subtasks": []
       },
       {
-        "id": "32",
+        "id": 32,
         "title": "Add Webhook Notification System",
         "description": "Implement a webhook notification system that enables users to configure and receive notifications for specific events such as task completions, failures, batch completions, and workflow pauses, with features including retry mechanisms, signature verification, and delivery logging.",
         "details": "Create a new WebhookContext module in lib/vel_tutor/webhook_context.ex as an Elixir context using Ecto for database interactions. Define schemas: Webhook with fields id (primary key), user_id (integer), organization_id (integer for multi-tenancy), url (string), secret (string for HMAC-SHA256), event_types (array of strings, e.g., ['task.completed', 'task.failed', 'batch.completed', 'workflow.paused']), is_active (boolean), created_at and updated_at timestamps; WebhookDelivery with fields id, webhook_id (foreign key), event_type (string), payload (jsonb), status (string enum: 'pending', 'success', 'failed'), attempt_count (integer, max 3), last_attempt_at (datetime), error_message (text), signature (string). Implement functions: create_webhook/1 (validates URL and event types), trigger_webhook/2 (for events, queues delivery job), deliver_webhook/1 (handles POST to URL with HMAC signature, retries with exponential backoff: 1s, 2s, 4s), log_delivery/1 (records history). Create database migrations for webhook and webhook_delivery tables, ensuring tenant_id scoping via organization_id. Implement API endpoints in a new WebhooksController at lib/vel_tutor_web/controllers/webhooks_controller.ex: POST /api/webhooks (creates webhook, requires authentication and RBAC check for webhook management permission), GET /api/webhooks (lists user's webhooks), POST /api/webhooks/:id/test (sends test payload to webhook URL). Integrate event triggers: in TaskContext, call WebhookContext.trigger_webhook/2 on task completion/failure; in BatchContext on batch completion; in WorkflowContext on workflow pause. Use Oban for background job processing of deliveries. Ensure webhook payloads include event data (e.g., task_id, status, timestamp) and HMAC-SHA256 signature in X-Webhook-Signature header. Handle failures by logging to WebhookDelivery and optionally alerting admins via existing audit system. Consider security: validate URLs to prevent SSRF, rate-limit webhook configurations per user/org.",
@@ -446,7 +446,7 @@
         "updatedAt": "2025-11-03T23:10:33.908Z"
       },
       {
-        "id": "33",
+        "id": 33,
         "title": "Implement SOC 2 Compliance Hardening",
         "description": "Implement security controls aligned with SOC 2 requirements, including encryption at rest, TLS enforcement, session management, access logging, automated scanning, penetration testing, and compliance documentation.",
         "details": "Focus implementation across multiple modules for comprehensive SOC 2 compliance hardening. For encryption at rest, use Ecto's built-in encryption features or libraries like Cloak to encrypt sensitive fields such as API keys and user data in the database; create migrations to update schemas for users, tasks, and workflows tables, ensuring tenant-specific keys if multi-tenant (referencing Task 26). For TLS 1.3 enforcement, configure the Phoenix endpoint in config/prod.exs to use TLS 1.3 only, disabling older versions, and set up SSL certificates with Let's Encrypt or similar; update the web server configuration in lib/vel_tutor_web/endpoint.ex to enforce HTTPS redirects and HSTS headers. For session management hardening, implement secure cookies with HttpOnly, Secure, and SameSite flags in the session plug, add CSRF protection using Phoenix's built-in CSRF plug, and configure session timeouts with automatic invalidation; extend the UserContext module at lib/vel_tutor/user_context.ex to handle session revocation. For access log audit trail, integrate a logging library like Logger or custom middleware to log all data access events with user ID, timestamp, justification (e.g., via API parameters), and store in a dedicated audit_logs table with fields like id, user_id, action, resource, justification, timestamp; create a migration for the table and ensure logs are immutable. For automated security scanning, integrate OWASP Dependency Check into the CI/CD pipeline (e.g., via GitHub Actions or Mix tasks) to scan for vulnerabilities in dependencies, and add SAST tools like Brakeman for Elixir code; configure alerts for failures. For penetration testing, conduct manual or automated pentests using tools like OWASP ZAP or Burp Suite, document findings, and implement remediations such as input validation fixes in controllers. For compliance documentation, generate reports using tools like Dradis or custom scripts to compile evidence from logs, scans, and tests into SOC 2 artifacts; store documentation in a secure S3 bucket or database. Ensure all changes are tenant-aware if applicable, and consider performance impacts like encryption overhead. Coordinate with DevOps for infrastructure changes like load balancer TLS configs.",
@@ -459,7 +459,7 @@
         "subtasks": []
       },
       {
-        "id": "34",
+        "id": 34,
         "title": "Add Horizontal Scaling Support",
         "description": "Implement horizontal scaling capabilities for vel_tutor on Fly.io, ensuring the application can handle increased load across multiple machines with stateless design, optimized database connections, multi-node PubSub, distributed queues, load testing, auto-scaling, and multi-region deployment guidance.",
         "details": "Begin by verifying stateless API design: ensure all endpoints do not rely on server-side session state, using JWT tokens or database-backed sessions for authentication, and confirm that user data is isolated via multi-tenancy (referencing Task 26). For database connection pooling, integrate PgBouncer in the Fly.io configuration (fly.toml) to manage PostgreSQL connections efficiently, setting up a separate PgBouncer app or service with connection limits (e.g., max_client_conn=1000, default_pool_size=50) and update config/runtime.exs to use the PgBouncer host for database connections. Implement Phoenix PubSub with Redis adapter: configure PubSub in config/runtime.exs to use Redis for multi-node communication, installing and configuring redis as a dependency, and ensure channels (e.g., for real-time updates in Task 29) work across nodes. Set up distributed task queue with Oban using PostgreSQL: add Oban to mix.exs, configure it in config/runtime.exs with PostgreSQL as the backend, and integrate it with the MCP Orchestrator (Task 1) for background job processing, ensuring jobs are enqueued and processed across nodes. Perform load testing: use tools like k6 or Apache Bench to simulate 1000 concurrent requests against key endpoints (e.g., task creation, streaming responses), monitoring for errors, latency under 500ms, and resource usage; document results and iterate on optimizations. Configure auto-scaling policy in fly.toml: set up Fly.io's autoscaling with min_machines=1, max_machines=10, and CPU/memory thresholds (e.g., scale up at 70% CPU); test scaling behavior with load tests. Develop a multi-region deployment guide: document steps for deploying to multiple Fly.io regions (e.g., iad and lax), including DNS configuration with Anycast, database replication for read replicas, and PubSub/Oban synchronization across regions; include failover strategies and cost considerations. Ensure all changes are tested in staging environments mimicking production Fly.io setup.",
@@ -474,7 +474,7 @@
         "updatedAt": "2025-11-03T23:52:36.465Z"
       },
       {
-        "id": "35",
+        "id": 35,
         "title": "Implement GraphQL API Alternative",
         "description": "Implement a GraphQL API endpoint alongside the existing REST API to provide an alternative interface for API consumers, including schema definitions for core entities and support for queries, mutations, and subscriptions.",
         "details": "Integrate the Absinthe library into the Phoenix application for GraphQL support, ensuring it is added to the project dependencies in mix.exs and configured in the application supervision tree. Define GraphQL schema definitions in lib/vel_tutor_web/schema.ex for the User, Agent, Task, and Workflow entities, using Absinthe's schema DSL to specify fields, types, and relationships; for example, the User type might include fields like id, name, email, and associations to agents or tasks. Implement queries for user profile (e.g., query { user(id: ID!) { name email } }), agent list (e.g., query { agents { id name provider } }), task history (e.g., query { tasks(userId: ID) { id status createdAt } }), and metrics (e.g., query { metrics { totalTasks completedTasks } }). Implement mutations for create task (e.g., mutation { createTask(input: { description: String! }) { id status } }), update agent (e.g., mutation { updateAgent(id: ID!, input: { name: String }) { id name } }), and cancel task (e.g., mutation { cancelTask(id: ID!) { id status } }). Add subscriptions for task status updates using WebSocket, such as subscription { taskStatusUpdated(taskId: ID!) { id status updatedAt } }, leveraging Absinthe's subscription capabilities. Configure a GraphQL playground accessible at /api/graphiql by adding the appropriate route in the router and ensuring it is enabled in development and staging environments. Ensure all implementations respect multi-tenancy if applicable (referencing Task 26 for tenant isolation), handle authentication and authorization similarly to REST endpoints, and optimize for performance by avoiding N+1 queries through dataloaders. Consider error handling for invalid queries or mutations, and integrate with existing contexts like MCPOrchestrator for task creation.",
@@ -497,7 +497,1417 @@
       "completedCount": 32,
       "tags": [
         "master"
-      ]
+      ],
+      "created": "2025-11-04T02:47:33.384Z",
+      "description": "Tasks for master context"
+    }
+  },
+  "viral": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Practice Session UI with Progress Tracking",
+        "description": "Build a LiveView component for multi-step practice sessions with real-time feedback, progress bar, timer, and pause/resume functionality.",
+        "details": "Use Phoenix LiveView for server-side state management. Integrate with PracticeContext for data. Implement real-time answer validation via WebSocket. Add mobile-responsive design with Tailwind CSS. Include server-managed timer and question counter. Use Ecto schemas for state persistence. Leverage existing Phoenix infrastructure.",
+        "testStrategy": "Unit test LiveView assigns and event handlers. Integration test with PracticeContext. Manual testing for real-time feedback and mobile responsiveness. Validate progress persistence across sessions.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create LiveView UI Component Structure",
+            "description": "Design and implement the basic HTML structure for the practice session UI using Phoenix LiveView, including placeholders for progress bar, timer, and question display.",
+            "dependencies": [],
+            "details": "Use Phoenix LiveView templates to create the component layout. Ensure it includes sections for question rendering, answer input, progress indicators, and control buttons like pause/resume. Integrate Tailwind CSS for initial styling to support mobile responsiveness.",
+            "status": "pending",
+            "testStrategy": "Unit test the LiveView template rendering and basic assigns."
+          },
+          {
+            "id": 2,
+            "title": "Integrate State Management with PracticeContext",
+            "description": "Connect the LiveView component to PracticeContext for fetching and updating session data, including questions and user progress.",
+            "dependencies": [],
+            "details": "Implement LiveView event handlers to interact with PracticeContext functions for loading questions, updating answers, and managing session state. Ensure server-side state is maintained across re-renders using LiveView assigns.",
+            "status": "pending",
+            "testStrategy": "Integration test with PracticeContext to verify data fetching and state updates."
+          },
+          {
+            "id": 3,
+            "title": "Implement Real-Time Feedback Mechanisms",
+            "description": "Add WebSocket-based real-time validation for user answers, providing immediate feedback on correctness.",
+            "dependencies": [],
+            "details": "Use Phoenix Channels or LiveView's built-in WebSocket support to send answer validations from the server. Update the UI dynamically to show feedback, such as correct/incorrect indicators, without full page reloads.",
+            "status": "pending",
+            "testStrategy": "Manual testing for real-time feedback via WebSocket connections and integration tests for validation logic."
+          },
+          {
+            "id": 4,
+            "title": "Add Timer and Progress Tracking Features",
+            "description": "Incorporate a server-managed timer, progress bar, and question counter with pause/resume functionality.",
+            "dependencies": [],
+            "details": "Implement a server-side timer using Elixir processes or LiveView timers. Display a progress bar and counter in the UI. Handle pause/resume events to control the timer state, ensuring synchronization across clients.",
+            "status": "pending",
+            "testStrategy": "Unit test timer logic and event handlers. Manual QA for progress bar accuracy and pause/resume on mobile devices."
+          },
+          {
+            "id": 5,
+            "title": "Set Up Persistence with Ecto Schemas",
+            "description": "Use Ecto schemas to persist session state, progress, and timer data across page reloads or sessions.",
+            "dependencies": [],
+            "details": "Define Ecto schemas for practice sessions, including fields for progress, timer state, and user answers. Implement database operations in the LiveView component to save and load state, leveraging existing Phoenix infrastructure.",
+            "status": "pending",
+            "testStrategy": "Integration test persistence across sessions. Validate Ecto schema operations and data integrity."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Develop Diagnostic Assessment Flow",
+        "description": "Create a multi-stage diagnostic LiveView with subject/grade selection, adaptive difficulty, timed sections, and progress persistence.",
+        "details": "Use Alpine.js for dropdowns. Implement server-side adaptive difficulty via MCP agent. Add countdown warnings with JavaScript timer and server validation. Persist progress in LiveView assigns and Ecto. Redirect to results on completion with loading state.",
+        "testStrategy": "Test adaptive logic with mock data. Validate timer synchronization. Manual QA for flow completion and persistence. Check server-side validation.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Subject/Grade Selection UI",
+            "description": "Create the user interface for selecting subject and grade in the diagnostic assessment flow using dropdowns.",
+            "dependencies": [],
+            "details": "Use Alpine.js to build interactive dropdowns for subject and grade selection. Ensure the UI is responsive and integrates with LiveView for state management. Include validation to prevent invalid selections.",
+            "status": "pending",
+            "testStrategy": "Manual QA for dropdown functionality and responsiveness."
+          },
+          {
+            "id": 2,
+            "title": "Develop Adaptive Difficulty Logic",
+            "description": "Implement server-side adaptive difficulty adjustment based on user performance using the MCP agent.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate the MCP agent to dynamically adjust question difficulty after each response. Store difficulty levels in LiveView assigns and use Ecto for persistence. Ensure logic adapts in real-time during the assessment.",
+            "status": "pending",
+            "testStrategy": "Test adaptive logic with mock data and validate difficulty adjustments."
+          },
+          {
+            "id": 3,
+            "title": "Add Timed Sections with Warnings",
+            "description": "Implement timed sections for the assessment with countdown timers and warnings using JavaScript and server validation.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Use JavaScript timers for client-side countdowns and server-side validation to prevent cheating. Add visual warnings when time is running low. Integrate with LiveView to handle timer events and enforce section limits.",
+            "status": "pending",
+            "testStrategy": "Validate timer synchronization and server-side validation."
+          },
+          {
+            "id": 4,
+            "title": "Implement Progress Persistence",
+            "description": "Persist user progress throughout the diagnostic assessment using LiveView assigns and Ecto.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Store progress data in LiveView assigns for real-time updates and use Ecto to save to the database. Ensure persistence across page reloads and sessions. Handle partial completions and resume functionality.",
+            "status": "pending",
+            "testStrategy": "Manual QA for flow completion and persistence across sessions."
+          },
+          {
+            "id": 5,
+            "title": "Handle Results Redirection",
+            "description": "Implement redirection to results page upon assessment completion with a loading state.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "On completion, redirect to the results page with a loading indicator. Use LiveView to manage the transition state. Ensure all progress is saved before redirection and display results accurately.",
+            "status": "pending",
+            "testStrategy": "Test redirection flow and loading state manually."
+          },
+          {
+            "id": 6,
+            "title": "Conduct Integration Testing",
+            "description": "Perform comprehensive integration testing for the entire diagnostic assessment flow.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Test the full multi-stage flow including UI interactions, adaptive logic, timers, persistence, and redirection. Use mock data for edge cases and ensure synchronization between client and server components.",
+            "status": "pending",
+            "testStrategy": "End-to-end testing with mock data, manual QA for overall flow, and check server-side validations."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Create Viral Results Page for Diagnostics",
+        "description": "Design a results page with skills heatmap, percentile ranking, AI recommendations, and shareable achievements.",
+        "details": "Use Chart.js for heatmap via Phoenix hook. Compute rankings server-side. Generate share cards with dynamic OG images using Elixir Image library. Implement 'Challenge a Friend' and 'Study Together' CTAs with event handlers. Handle deep links with live_session.",
+        "testStrategy": "Verify heatmap rendering and data accuracy. Test share card generation and links. Simulate deep link flows. Check AI recommendations integration.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Heatmap Visualization",
+            "description": "Create a skills heatmap using Chart.js integrated via a Phoenix hook to display user diagnostic results visually.",
+            "dependencies": [],
+            "details": "Utilize Chart.js library within a Phoenix LiveView hook to render the heatmap. Ensure data is fetched from the server-side context and updated in real-time. Make it responsive for mobile devices using Tailwind CSS.",
+            "status": "pending",
+            "testStrategy": "Verify heatmap rendering accuracy and data visualization on different devices. Test data updates via LiveView assigns."
+          },
+          {
+            "id": 2,
+            "title": "Compute Percentile Rankings Server-Side",
+            "description": "Develop server-side logic to calculate and display percentile rankings for user skills based on diagnostic data.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement ranking computations in Elixir using Ecto queries to aggregate data from the database. Compute percentiles based on comparative user data and cache results for performance. Integrate with the results page to display rankings dynamically.",
+            "status": "pending",
+            "testStrategy": "Test ranking calculations with sample data sets. Validate percentile accuracy and performance under load. Check integration with the heatmap display."
+          },
+          {
+            "id": 3,
+            "title": "Integrate AI Recommendations",
+            "description": "Add AI-generated recommendations to the results page based on user diagnostic outcomes.",
+            "dependencies": [
+              2
+            ],
+            "details": "Connect to an AI service or model to generate personalized recommendations. Display them on the results page alongside the heatmap and rankings. Ensure recommendations are contextually relevant and update based on user progress.",
+            "status": "pending",
+            "testStrategy": "Simulate AI recommendation generation. Test display integration and relevance. Manual QA for recommendation accuracy and user feedback."
+          },
+          {
+            "id": 4,
+            "title": "Create Shareable Achievements with OG Images and Deep Links",
+            "description": "Implement shareable achievements, dynamic OG images, and deep link handling for the results page.",
+            "dependencies": [
+              3
+            ],
+            "details": "Use Elixir Image library to generate dynamic Open Graph images for share cards. Implement 'Challenge a Friend' and 'Study Together' CTAs with event handlers in LiveView. Handle deep links using live_session to direct users to specific results or challenges.",
+            "status": "pending",
+            "testStrategy": "Test OG image generation and social sharing links. Simulate deep link flows and CTA interactions. Validate event handlers and link accuracy."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Build Viral Results Page for Practice Tests",
+        "description": "Develop a results page with score breakdown, mini-leaderboard, and share buttons for challenges.",
+        "details": "Display question-by-question breakdown in LiveView. Use Phoenix Presence for real-time leaderboard updates via PubSub. Implement stream for efficient rendering. Add share CTAs with Alpine.js modal and Web Share API.",
+        "testStrategy": "Test leaderboard updates in real-time. Validate score calculations. Manual testing of share modals and deep links. Ensure anonymized data.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Score Breakdown Display",
+            "description": "Create a detailed question-by-question score breakdown display in LiveView for the practice test results page.",
+            "dependencies": [],
+            "details": "Use LiveView to render a list of questions with user answers, correct answers, and explanations. Ensure efficient rendering with streams for large question sets. Integrate with the PracticeContext to fetch and display scores accurately.",
+            "status": "pending",
+            "testStrategy": "Unit test the LiveView component for correct score calculations and rendering. Integration test with PracticeContext to validate data accuracy."
+          },
+          {
+            "id": 2,
+            "title": "Develop Real-Time Leaderboard with Presence",
+            "description": "Build a mini-leaderboard that updates in real-time using Phoenix Presence and PubSub for practice test challenges.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement Phoenix Presence to track user scores and update the leaderboard via PubSub. Use LiveView streams for efficient rendering of rankings. Ensure real-time updates are pushed to connected clients without full page reloads.",
+            "status": "pending",
+            "testStrategy": "Test real-time updates by simulating multiple users submitting scores. Validate leaderboard rankings and ensure Presence handles user connections/disconnections correctly."
+          },
+          {
+            "id": 3,
+            "title": "Add Share Buttons and Modals",
+            "description": "Integrate share buttons with Alpine.js modals and Web Share API for viral sharing of practice test results.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add share CTAs that open Alpine.js modals for sharing results. Implement Web Share API for native sharing on supported devices. Include options for deep links and social media sharing. Handle fallbacks for unsupported browsers.",
+            "status": "pending",
+            "testStrategy": "Manual testing of share modals on various devices and browsers. Validate deep link functionality and ensure share buttons trigger correct actions. Test Web Share API integration."
+          },
+          {
+            "id": 4,
+            "title": "Handle Anonymized Data Processing",
+            "description": "Ensure all user data on the results page is anonymized for privacy and compliance.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Process and anonymize user scores, leaderboards, and shared data server-side before rendering. Use Elixir to strip personal identifiers and aggregate data where necessary. Implement checks to prevent PII exposure in real-time updates and shares.",
+            "status": "pending",
+            "testStrategy": "Test data anonymization by verifying no personal information is exposed in leaderboards or shares. Integration test with database to ensure anonymized data is stored and retrieved correctly."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement Flashcard Study Session",
+        "description": "Create a swipeable flashcard UI with AI-generated decks, spaced repetition, and achievement triggers.",
+        "details": "Use Alpine.js for touch events. Track state server-side in LiveView. Integrate with MCP Personalization Agent for deck generation. Implement spaced repetition logic in FlashcardContext. Trigger achievements on completion.",
+        "testStrategy": "Test swipe interactions and state persistence. Validate AI-generated content. Check spaced repetition algorithm. Manual QA for mobile swiping.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Swipeable Flashcard UI with Alpine.js",
+            "description": "Develop the user interface for swiping flashcards, utilizing Alpine.js to handle touch events for smooth interactions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a responsive flashcard component in the LiveView template that binds touch events using Alpine.js directives. Ensure mobile responsiveness and accessibility for swipe gestures.",
+            "status": "pending",
+            "testStrategy": "Test swipe interactions on various devices, validate touch event handling, and perform manual QA for UI responsiveness."
+          },
+          {
+            "id": 2,
+            "title": "Implement Server-Side State Tracking in LiveView",
+            "description": "Set up server-side tracking of flashcard session state using Phoenix LiveView for persistence and real-time updates.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate state management in the LiveView process to track current card, progress, and user interactions. Use assigns and handle_info for state updates across swipes.",
+            "status": "pending",
+            "testStrategy": "Test state persistence across page reloads, validate real-time updates, and check for data integrity in the database."
+          },
+          {
+            "id": 3,
+            "title": "Integrate AI Deck Generation with MCP Personalization Agent",
+            "description": "Connect the flashcard system to the MCP Personalization Agent for generating customized decks based on user data.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement API calls to the MCP agent within the FlashcardContext to fetch AI-generated decks. Handle deck loading and caching for efficient retrieval during sessions.",
+            "status": "pending",
+            "testStrategy": "Validate AI-generated content for relevance and accuracy, test integration endpoints, and ensure proper error handling for deck generation."
+          },
+          {
+            "id": 4,
+            "title": "Implement Spaced Repetition Logic in FlashcardContext",
+            "description": "Develop the algorithm for spaced repetition to schedule card reviews based on user performance.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add logic in FlashcardContext to calculate intervals using spaced repetition formulas, updating card states after each swipe. Store repetition data server-side for persistence.",
+            "status": "pending",
+            "testStrategy": "Check spaced repetition algorithm for correct interval calculations, validate card scheduling, and test edge cases like perfect recall or frequent misses."
+          },
+          {
+            "id": 5,
+            "title": "Implement Achievement Triggers on Session Completion",
+            "description": "Set up triggers for unlocking achievements when users complete flashcard sessions or reach milestones.",
+            "dependencies": [
+              4
+            ],
+            "details": "Integrate achievement logic that checks for completion criteria post-session, using the FlashcardContext to trigger rewards. Ensure achievements are tracked and displayed in the UI.",
+            "status": "pending",
+            "testStrategy": "Test achievement unlocking on various completion scenarios, validate trigger conditions, and perform manual QA for reward notifications."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Integrate Loop Orchestrator MCP Agent for Viral Prompts",
+        "description": "Set up event handlers for viral triggers, PubSub subscription, and decision logic for prompts.",
+        "details": "Handle info messages for completions. Subscribe to Loop Orchestrator topic. Include throttling and A/B test support via on_mount hook. Fallback to default prompts.",
+        "testStrategy": "Mock PubSub messages and test handlers. Validate throttling logic. A/B test variant assignment. Check fallback behavior.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up event handlers for viral triggers",
+            "description": "Implement event handlers to manage viral triggers and handle info messages for completions in the Loop Orchestrator MCP Agent.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Configure event handlers in the MCP Agent to listen for viral triggers, process completion info messages, and integrate with the overall prompt decision logic. Ensure handlers are robust and handle various message types efficiently.",
+            "status": "pending",
+            "testStrategy": "Mock PubSub messages and test handlers for correct event processing and message handling."
+          },
+          {
+            "id": 2,
+            "title": "Subscribe to Loop Orchestrator PubSub topic",
+            "description": "Establish a subscription to the Loop Orchestrator topic for real-time messaging and updates.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Use PubSub mechanisms to subscribe to the Loop Orchestrator topic, ensuring the agent receives updates on viral prompts and completions. Implement connection management and error handling for subscription stability.",
+            "status": "pending",
+            "testStrategy": "Test subscription setup with mock PubSub to verify message reception and handling."
+          },
+          {
+            "id": 3,
+            "title": "Implement throttling and A/B test logic via on_mount hook",
+            "description": "Add throttling mechanisms and A/B test support using the on_mount hook for prompt decision logic.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Integrate throttling to control prompt frequency and implement A/B testing variant assignment in the on_mount hook. This includes logic for allocating users to test variants and logging exposures for experimentation.",
+            "status": "pending",
+            "testStrategy": "Validate throttling logic and A/B test variant assignment through unit tests and mock scenarios."
+          },
+          {
+            "id": 4,
+            "title": "Implement fallback to default prompts",
+            "description": "Ensure the system falls back to default prompts when necessary, maintaining reliability in prompt selection.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Develop logic to detect failures in viral prompt retrieval or decision-making and seamlessly switch to predefined default prompts. This includes error handling and prioritization of fallback mechanisms.",
+            "status": "pending",
+            "testStrategy": "Check fallback behavior by simulating failures and verifying default prompt usage."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Buddy Challenge Loop",
+        "description": "Build the student-to-student challenge flow with share options, deep links, and rewards.",
+        "details": "Trigger on practice completion. Generate signed tokens in ChallengeContext. Use Alpine.js for share modal with Web Share API. Track presence and rewards via PubSub.",
+        "testStrategy": "Simulate challenge creation and acceptance. Test deep link handling. Validate reward distribution. Check attribution tracking.",
+        "priority": "high",
+        "dependencies": [
+          6,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Challenge Triggering on Practice Completion",
+            "description": "Set up the mechanism to trigger a buddy challenge when a student completes a practice session.",
+            "dependencies": [],
+            "details": "Modify the practice completion handler to initiate the challenge flow, ensuring it integrates with existing session tracking and user state.",
+            "status": "pending",
+            "testStrategy": "Simulate practice completion events and verify challenge initiation."
+          },
+          {
+            "id": 2,
+            "title": "Generate Signed Tokens in ChallengeContext",
+            "description": "Develop the logic to create and sign tokens for challenge invitations to ensure security and authenticity.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement token generation in ChallengeContext using appropriate signing mechanisms, storing necessary challenge data like user IDs and timestamps.",
+            "status": "pending",
+            "testStrategy": "Test token creation and validation for correctness and security."
+          },
+          {
+            "id": 3,
+            "title": "Build Share Modal with Alpine.js and Web Share API",
+            "description": "Create a modal interface for sharing challenges using Alpine.js and the Web Share API for cross-platform compatibility.",
+            "dependencies": [
+              2
+            ],
+            "details": "Design and implement the share modal component with Alpine.js, integrating Web Share API to allow sharing via native apps, including fallback options.",
+            "status": "pending",
+            "testStrategy": "Test modal display and sharing functionality across different devices and browsers."
+          },
+          {
+            "id": 4,
+            "title": "Handle Deep Link Processing for Challenge Acceptance",
+            "description": "Implement deep link handling to process incoming challenge links and direct users to accept or join challenges.",
+            "dependencies": [
+              3
+            ],
+            "details": "Set up URL routing and handlers for deep links, parsing tokens and updating challenge state upon acceptance, ensuring cross-device support.",
+            "status": "pending",
+            "testStrategy": "Simulate deep link clicks and verify proper redirection and challenge state updates."
+          },
+          {
+            "id": 5,
+            "title": "Track Presence and Rewards via PubSub",
+            "description": "Integrate PubSub for real-time presence tracking and reward distribution in the buddy challenge loop.",
+            "dependencies": [
+              4
+            ],
+            "details": "Use PubSub to monitor user presence during challenges and trigger reward calculations and notifications upon successful completions.",
+            "status": "pending",
+            "testStrategy": "Test presence updates and reward triggers in simulated multi-user scenarios."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Develop Results Rally Loop",
+        "description": "Create cohort leaderboard with invite functionality and real-time updates.",
+        "details": "Use LiveView stream for rankings. Subscribe to PubSub for updates. Generate rally tokens. Implement presence indicators.",
+        "testStrategy": "Test real-time stream updates. Validate ranking computations. Manual testing of invites and deep links. Check cohort filtering.",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Leaderboard Stream",
+            "description": "Initialize the LiveView stream for displaying cohort leaderboard rankings in real-time.",
+            "dependencies": [
+              6,
+              4
+            ],
+            "details": "Configure LiveView to stream leaderboard data using assigns and handle stream inserts/updates for rankings based on cohort filtering.",
+            "status": "pending",
+            "testStrategy": "Test stream rendering with mock data and verify ranking accuracy under load."
+          },
+          {
+            "id": 2,
+            "title": "Implement PubSub Updates",
+            "description": "Subscribe to Phoenix PubSub for real-time updates to the leaderboard stream.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use Phoenix.PubSub to subscribe to relevant topics, handle incoming messages in handle_info, and update the stream accordingly for live ranking changes.",
+            "status": "pending",
+            "testStrategy": "Test subscription and message handling with simulated PubSub events, ensuring updates reflect in the UI."
+          },
+          {
+            "id": 3,
+            "title": "Generate Rally Tokens",
+            "description": "Create functionality to generate unique rally tokens for invite links.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement token generation logic using secure random strings, store them in the database, and associate with rally sessions for shareable invite URLs.",
+            "status": "pending",
+            "testStrategy": "Validate token uniqueness and URL generation, test invite link functionality manually."
+          },
+          {
+            "id": 4,
+            "title": "Implement Presence Indicators",
+            "description": "Add presence indicators to show online users in the rally leaderboard.",
+            "dependencies": [
+              3
+            ],
+            "details": "Integrate Phoenix Presence to track user presence, display indicators like avatars or counters in the LiveView, and handle presence diffs for real-time updates.",
+            "status": "pending",
+            "testStrategy": "Test presence tracking with multiple users, validate indicator updates, and check performance."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Build Proud Parent Loop",
+        "description": "Implement parent progress sharing with privacy-safe cards and referral rewards.",
+        "details": "Generate progress cards server-side. Use Alpine.js for share modals. Ensure COPPA compliance. Track rewards via IncentivesContext.",
+        "testStrategy": "Verify privacy-safe content. Test share flows. Validate consent checks. Check reward attribution.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Generate Progress Cards Server-Side",
+            "description": "Create server-side logic to generate privacy-safe progress cards for parents to share their child's achievements.",
+            "dependencies": [],
+            "details": "Implement server-side rendering for progress cards using templates that ensure no personal identifiable information is exposed. Integrate with existing user data models to pull anonymized progress metrics.",
+            "status": "pending",
+            "testStrategy": "Verify that generated cards contain only privacy-safe content and no PII."
+          },
+          {
+            "id": 2,
+            "title": "Implement Share Modals with Alpine.js",
+            "description": "Develop interactive share modals using Alpine.js to allow parents to share progress cards via social media or messaging.",
+            "dependencies": [],
+            "details": "Use Alpine.js to create modal components for sharing options, including copy links, social media integrations, and preview of the progress card. Ensure modals are responsive and accessible.",
+            "status": "pending",
+            "testStrategy": "Test share flows including modal opening, link copying, and integration with external platforms."
+          },
+          {
+            "id": 3,
+            "title": "Ensure COPPA Compliance and Track Rewards",
+            "description": "Implement checks for COPPA compliance in sharing features and set up reward tracking for referrals via IncentivesContext.",
+            "dependencies": [],
+            "details": "Add consent mechanisms and age verification where necessary to comply with COPPA. Integrate with IncentivesContext to track and attribute referral rewards when parents share and others engage.",
+            "status": "pending",
+            "testStrategy": "Validate consent checks and age verifications. Check reward attribution and tracking accuracy."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Streak Rescue Loop",
+        "description": "Create at-risk streak detection and co-practice invitation with urgency UI.",
+        "details": "Use Oban for checks. Implement shared LiveView with presence. Add countdown timer with JavaScript. Sync timers server-side.",
+        "testStrategy": "Test streak detection logic. Validate co-practice sync. Manual QA for urgency UI. Check reward on completion.",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Streak Detection with Oban",
+            "description": "Set up background job using Oban to periodically check for at-risk streaks based on user activity patterns.",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Configure Oban worker to query user streak data, identify users with streaks at risk of breaking (e.g., no activity in 24 hours), and trigger notifications or invitations. Ensure the job runs efficiently without overloading the database.",
+            "status": "pending",
+            "testStrategy": "Test Oban job execution with mock data, validate streak detection logic, and check for edge cases like multiple streaks."
+          },
+          {
+            "id": 2,
+            "title": "Implement Shared LiveView with Presence",
+            "description": "Create a shared LiveView component that allows multiple users to join a co-practice session with real-time presence tracking.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use Phoenix LiveView and Presence to manage shared state for co-practice invitations. Track user joins, leaves, and activity in real-time, ensuring the UI updates dynamically for all participants in the session.",
+            "status": "pending",
+            "testStrategy": "Test presence tracking with multiple users, validate LiveView state synchronization, and perform manual QA for real-time updates."
+          },
+          {
+            "id": 3,
+            "title": "Add Countdown Timer with JavaScript and Server Sync",
+            "description": "Integrate a countdown timer in the UI using JavaScript, synchronized with server-side state for accuracy.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement a JavaScript-based countdown timer that displays urgency for streak rescue. Sync the timer with server-side LiveView assigns to prevent drift, using periodic updates or PubSub for real-time synchronization across clients.",
+            "status": "pending",
+            "testStrategy": "Test timer accuracy, synchronization across multiple clients, and edge cases like network interruptions or page refreshes."
+          },
+          {
+            "id": 4,
+            "title": "Design and Implement Urgency UI",
+            "description": "Develop the user interface elements that convey urgency for streak rescue, including invitations and visual cues.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create UI components in LiveView templates with urgent styling (e.g., red highlights, flashing elements) for co-practice invitations. Ensure the UI integrates with the countdown timer and presence features, providing clear calls-to-action for users to join sessions.",
+            "status": "pending",
+            "testStrategy": "Manual QA for UI responsiveness, accessibility, and visual urgency. Test integration with timer and presence, validate user interactions."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Develop Live Presence System",
+        "description": "Build global and subject-specific presence widgets with real-time updates.",
+        "details": "Use Phoenix Presence for tracking. Display counters and avatars. Handle presence diffs in handle_info. Opt-out settings.",
+        "testStrategy": "Test presence tracking and updates. Validate counters. Manual testing for opt-out. Check performance with multiple users.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Setup Presence Tracking",
+            "description": "Implement Phoenix Presence for tracking user presence in global and subject-specific contexts, including handling real-time diffs in handle_info.",
+            "dependencies": [],
+            "details": "Use Phoenix Presence to track online users, subscribe to presence topics, and process diffs in the handle_info callback for efficient updates.",
+            "status": "pending",
+            "testStrategy": "Test presence tracking and updates with multiple users to ensure real-time diffs are handled correctly."
+          },
+          {
+            "id": 2,
+            "title": "Implement Widget Display with Counters and Avatars",
+            "description": "Create presence widgets that display user counters and avatars for global and subject-specific views with real-time updates.",
+            "dependencies": [
+              1
+            ],
+            "details": "Build LiveView components to render counters and avatars, integrating with the presence tracking to show live updates via streams or assigns.",
+            "status": "pending",
+            "testStrategy": "Validate counters and avatar displays, ensuring they update in real-time and handle multiple users without performance issues."
+          },
+          {
+            "id": 3,
+            "title": "Handle Opt-out Settings",
+            "description": "Add functionality for users to opt-out of presence tracking, ensuring their presence is not displayed in widgets.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement user settings to opt-out, modify presence tracking logic to exclude opted-out users, and update widgets accordingly while maintaining performance.",
+            "status": "pending",
+            "testStrategy": "Manual testing for opt-out functionality, including checking that opted-out users are not shown and verifying overall system performance with multiple users."
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Create Activity Feed",
+        "description": "Implement a social feed with achievements and interactions using LiveView stream.",
+        "details": "Stream feed items via PubSub. Add react/like buttons. Personalize with user filters. Infinite scroll with HTMX.",
+        "testStrategy": "Test stream insertions. Validate personalization. Manual QA for interactions. Check HTMX pagination.",
+        "priority": "low",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up LiveView Stream via PubSub",
+            "description": "Configure PubSub to enable real-time streaming of activity feed items using Phoenix LiveView streams.",
+            "dependencies": [
+              11
+            ],
+            "details": "Integrate Phoenix.PubSub for broadcasting feed updates, set up LiveView stream assigns to handle dynamic insertions of achievements and interactions, ensuring efficient real-time updates without full page reloads.",
+            "status": "pending",
+            "testStrategy": "Test stream insertions by simulating PubSub broadcasts and verifying feed updates in the UI."
+          },
+          {
+            "id": 2,
+            "title": "Implement React and Like Buttons",
+            "description": "Add interactive buttons for users to react to or like feed items, enabling social engagement.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create LiveView event handlers for react and like actions, update the database with user interactions, broadcast changes via PubSub to reflect updates in real-time across all connected clients, and ensure buttons are mobile-responsive.",
+            "status": "pending",
+            "testStrategy": "Manual QA for interactions, including testing button clicks, database updates, and real-time UI reflections."
+          },
+          {
+            "id": 3,
+            "title": "Add Personalization Filters",
+            "description": "Implement user-specific filters to personalize the activity feed based on preferences or criteria.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add filter options in the UI (e.g., by type, date, or user), modify queries to apply filters server-side, dynamically update the LiveView stream with filtered results, and persist filter settings in user sessions for consistency.",
+            "status": "pending",
+            "testStrategy": "Validate personalization by testing filter applications, ensuring correct data display, and checking edge cases like no results."
+          },
+          {
+            "id": 4,
+            "title": "Implement Infinite Scroll with HTMX",
+            "description": "Enable infinite scrolling to load more feed items progressively using HTMX for better user experience.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Integrate HTMX for pagination requests, set up server-side endpoints to fetch additional feed items on scroll, append them to the LiveView stream without disrupting existing interactions or filters, and handle loading states for smooth UX.",
+            "status": "pending",
+            "testStrategy": "Check HTMX pagination by simulating scroll events, verifying correct item loading, and ensuring no conflicts with real-time updates or filters."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Build Leaderboards",
+        "description": "Develop global, subject, and cohort leaderboards with ranking logic.",
+        "details": "Compute rankings in LeaderboardContext. Use LiveView streams. Add fairness filters. Include invite CTAs.",
+        "testStrategy": "Test ranking calculations. Validate filters. Manual testing of updates. Check invite flows.",
+        "priority": "low",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Ranking Computation Logic",
+            "description": "Develop the core ranking logic for global, subject, and cohort leaderboards in LeaderboardContext, ensuring accurate computations based on user data.",
+            "dependencies": [
+              11
+            ],
+            "details": "Compute rankings using appropriate algorithms in LeaderboardContext, handling different leaderboard types (global, subject, cohort) with efficient data retrieval and sorting mechanisms.",
+            "status": "pending",
+            "testStrategy": "Unit tests for ranking calculations and edge cases, integration tests with data sources."
+          },
+          {
+            "id": 2,
+            "title": "Integrate LiveView Streams for Leaderboard Rendering",
+            "description": "Set up LiveView streams to handle real-time updates and rendering of leaderboards, displaying rankings dynamically.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use Phoenix LiveView streams to manage leaderboard data updates, ensuring efficient rendering of global, subject, and cohort leaderboards with real-time changes reflected in the UI.",
+            "status": "pending",
+            "testStrategy": "Manual testing of real-time updates, validate stream performance under load."
+          },
+          {
+            "id": 3,
+            "title": "Add Fairness Filters and Invite CTAs",
+            "description": "Implement fairness filters to ensure equitable rankings and include call-to-action elements for inviting others to participate.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add filters in LeaderboardContext to apply fairness criteria (e.g., excluding bots or cheaters), and integrate invite CTAs into the leaderboard UI to encourage user engagement and growth.",
+            "status": "pending",
+            "testStrategy": "Validate filter logic with test data, manual QA for invite flows and UI interactions."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Implement Badges and Achievements System",
+        "description": "Create badge unlock animations, collection page, and share functionality.",
+        "details": "Define badges in table. Use Alpine.js for animations. Generate share cards server-side. Track in user_badges.",
+        "testStrategy": "Test unlock logic. Validate animations. Manual QA for sharing. Check collection display.",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Badges and Implement Tracking",
+            "description": "Define the structure and data for badges in the database table, and implement the tracking mechanism in the user_badges table to record when users unlock badges.",
+            "dependencies": [],
+            "details": "Create a badges table with fields like id, name, description, icon, criteria. Implement logic to check and update user_badges table when criteria are met, ensuring proper indexing for performance.",
+            "status": "pending",
+            "testStrategy": "Unit tests for badge definition logic and database insertions. Integration tests for tracking accuracy."
+          },
+          {
+            "id": 2,
+            "title": "Create Badge Unlock Animations with Alpine.js",
+            "description": "Develop animations for when badges are unlocked using Alpine.js to provide visual feedback to users.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use Alpine.js to create smooth animations triggered on badge unlock events. Integrate with the frontend to display animations on the collection page or during practice sessions, ensuring compatibility with existing UI components.",
+            "status": "pending",
+            "testStrategy": "Manual QA for animation smoothness and timing. Validate on different devices and browsers."
+          },
+          {
+            "id": 3,
+            "title": "Implement Share Functionality for Badges",
+            "description": "Add functionality to generate and share badge achievement cards, including server-side card generation and sharing options.",
+            "dependencies": [
+              1
+            ],
+            "details": "Generate share cards server-side using image libraries or templates. Implement sharing via social media, email, or direct links, integrating with Web Share API where possible. Ensure cards include user name, badge details, and app branding.",
+            "status": "pending",
+            "testStrategy": "Test card generation for various badges. Manual QA for sharing on different platforms. Validate link handling and tracking."
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Develop XP and Rewards System UI",
+        "description": "Build XP display, level progression, and rewards shop with validation.",
+        "details": "Compute XP in assigns. Add gain animations with Alpine.js. Integrate IncentivesContext for redemptions.",
+        "testStrategy": "Test XP calculations. Validate redemptions. Manual QA for animations. Check abuse detection.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement XP Display and Computation",
+            "description": "Create the UI component for displaying current XP and compute XP gains based on user actions, integrating with assigns for real-time updates.",
+            "dependencies": [],
+            "details": "Compute XP in LiveView assigns, ensuring accurate calculations for various activities. Implement the display widget to show XP progress bars or counters, with logic to update on events.",
+            "status": "pending",
+            "testStrategy": "Test XP calculations with various scenarios, validate display updates, and check for edge cases in computation."
+          },
+          {
+            "id": 2,
+            "title": "Add Level Progression Animations",
+            "description": "Develop animations for level ups and XP gains using Alpine.js to enhance user experience during progression.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add gain animations with Alpine.js for XP increases and level milestones. Ensure animations are smooth and trigger on XP changes, including visual effects for level progression.",
+            "status": "pending",
+            "testStrategy": "Manual QA for animation smoothness and timing. Test animation triggers on XP events and validate performance."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Rewards Shop with Validation",
+            "description": "Build the rewards shop UI and integrate IncentivesContext for handling redemptions with proper validation to prevent abuse.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate IncentivesContext for redemptions, implementing shop display with items, purchase logic, and validation checks. Ensure server-side validation for redemptions and abuse detection.",
+            "status": "pending",
+            "testStrategy": "Validate redemptions and check abuse detection mechanisms. Test shop interactions and ensure validation prevents invalid transactions."
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Implement Session Transcription Pipeline",
+        "description": "Set up audio capture, real-time transcription, and AI summarization.",
+        "details": "Use WebRTC in Phoenix hook. Transcribe with Deepgram. Summarize via GPT-4o in Oban worker. Store in tables.",
+        "testStrategy": "Test audio capture. Validate transcriptions. Check summarization accuracy. Ensure privacy compliance.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up WebRTC Audio Capture in Phoenix Hook",
+            "description": "Implement audio capture functionality using WebRTC within a Phoenix LiveView hook to record session audio in real-time.",
+            "dependencies": [],
+            "details": "Integrate WebRTC API in a custom Phoenix hook to handle audio stream capture from the user's microphone, ensuring permissions are requested and streams are managed efficiently to avoid memory leaks.",
+            "status": "pending",
+            "testStrategy": "Test audio capture initiation, permission handling, and stream quality on various browsers and devices."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Real-Time Transcription with Deepgram",
+            "description": "Connect the captured audio stream to Deepgram for real-time transcription of session audio.",
+            "dependencies": [
+              1
+            ],
+            "details": "Stream audio data to Deepgram's API in real-time, handle WebSocket connections for transcription responses, and process incoming transcripts to display or store them as they arrive.",
+            "status": "pending",
+            "testStrategy": "Validate transcription accuracy against known audio samples, test latency, and ensure handling of connection drops."
+          },
+          {
+            "id": 3,
+            "title": "Implement AI Summarization with GPT-4o in Oban Worker",
+            "description": "Set up background processing to summarize transcribed text using GPT-4o via an Oban worker.",
+            "dependencies": [
+              2
+            ],
+            "details": "After transcription completes, enqueue a job in Oban to send the full transcript to GPT-4o for summarization, retrieve the summary, and prepare it for storage or display.",
+            "status": "pending",
+            "testStrategy": "Check summarization quality on sample transcripts, verify job queuing and processing, and test error handling for API failures."
+          },
+          {
+            "id": 4,
+            "title": "Store Transcriptions and Summaries in Database Tables",
+            "description": "Design and implement database tables to store audio transcripts, summaries, and related session metadata.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create Ecto schemas for transcription and summary tables, including fields for session ID, timestamps, raw transcripts, summarized text, and ensure data integrity with constraints and indexes.",
+            "status": "pending",
+            "testStrategy": "Test data insertion, retrieval, and integrity; perform load testing for concurrent sessions."
+          },
+          {
+            "id": 5,
+            "title": "Ensure Privacy Compliance and Data Handling",
+            "description": "Implement measures for user consent, data encryption, and compliance with privacy regulations like GDPR for audio and transcription data.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Add user consent prompts for audio recording, encrypt stored data, implement data retention policies, and provide opt-out mechanisms to ensure compliance with privacy laws.",
+            "status": "pending",
+            "testStrategy": "Audit for compliance, test consent flows, and validate encryption/decryption processes."
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Build Auto Beat-My-Skill Challenge Agentic Action",
+        "description": "Trigger challenges based on session gaps with share options.",
+        "details": "Listen for summary_ready. Generate micro-decks via Personalization Agent. Implement share modal.",
+        "testStrategy": "Mock session summaries. Test deck generation. Validate share flows. Check reward tracking.",
+        "priority": "medium",
+        "dependencies": [
+          16,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Summary Event Listening",
+            "description": "Set up event listener for summary_ready to trigger challenge generation based on session gaps.",
+            "dependencies": [
+              16
+            ],
+            "details": "Use Phoenix PubSub or LiveView hooks to listen for the summary_ready event emitted after session summarization. Ensure the listener detects session gaps and prepares data for micro-deck generation.",
+            "status": "pending",
+            "testStrategy": "Mock summary_ready events and verify listener triggers with gap detection logic."
+          },
+          {
+            "id": 2,
+            "title": "Generate Micro-Decks via Personalization Agent",
+            "description": "Integrate with Personalization Agent to create AI-driven micro-decks for challenges.",
+            "dependencies": [
+              1
+            ],
+            "details": "Upon receiving summary_ready, invoke the Personalization Agent to generate tailored micro-decks based on session summaries and user data. Store generated decks in the database for challenge use.",
+            "status": "pending",
+            "testStrategy": "Test with mock session summaries; validate deck content accuracy and personalization using unit tests."
+          },
+          {
+            "id": 3,
+            "title": "Implement Share Modal for Challenges",
+            "description": "Build a share modal with options to share challenges via social media or deep links.",
+            "dependencies": [
+              2,
+              7
+            ],
+            "details": "Use Alpine.js to create a modal component that appears after deck generation, integrating Web Share API for native sharing. Include deep links and track share actions for attribution.",
+            "status": "pending",
+            "testStrategy": "Simulate share modal triggers; test Web Share API integration and deep link handling in browser tests."
+          },
+          {
+            "id": 4,
+            "title": "Track Rewards and Attribution",
+            "description": "Implement reward tracking for challenge completions and share attributions.",
+            "dependencies": [
+              3,
+              7
+            ],
+            "details": "Use PubSub to track challenge acceptance, completions, and shares. Attribute rewards based on shares and ensure proper distribution via database updates and notifications.",
+            "status": "pending",
+            "testStrategy": "Mock challenge flows; validate reward calculations, attribution logic, and database persistence through integration tests."
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Develop Study Buddy Nudge Agentic Action",
+        "description": "Detect exams and prompt co-practice invites.",
+        "details": "NLP detect keywords. Generate co-practice decks. Implement shared LiveView.",
+        "testStrategy": "Test NLP detection. Validate deck creation. Manual QA for co-practice. Check reminders.",
+        "priority": "medium",
+        "dependencies": [
+          16,
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement NLP Keyword Detection for Exams",
+            "description": "Integrate NLP to detect keywords indicating upcoming exams in user content or inputs.",
+            "dependencies": [],
+            "details": "Use a pre-trained NLP model or library to scan text for keywords such as 'exam', 'test', 'assessment', etc. Ensure the detection is context-aware and has high accuracy by incorporating training data and fine-tuning.",
+            "status": "pending",
+            "testStrategy": "Test detection accuracy with a variety of sample texts, including edge cases, and validate false positives/negatives."
+          },
+          {
+            "id": 2,
+            "title": "Generate Co-Practice Decks",
+            "description": "Create shareable practice decks based on detected exam topics.",
+            "dependencies": [
+              1
+            ],
+            "details": "Upon detection of an exam, automatically generate or select relevant practice question decks using templates or AI generation. Ensure decks are customizable and stored in the database for sharing.",
+            "status": "pending",
+            "testStrategy": "Validate deck creation by checking content relevance to detected topics and ensuring decks are properly formatted for sharing."
+          },
+          {
+            "id": 3,
+            "title": "Implement Shared LiveView for Co-Practice",
+            "description": "Develop a shared LiveView interface for real-time co-practice sessions.",
+            "dependencies": [
+              2
+            ],
+            "details": "Build a Phoenix LiveView component that allows multiple users to join a co-practice session, synchronize progress, and update in real-time using PubSub. Include features like session invites and participant management.",
+            "status": "pending",
+            "testStrategy": "Perform manual QA testing for multi-user synchronization, real-time updates, and handling of disconnections or errors."
+          },
+          {
+            "id": 4,
+            "title": "Add Reminder Logic for Co-Practice Invites",
+            "description": "Implement prompting and reminder mechanisms to invite users to co-practice sessions.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "After exam detection and LiveView setup, add logic to send notifications, in-app prompts, or reminders to users encouraging them to join or initiate co-practice sessions. Include scheduling for follow-up reminders if no action is taken.",
+            "status": "pending",
+            "testStrategy": "Test reminder triggers based on detection events, validate delivery methods, and check user engagement metrics through manual testing."
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Create Parent Progress Reel Agentic Action",
+        "description": "Generate video reels on high ratings with share links.",
+        "details": "Use FFmpeg for reels. Ensure privacy. Track referrals.",
+        "testStrategy": "Test reel generation. Validate privacy. Manual QA for sharing. Check attribution.",
+        "priority": "low",
+        "dependencies": [
+          16
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Generate Video Reels Using FFmpeg",
+            "description": "Create video reels based on high ratings by processing media files with FFmpeg to compile clips, add effects, and format for social sharing.",
+            "dependencies": [
+              16
+            ],
+            "details": "Implement FFmpeg commands in Elixir to concatenate video clips from user progress data, apply filters for quality and branding, and output MP4 files optimized for reels. Ensure integration with the parent task's agentic action framework.",
+            "status": "pending",
+            "testStrategy": "Test reel generation with sample video inputs, validate output formats and durations, and check for FFmpeg errors in unit tests."
+          },
+          {
+            "id": 2,
+            "title": "Implement Privacy Checks for Reels",
+            "description": "Add privacy safeguards to ensure reels do not include sensitive user data or unauthorized content before generation and sharing.",
+            "dependencies": [
+              1
+            ],
+            "details": "Develop server-side checks in the LiveView or agent to verify user consent, anonymize any personal identifiers in reel content, and comply with data protection regulations like GDPR. Integrate with existing privacy modules.",
+            "status": "pending",
+            "testStrategy": "Validate privacy checks with mock user data, test for anonymization in generated reels, and perform manual QA to ensure no sensitive information is exposed."
+          },
+          {
+            "id": 3,
+            "title": "Track Share Links and Referrals",
+            "description": "Implement tracking mechanisms for share links embedded in reels to monitor referrals and engagement metrics.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add unique tracking parameters to share URLs using Elixir libraries, log referral events in the database, and integrate with analytics to attribute shares back to users. Ensure links are generated dynamically and handle redirects properly.",
+            "status": "pending",
+            "testStrategy": "Test link generation and tracking with simulated shares, validate referral attribution in logs, and check for correct handling of deep links and analytics integration."
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Implement Next-Session Prep Pack Share",
+        "description": "Auto-generate prep packs with resources and share CTAs.",
+        "details": "Summarize sessions. Curate resources via Perplexity. Email via Phoenix.Mailer.",
+        "testStrategy": "Test pack generation. Validate resources. Manual QA for sharing. Check tracking.",
+        "priority": "low",
+        "dependencies": [
+          16
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Summarize Completed Sessions",
+            "description": "Generate AI-powered summaries of completed study sessions to prepare for the next session.",
+            "dependencies": [
+              16
+            ],
+            "details": "Utilize GPT-4o in an Oban worker to process transcripts from the Session Transcription Pipeline (Task 16) and create concise summaries of key points discussed.",
+            "status": "pending",
+            "testStrategy": "Validate summarization accuracy by comparing outputs to known transcripts and ensuring content relevance."
+          },
+          {
+            "id": 2,
+            "title": "Curate Resources via Perplexity",
+            "description": "Use Perplexity API to search and curate relevant educational resources based on session summaries.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate with Perplexity to query for articles, videos, or other resources related to the topics in the session summaries, ensuring they are up-to-date and pertinent.",
+            "status": "pending",
+            "testStrategy": "Check the relevance and quality of curated resources through manual review and automated checks for source credibility."
+          },
+          {
+            "id": 3,
+            "title": "Generate Prep Pack",
+            "description": "Assemble the session summary, curated resources, and share CTAs into a cohesive prep pack.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Compile the summary from subtask 1 and resources from subtask 2 into a structured pack format, including call-to-action elements for sharing or further engagement.",
+            "status": "pending",
+            "testStrategy": "Test the pack generation process for correct assembly, ensuring all components are included and formatted properly."
+          },
+          {
+            "id": 4,
+            "title": "Email Prep Pack Sharing",
+            "description": "Send the generated prep pack to users via email using Phoenix.Mailer.",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement email delivery through Phoenix.Mailer, attaching or embedding the prep pack content, and include tracking for open rates and engagement.",
+            "status": "pending",
+            "testStrategy": "Validate email delivery, content rendering, and tracking functionality through manual QA and integration tests."
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "Build Smart Link Attribution System",
+        "description": "Generate signed links, track events, and handle cross-device attribution.",
+        "details": "Use HMAC for signing. Store in attribution_events. Parse UTM in plugs.",
+        "testStrategy": "Test link generation and verification. Validate tracking. Manual QA for cross-device. Check dashboard.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Signed Link Generation with HMAC",
+            "description": "Develop functionality to generate signed links using HMAC for security and integrity verification.",
+            "dependencies": [],
+            "details": "Use HMAC-SHA256 for signing links with a secret key. Ensure links include necessary parameters like user ID and timestamps. Implement in a Phoenix controller or module for link creation.",
+            "status": "pending",
+            "testStrategy": "Unit tests for HMAC signing and verification. Integration tests for link generation and invalid signature rejection."
+          },
+          {
+            "id": 2,
+            "title": "Build Event Tracking Storage System",
+            "description": "Create a system to track and store attribution events in the database.",
+            "dependencies": [],
+            "details": "Store events in the attribution_events table using Ecto schemas. Capture event data such as clicks, conversions, and timestamps. Ensure data persistence and querying capabilities for analytics.",
+            "status": "pending",
+            "testStrategy": "Database tests for event insertion and retrieval. Validate data integrity and performance under load."
+          },
+          {
+            "id": 3,
+            "title": "Implement UTM Parameter Parsing in Plugs",
+            "description": "Add parsing logic for UTM parameters in Phoenix plugs to extract attribution data.",
+            "dependencies": [],
+            "details": "Create a plug that parses query parameters for UTM tags (source, medium, campaign, etc.) and associates them with user sessions or events. Store parsed data for later use in attribution logic.",
+            "status": "pending",
+            "testStrategy": "Unit tests for parameter parsing. Integration tests to ensure UTM data is correctly captured and stored."
+          },
+          {
+            "id": 4,
+            "title": "Develop Cross-Device Attribution Handling",
+            "description": "Implement logic to handle attribution across multiple devices using user identification.",
+            "dependencies": [],
+            "details": "Use cookies, user IDs, or device fingerprints to link events across devices. Aggregate attribution data in the database and provide APIs for cross-device insights. Ensure privacy compliance.",
+            "status": "pending",
+            "testStrategy": "Manual QA for cross-device scenarios. Test with mock devices and validate attribution accuracy. Check for privacy and data handling."
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Develop K-Factor Tracking Dashboard",
+        "description": "Compute K-factor metrics and display in LiveView with filters.",
+        "details": "Use MetricsContext for calculations. Chart.js for visualizations. Add export functionality.",
+        "testStrategy": "Test K-factor formulas. Validate charts. Manual QA for filters. Check alerts.",
+        "priority": "medium",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement K-Factor Metrics Computation",
+            "description": "Compute K-factor metrics using MetricsContext for accurate calculations based on user data.",
+            "dependencies": [
+              21
+            ],
+            "details": "Integrate MetricsContext to perform K-factor calculations, ensuring formulas are validated and handle real-time updates efficiently.",
+            "status": "pending",
+            "testStrategy": "Test K-factor formulas with various data sets to ensure accuracy."
+          },
+          {
+            "id": 2,
+            "title": "Create Chart.js Visualizations",
+            "description": "Develop Chart.js visualizations to display K-factor metrics in LiveView for interactive charts.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement Chart.js library to render charts in LiveView, ensuring responsive design and integration with computed metrics for dynamic updates.",
+            "status": "pending",
+            "testStrategy": "Validate charts display correctly with sample data and check for real-time updates."
+          },
+          {
+            "id": 3,
+            "title": "Add Filters and Export Functionality",
+            "description": "Implement filters for the dashboard and add export functionality for K-factor data.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add filter options to LiveView for refining displayed metrics, and integrate export features to allow users to download data in various formats.",
+            "status": "pending",
+            "testStrategy": "Manual QA for filters to ensure proper functionality and check export outputs for accuracy."
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "Integrate Experimentation Agent",
+        "description": "Set up A/B tests with variant assignment and metrics.",
+        "details": "Configure in admin panel. Use on_mount for allocation. Log exposures.",
+        "testStrategy": "Test variant assignment. Validate logging. Manual QA for real-time metrics. Check winner declaration.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure A/B Test in Admin Panel",
+            "description": "Set up the A/B test parameters in the admin panel, including defining test variants, target audience, and allocation rules.",
+            "dependencies": [],
+            "details": "Access the admin panel interface to create a new A/B test experiment. Define control and variant groups, set allocation percentages, and configure targeting criteria such as user segments or traffic sources. Ensure the configuration is saved and validated for correctness.",
+            "status": "pending",
+            "testStrategy": "Verify configuration saves correctly and displays in the admin panel. Test with mock data to ensure allocation rules are applied."
+          },
+          {
+            "id": 2,
+            "title": "Implement Variant Assignment Logic",
+            "description": "Develop the logic to assign users to A/B test variants using the on_mount hook for allocation.",
+            "dependencies": [],
+            "details": "Integrate the on_mount hook in the LiveView or component to handle variant assignment upon page load. Use randomization or predefined rules to assign users to control or variant groups based on the configured allocation. Store the assignment in the user session or database for consistency.",
+            "status": "pending",
+            "testStrategy": "Test variant assignment with simulated user loads to ensure even distribution. Validate that assignments persist across sessions."
+          },
+          {
+            "id": 3,
+            "title": "Log Exposure Events",
+            "description": "Implement logging for A/B test exposures to track when users are assigned and interact with variants.",
+            "dependencies": [],
+            "details": "Add logging mechanisms to record exposure events, such as when a user is assigned to a variant and views the content. Use the on_mount hook to trigger logging on page mount. Send logs to analytics or a dedicated logging service, including user ID, variant ID, and timestamp.",
+            "status": "pending",
+            "testStrategy": "Simulate user interactions and check that exposure logs are generated accurately. Validate log data integrity and transmission."
+          },
+          {
+            "id": 4,
+            "title": "Set Up Metrics Monitoring",
+            "description": "Configure monitoring and tracking of key metrics for A/B test performance and winner declaration.",
+            "dependencies": [],
+            "details": "Integrate metrics tracking to monitor KPIs such as conversion rates, engagement, or other defined goals for each variant. Use analytics tools or custom dashboards to visualize data in real-time. Implement logic to declare a winner based on statistical significance after sufficient data collection.",
+            "status": "pending",
+            "testStrategy": "Manual QA to verify metrics are tracked correctly. Test winner declaration logic with sample data. Ensure dashboards update in real-time."
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "title": "Create Guardrail Metrics Dashboard",
+        "description": "Monitor fraud, opt-outs, and compliance metrics.",
+        "details": "Query fraud_signals. Display trends. Set up alerts.",
+        "testStrategy": "Test metric computations. Validate alerts. Manual QA for compliance checks. Check audit logs.",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Query Fraud Signals",
+            "description": "Implement querying of fraud_signals database to retrieve relevant metrics for monitoring.",
+            "dependencies": [],
+            "details": "Set up database queries to fetch fraud signals data, including filters for time ranges and types. Ensure efficient querying to handle large datasets.",
+            "status": "pending",
+            "testStrategy": "Test query performance and accuracy of data retrieval with sample datasets."
+          },
+          {
+            "id": 2,
+            "title": "Display Trends",
+            "description": "Create visualizations to display trends in fraud, opt-outs, and compliance metrics.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use charting libraries to render trend graphs based on queried data. Include options for filtering by date ranges and metric types.",
+            "status": "pending",
+            "testStrategy": "Validate chart rendering and data accuracy through automated tests and manual checks."
+          },
+          {
+            "id": 3,
+            "title": "Set Up Alerts",
+            "description": "Configure alerting system for anomalies in metrics.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement alert logic based on thresholds for fraud signals, opt-outs, and compliance issues. Integrate with notification systems for real-time alerts.",
+            "status": "pending",
+            "testStrategy": "Test alert triggers with mock data and verify notifications are sent correctly."
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Implement Weekly Viral Loop Performance Report",
+        "description": "Generate automated reports with insights and delivery.",
+        "details": "Use Oban for scheduling. AI-analyze trends. Email PDFs.",
+        "testStrategy": "Test report generation. Validate insights. Manual QA for delivery. Check distribution.",
+        "priority": "low",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Oban Job for Weekly Report Scheduling",
+            "description": "Configure Oban to schedule the weekly viral loop performance report generation at a specific time each week.",
+            "dependencies": [],
+            "details": "Use Oban Pro or standard Oban to create a recurring job that triggers every week. Ensure the job handles time zones and retries. Integrate with the existing Phoenix application structure.",
+            "status": "pending",
+            "testStrategy": "Test job scheduling by verifying the job runs at the correct time and handles failures gracefully."
+          },
+          {
+            "id": 2,
+            "title": "Implement AI Trend Analysis for Report Insights",
+            "description": "Develop AI-powered analysis to identify trends in viral loop performance data and generate insights for the report.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate with an AI service like GPT-4o to analyze performance metrics, user engagement data, and loop effectiveness. Process data from relevant tables or APIs, generate summaries and recommendations, and format them for inclusion in the report.",
+            "status": "pending",
+            "testStrategy": "Validate AI-generated insights by comparing outputs against known data sets and ensuring accuracy in trend detection."
+          },
+          {
+            "id": 3,
+            "title": "Generate PDF Reports and Email Delivery",
+            "description": "Create PDF versions of the reports with insights and automate email delivery to specified recipients.",
+            "dependencies": [
+              2
+            ],
+            "details": "Use a library like Puppeteer or Elixir PDF generation tools to render the report as a PDF. Integrate with Phoenix.Mailer to send the PDF attachments via email, including proper subject lines and recipient lists. Ensure secure handling of attachments.",
+            "status": "pending",
+            "testStrategy": "Test PDF generation for correct formatting and content inclusion, then perform manual QA on email delivery to confirm receipt and attachment integrity."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-04T03:01:47.169Z",
+      "updated": "2025-11-04T03:01:47.169Z",
+      "description": "Tasks for viral context"
     }
   }
 }

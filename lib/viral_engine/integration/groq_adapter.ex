@@ -84,7 +84,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
     body =
       Jason.encode!(%{
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.3-70b-versatile",
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens,
@@ -121,7 +121,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
                        :ok
                    end
                  else
-                   callback_fn.({:done, %{provider: "groq", model: "llama-3.1-70b-versatile"}})
+                   callback_fn.({:done, %{provider: "groq", model: "llama-3.3-70b-versatile"}})
                  end
                end
              end)
@@ -169,7 +169,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
     body =
       Jason.encode!(%{
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.3-70b-versatile",
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens
@@ -186,7 +186,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
         case Jason.decode(response_body) do
           {:ok, %{"choices" => [%{"message" => %{"content" => content}} | _], "usage" => usage}} ->
             tokens_used = Map.get(usage, "total_tokens", 0)
-            cost = calculate_cost(tokens_used, "llama-3.1-70b-versatile")
+            cost = calculate_cost(tokens_used, "llama-3.3-70b-versatile")
 
             # Log performance metrics
             Logger.info("Groq API call completed in #{latency}ms, tokens: #{tokens_used}")
@@ -198,7 +198,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
                cost: cost,
                latency_ms: latency,
                provider: "groq",
-               model: "llama-3.1-70b-versatile",
+               model: "llama-3.3-70b-versatile",
                raw_response: response_body
              }}
 
@@ -224,10 +224,12 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
   defp calculate_cost(tokens, model) do
     # Groq pricing (as of 2025)
-    # Llama 3.1 70B: $0.00059 input / $0.00079 output per 1K tokens (avg $0.00069)
-    # Mixtral 8x7B: $0.00024 input / $0.00024 output per 1K tokens (avg $0.00024)
+    # Llama 3.3 70B: $0.59 input / $0.79 output per 1M tokens (avg $0.00069 per 1K)
+    # Llama 3.1 70B: $0.59 input / $0.79 output per 1M tokens (avg $0.00069 per 1K)
+    # Mixtral 8x7B: $0.24 input / $0.24 output per 1M tokens (avg $0.00024 per 1K)
     rate =
       case model do
+        "llama-3.3-70b-versatile" -> 0.00069
         "llama-3.1-70b-versatile" -> 0.00069
         "mixtral-8x7b-32768" -> 0.00024
         _ -> 0.00069

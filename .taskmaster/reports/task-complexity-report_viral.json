@@ -1,0 +1,213 @@
+{
+	"meta": {
+		"generatedAt": "2025-11-04T03:02:41.662Z",
+		"tasksAnalyzed": 25,
+		"totalTasks": 25,
+		"analysisCount": 25,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Implement Practice Session UI with Progress Tracking",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the implementation into subtasks for UI component creation, state management integration, real-time feedback mechanisms, timer and progress tracking, and persistence with Ecto.",
+			"reasoning": "This task involves building a complex LiveView component with real-time features, mobile responsiveness, and server-side persistence, requiring integration with multiple contexts and WebSocket handling, leading to high implementation effort and testing needs."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Develop Diagnostic Assessment Flow",
+			"complexityScore": 9,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Expand into subtasks covering subject/grade selection UI, adaptive difficulty logic, timed sections with warnings, progress persistence, results redirection, and integration testing.",
+			"reasoning": "The adaptive difficulty via MCP agent, server-side validation, and multi-stage flow introduce significant technical challenges, dependencies on Task 1, and extensive testing for synchronization and persistence."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Create Viral Results Page for Diagnostics",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subdivide into heatmap visualization, percentile ranking computation, AI recommendations integration, shareable achievements with OG images, and deep link handling.",
+			"reasoning": "Involves data visualization with Chart.js, server-side computations, dynamic image generation, and sharing features, with dependencies on Task 2, requiring careful testing for accuracy and performance."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Build Viral Results Page for Practice Tests",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Split into score breakdown display, real-time leaderboard with Presence, share buttons and modals, and anonymized data handling.",
+			"reasoning": "Real-time updates via PubSub and Presence, along with Web Share API integration, add complexity to rendering and testing, dependent on Task 1."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Implement Flashcard Study Session",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into swipeable UI with Alpine.js, server-side state tracking, AI deck generation integration, spaced repetition logic, and achievement triggers.",
+			"reasoning": "Combines touch interactions, AI integration with MCP agent, spaced repetition algorithms, and mobile responsiveness, with dependencies on Task 1, necessitating thorough testing for interactions and persistence."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Integrate Loop Orchestrator MCP Agent for Viral Prompts",
+			"complexityScore": 9,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into event handler setup, PubSub subscription, throttling and A/B test logic, and fallback prompt implementation.",
+			"reasoning": "High dependencies on multiple tasks, involving real-time messaging, throttling, and experimentation, with critical testing for reliability and performance."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Implement Buddy Challenge Loop",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Subtasks for challenge triggering, signed token generation, share modal with Web Share API, deep link handling, and reward tracking via PubSub.",
+			"reasoning": "Involves share flows, deep links, presence tracking, and rewards, dependent on Tasks 6 and 4, with challenges in attribution and cross-device handling."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Develop Results Rally Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Expand to leaderboard stream setup, PubSub updates, rally token generation, and presence indicators.",
+			"reasoning": "Real-time stream updates and cohort filtering add complexity, dependent on Tasks 6 and 4, requiring testing for scalability and accuracy."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Build Proud Parent Loop",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into progress card generation, share modals, COPPA compliance checks, and reward tracking.",
+			"reasoning": "Focus on privacy and compliance with COPPA, share functionality, and incentives, dependent on Task 6, with moderate testing needs."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Implement Streak Rescue Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subtasks for streak detection with Oban, shared LiveView with presence, countdown timer sync, and urgency UI.",
+			"reasoning": "Involves background jobs, real-time presence, timer synchronization, and UI urgency, dependent on Tasks 6 and 5, with testing for logic and sync."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Develop Live Presence System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Split into Presence tracking setup, widget display with counters and avatars, and opt-out handling.",
+			"reasoning": "Real-time presence diffs and opt-out features require careful implementation and testing for performance with multiple users."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Create Activity Feed",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into stream setup via PubSub, interaction buttons, personalization filters, and infinite scroll with HTMX.",
+			"reasoning": "LiveView streams, personalization, and HTMX pagination introduce challenges in real-time updates and user experience, dependent on Task 11."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Build Leaderboards",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Subdivide into ranking computation, stream rendering, fairness filters, and invite CTAs.",
+			"reasoning": "Ranking logic and real-time updates with filters, dependent on Task 11, requiring validation of computations and flows."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Implement Badges and Achievements System",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into badge definition and tracking, unlock animations with Alpine.js, and share functionality.",
+			"reasoning": "Involves animations, server-side card generation, and sharing, with low dependencies, moderate testing for UI and logic."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Develop XP and Rewards System UI",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Split into XP display and computation, level progression animations, and rewards shop integration.",
+			"reasoning": "Animations, validation, and incentives integration add complexity, with testing for calculations and abuse detection."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Implement Session Transcription Pipeline",
+			"complexityScore": 9,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand to audio capture with WebRTC, real-time transcription via Deepgram, AI summarization with GPT-4o, storage, and privacy compliance.",
+			"reasoning": "High technical challenges with WebRTC, external APIs, background workers, and privacy, requiring extensive testing for accuracy and compliance."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Build Auto Beat-My-Skill Challenge Agentic Action",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subtasks for summary event listening, micro-deck generation, share modal, and reward tracking.",
+			"reasoning": "AI-driven deck generation and share flows, dependent on Tasks 16 and 7, with testing for automation and attribution."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Develop Study Buddy Nudge Agentic Action",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into NLP keyword detection, co-practice deck creation, shared LiveView, and reminder logic.",
+			"reasoning": "NLP integration, deck generation, and co-practice sync, dependent on Tasks 16 and 10, requiring validation of detection and flows."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Create Parent Progress Reel Agentic Action",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Split into reel generation with FFmpeg, privacy checks, and share link tracking.",
+			"reasoning": "Video processing and privacy compliance, dependent on Task 16, with testing for generation and attribution."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Implement Next-Session Prep Pack Share",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into session summarization, resource curation via Perplexity, pack generation, and email sharing.",
+			"reasoning": "AI summarization, external API integration, and email delivery, dependent on Task 16, with moderate testing for content accuracy."
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Build Smart Link Attribution System",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subtasks for signed link generation with HMAC, event tracking storage, UTM parsing, and cross-device attribution.",
+			"reasoning": "Cryptographic signing, tracking, and attribution logic introduce security and complexity, with high testing for verification and analytics."
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Develop K-Factor Tracking Dashboard",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into K-factor computation, Chart.js visualizations, filters, and export functionality.",
+			"reasoning": "Metrics calculations and charting, dependent on Task 21, requiring validation of formulas and real-time updates."
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Integrate Experimentation Agent",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Split into A/B test configuration, variant assignment, exposure logging, and metrics monitoring.",
+			"reasoning": "Experimentation setup with allocation and logging adds complexity in real-time and analytics, with testing for assignment accuracy."
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Create Guardrail Metrics Dashboard",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break into fraud signal querying, trend display, and alert setup.",
+			"reasoning": "Monitoring and alerting for compliance, with low dependencies, moderate testing for metrics and audits."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Implement Weekly Viral Loop Performance Report",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Subtasks for report scheduling with Oban, AI trend analysis, and PDF email delivery.",
+			"reasoning": "Automated scheduling, AI insights, and delivery, dependent on Task 22, with testing for generation and distribution."
+		}
+	]
+}

@@ -49,8 +49,8 @@ config :viral_engine, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        # Run anomaly detection every hour
-       {"0 * * * *", ViralEngine.Jobs.AnomalyDetectionWorker},
+       # {"0 * * * *", ViralEngine.Jobs.AnomalyDetectionWorker},  # TODO: Implement this worker
        # Check approval timeouts every 5 minutes
-       {"*/5 * * * *", ViralEngine.Jobs.ApprovalTimeoutChecker}
+       # {"*/5 * * * *", ViralEngine.Jobs.ApprovalTimeoutChecker}  # TODO: Convert GenServer to Oban worker
      ]}
   ]
