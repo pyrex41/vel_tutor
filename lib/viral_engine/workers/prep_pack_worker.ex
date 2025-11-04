@@ -100,7 +100,7 @@ defmodule ViralEngine.Workers.PrepPackWorker do
 
   # Private helper functions
 
-  defp identify_weak_topics(student_id, session) do
+  defp identify_weak_topics(_student_id, session) do
     # In production, analyze:
     # 1. Questions answered incorrectly in this session
     # 2. Historical weak areas from past sessions
@@ -110,10 +110,10 @@ defmodule ViralEngine.Workers.PrepPackWorker do
     session.weak_areas || ["General Review"]
   end
 
-  defp generate_ai_recommendations(student_id, session, weak_topics) do
+  defp generate_ai_recommendations(_student_id, session, weak_topics) do
     # In production, call AI service to generate personalized recommendations
 
-    topics_text = Enum.join(weak_topics, ", ")
+    _topics_text = Enum.join(weak_topics, ", ")
 
     """
     Great job on your #{session.subject} practice! Here's what to focus on for next time:
@@ -135,7 +135,7 @@ defmodule ViralEngine.Workers.PrepPackWorker do
     """
   end
 
-  defp curate_resources(subject, weak_topics) do
+  defp curate_resources(_subject, weak_topics) do
     # In production, query a resource database or call external APIs
 
     # Simulated resources
@@ -202,7 +202,7 @@ defmodule ViralEngine.Workers.PrepPackWorker do
     }
 
     case ViralPrompts.trigger_prompt(:prep_pack_ready, student_id, event_data) do
-      {:ok, prompt} ->
+      {:ok, _prompt} ->
         Logger.info("Triggered prep pack prompt for student #{student_id}")
         ViralPrompts.broadcast_event(:prep_pack_ready, student_id, event_data)
 

@@ -127,7 +127,7 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
   @doc """
   Identifies weak topics for a subject based on past performance.
   """
-  def identify_weak_topics(user_id, subject) do
+  def identify_weak_topics(_user_id, subject) do
     # In production, analyze user's session history
     # and identify topics with low scores
 
@@ -164,7 +164,7 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
   @doc """
   Checks if user has an active study session for subject.
   """
-  def has_active_study_session?(user_id, subject) do
+  def has_active_study_session?(_user_id, _subject) do
     # Query for active study sessions
     # In production:
     # from(ss in StudySession,
@@ -192,7 +192,7 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
     }
 
     case ViralPrompts.trigger_prompt(:study_buddy_nudge, user_id, event_data) do
-      {:ok, prompt} ->
+      {:ok, _prompt} ->
         Logger.info("Triggered study buddy nudge for user #{user_id}")
         ViralPrompts.broadcast_event(:study_buddy_nudge, user_id, event_data)
 
@@ -210,7 +210,7 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
   - Complementary strengths (friend is strong where user is weak)
   - Recent activity (active users)
   """
-  def recommend_study_buddies(user_id, subject, weak_topics, limit \\ 5) do
+  def recommend_study_buddies(_user_id, _subject, _weak_topics, _limit \\ 5) do
     # In production, complex query to find compatible study partners:
     # 1. Same grade level and subject
     # 2. Strong in user's weak topics

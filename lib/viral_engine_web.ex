@@ -19,7 +19,9 @@ defmodule ViralEngineWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: ViralEngineWeb
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: ViralEngineWeb.Layouts]
 
       import Plug.Conn
       import ViralEngineWeb.Gettext

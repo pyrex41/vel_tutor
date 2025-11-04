@@ -152,7 +152,7 @@ defmodule ViralEngine.LeaderboardContext do
 
   # Private functions
 
-  defp get_score_leaderboard(cutoff, limit, subject, grade_level \\ nil) do
+  defp get_score_leaderboard(cutoff, limit, subject, _grade_level \\ nil) do
     base_query = from(s in ViralEngine.PracticeSession,
       where: s.completed == true and s.inserted_at >= ^cutoff,
       select: %{
@@ -181,7 +181,7 @@ defmodule ViralEngine.LeaderboardContext do
     end)
   end
 
-  defp get_average_score_leaderboard(cutoff, limit, subject, grade_level \\ nil) do
+  defp get_average_score_leaderboard(cutoff, limit, subject, _grade_level \\ nil) do
     base_query = from(s in ViralEngine.PracticeSession,
       where: s.completed == true and s.inserted_at >= ^cutoff,
       select: %{
@@ -227,7 +227,7 @@ defmodule ViralEngine.LeaderboardContext do
     end)
   end
 
-  defp get_sessions_leaderboard(cutoff, limit, subject, grade_level \\ nil) do
+  defp get_sessions_leaderboard(cutoff, limit, subject, _grade_level \\ nil) do
     base_query = from(s in ViralEngine.PracticeSession,
       where: s.completed == true and s.inserted_at >= ^cutoff,
       select: %{
