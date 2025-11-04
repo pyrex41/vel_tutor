@@ -29,9 +29,10 @@ defmodule ViralEngineWeb do
 
   def view do
     quote do
-      use Phoenix.View,
-        root: "lib/viral_engine_web/templates",
-        namespace: ViralEngineWeb
+      # Note: Phoenix.View removed in Phoenix 1.7+ - using Phoenix.Component instead
+      # use Phoenix.View,
+      #   root: "lib/viral_engine_web/templates",
+      #   namespace: ViralEngineWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -87,7 +88,8 @@ defmodule ViralEngineWeb do
       import Phoenix.LiveView.Helpers
 
       # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.View
+      # Note: Phoenix.View removed in Phoenix 1.7+ - using Phoenix.Component instead
+      # import Phoenix.View
 
       import ViralEngineWeb.ErrorHelpers
       import ViralEngineWeb.Gettext

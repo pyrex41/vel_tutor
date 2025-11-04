@@ -24,7 +24,7 @@ defmodule ViralEngine.PrepPack do
     field(:resources, :map, default: %{})
     # study_guides, practice_problems, video_links, flashcard_decks
 
-    field(:ai_recommendations, :text)
+    field(:ai_recommendations, :string)
     field(:estimated_time_minutes, :integer, default: 30)
 
     field(:status, :string, default: "generated")

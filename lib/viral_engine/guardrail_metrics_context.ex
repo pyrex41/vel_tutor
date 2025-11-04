@@ -118,7 +118,7 @@ defmodule ViralEngine.GuardrailMetricsContext do
       where: ps.inserted_at >= ^cutoff,
       select: %{
         total_shares: count(ps.id),
-        never_viewed: count(ps.id, filter: ps.view_count == 0)
+        never_viewed: fragment("COUNT(*) FILTER (WHERE ? = 0)", ps.view_count)
       }
     )
     |> Repo.one()
@@ -128,7 +128,7 @@ defmodule ViralEngine.GuardrailMetricsContext do
       where: al.inserted_at >= ^cutoff,
       select: %{
         total_links: count(al.id),
-        zero_clicks: count(al.id, filter: al.click_count == 0)
+        zero_clicks: fragment("COUNT(*) FILTER (WHERE ? = 0)", al.click_count)
       }
     )
     |> Repo.one()
@@ -242,8 +242,8 @@ defmodule ViralEngine.GuardrailMetricsContext do
       group_by: ae.referrer_id,
       select: %{
         referrer_id: ae.referrer_id,
-        total_clicks: count(ae.id, filter: ae.event_type == "click"),
-        total_conversions: count(ae.id, filter: ae.event_type == "conversion")
+        total_clicks: fragment("COUNT(*) FILTER (WHERE ? = 'click')", ae.event_type),
+        total_conversions: fragment("COUNT(*) FILTER (WHERE ? = 'conversion')", ae.event_type)
       }
     )
     |> Repo.all()

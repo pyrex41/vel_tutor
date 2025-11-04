@@ -8,7 +8,7 @@ defmodule ViralEngine.Experiment do
 
   schema "experiments" do
     field(:name, :string)
-    field(:description, :text)
+    field(:description, :string)
     field(:experiment_key, :string)
 
     field(:status, :string, default: "draft")

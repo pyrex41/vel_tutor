@@ -17,6 +17,7 @@ defmodule ViralEngineWeb.Live.ViralPromptsHook do
   """
 
   import Phoenix.LiveView
+  import Phoenix.Component, only: [assign: 2, assign: 3]
   alias ViralEngine.LoopOrchestrator
 
   def on_mount(:default, _params, _session, socket) do

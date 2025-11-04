@@ -8,6 +8,7 @@ defmodule ViralEngine.LoopOrchestrator do
 
   use GenServer
   require Logger
+  import Ecto.Query
 
   alias ViralEngine.{Repo, ViralPromptLog}
   alias Phoenix.PubSub

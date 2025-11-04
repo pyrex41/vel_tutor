@@ -1,4 +1,5 @@
 defmodule ViralEngine.Activity.Context do
+  import Ecto.Query
   alias ViralEngine.Repo
   alias ViralEngine.Activity.Activity
 
@@ -55,16 +56,18 @@ defmodule ViralEngine.Activity.Context do
     cursor = Keyword.get(opts, :cursor, nil)
     type_filter = Keyword.get(opts, :type, nil)
 
-    query =
+    base_query =
       from(a in Activity,
         where: a.user_id == ^user_id or is_nil(a.target_id) or a.target_id == ^user_id,
         order_by: [desc: a.inserted_at],
-        limit: ^limit + 1,
         preload: [:user]
       )
 
-    query = if type_filter, do: from(a in query, where: a.type == ^type_filter), else: query
-    query = if cursor, do: from(a in query, where: a.inserted_at < ^cursor), else: query
+    query =
+      base_query
+      |> maybe_filter_type(type_filter)
+      |> maybe_filter_cursor(cursor)
+      |> limit(^(limit + 1))
 
     results = Repo.all(query)
 
@@ -93,6 +96,16 @@ defmodule ViralEngine.Activity.Context do
 
         create_activity(like_attrs)
     end
+  end
+
+  defp maybe_filter_type(query, nil), do: query
+  defp maybe_filter_type(query, type_filter) do
+    from(a in query, where: a.type == ^type_filter)
+  end
+
+  defp maybe_filter_cursor(query, nil), do: query
+  defp maybe_filter_cursor(query, cursor) do
+    from(a in query, where: a.inserted_at < ^cursor)
   end
 
   defp broadcast_activity({:ok, activity}) do

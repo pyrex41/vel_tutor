@@ -18,11 +18,11 @@ defmodule ViralEngine.SessionTranscript do
     field(:audio_duration, :integer) # Duration in seconds
     field(:audio_format, :string, default: "webm")
 
-    field(:transcript_text, :text)
+    field(:transcript_text, :string)
     field(:transcript_segments, {:array, :map}, default: [])  # Timestamped segments
     field(:language, :string, default: "en-US")
 
-    field(:ai_summary, :text)
+    field(:ai_summary, :string)
     field(:key_points, {:array, :string}, default: [])
     field(:sentiment_score, :float)  # -1.0 to 1.0
     field(:confidence_score, :float) # 0.0 to 1.0
@@ -30,7 +30,7 @@ defmodule ViralEngine.SessionTranscript do
     field(:processing_status, :string, default: "pending")
     # pending, transcribing, summarizing, completed, failed
 
-    field(:error_message, :text)
+    field(:error_message, :string)
     field(:metadata, :map, default: %{})
 
     field(:processed_at, :utc_datetime)

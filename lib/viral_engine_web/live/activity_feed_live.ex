@@ -66,10 +66,11 @@ defmodule ViralEngineWeb.ActivityFeedLive do
 
   @impl true
   def handle_info({:activity, user_id, activity}, socket) do
-  if user_id == socket.assigns.user_id do
-    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
-  else
-    {:noreply, socket}
+    if user_id == socket.assigns.user_id do
+      {:noreply, stream_insert(socket, :activities, activity, at: 0)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -108,18 +109,18 @@ defmodule ViralEngineWeb.ActivityFeedLive do
       </div>
 
       <div id="feed" class="space-y-4">
-        <.stream stream={@streams.activities} let={activity} id={activity.id}>
+        <%= for {id, activity} <- @streams.activities do %>
           <div class="activity-card bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0">
-                <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium " <>
+                <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{
                   case activity.type do
                     "like" -> "bg-green-100 text-green-800"
                     "achievement" -> "bg-purple-100 text-purple-800"
                     "follow" -> "bg-indigo-100 text-indigo-800"
                     _ -> "bg-blue-100 text-blue-800"
                   end
-                %>">
+                }"}>
                   <%= String.capitalize(activity.type) %>
                 </span>
               </div>
@@ -139,7 +140,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
               </div>
             </div>
           </div>
-        </.stream>
+        <% end %>
       </div>
 
       <%= if @has_more do %>

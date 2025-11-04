@@ -5,7 +5,6 @@ defmodule ViralEngine.Activity.Activity do
   schema "activities" do
     field(:type, :string)
     field(:content, :string)
-    field(:user_id, :id)
     field(:target_id, :id)
     field(:target_type, :string)
 

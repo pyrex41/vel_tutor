@@ -3,10 +3,10 @@ defmodule ViralEngine.Provider do
   import Ecto.Changeset
 
   schema "providers" do
-    field(:avg_latency_ms, :integer, null: false)
-    field(:cost_per_token, :decimal, null: false)
-    field(:name, :string, null: false)
-    field(:reliability_score, :decimal, null: false)
+    field(:avg_latency_ms, :integer)
+    field(:cost_per_token, :decimal)
+    field(:name, :string)
+    field(:reliability_score, :decimal)
 
     timestamps()
   end
