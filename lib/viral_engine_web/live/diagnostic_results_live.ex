@@ -1,7 +1,9 @@
 defmodule ViralEngineWeb.DiagnosticResultsLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.DiagnosticContext
+  alias ViralEngine.{DiagnosticContext, RallyContext, ViralPrompts}
   require Logger
+
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(%{"id" => assessment_id}, %{"user_token" => user_token}, socket) do
@@ -31,14 +33,22 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     recommendations = generate_ai_recommendations(assessment)
     share_url = generate_share_url(assessment.id)
 
+    # Trigger viral prompt for results rally
+    viral_prompt = trigger_results_rally_prompt(user.id, assessment)
+
     socket =
       socket
       |> assign(:user, user)
+      |> assign(:user_id, user.id)
       |> assign(:assessment, assessment)
       |> assign(:results, results)
       |> assign(:recommendations, recommendations)
       |> assign(:share_url, share_url)
       |> assign(:show_share_modal, false)
+      |> assign(:viral_prompt, viral_prompt)
+      |> assign(:show_viral_modal, viral_prompt != nil)
+      |> assign(:rally_created, false)
+      |> assign(:rally_link, nil)
 
     {:ok, socket}
   end
@@ -188,4 +198,66 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     do: "Good work! You're right around average"
 
   defp get_percentile_message(_percentile), do: "Keep practicing - you can improve!"
+
+  @impl true
+  def handle_event("create_rally", _params, socket) do
+    assessment = socket.assigns.assessment
+    user = socket.assigns.user
+
+    case RallyContext.create_rally(user.id, assessment.id) do
+      {:ok, rally} ->
+        rally_link = RallyContext.generate_rally_link(rally)
+
+        {:noreply,
+         socket
+         |> assign(:rally_created, true)
+         |> assign(:rally_link, rally_link)
+         |> assign(:show_viral_modal, false)
+         |> put_flash(:success, "Rally created! Share the link to invite friends.")}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Could not create rally. Please try again.")}
+    end
+  end
+
+  @impl true
+  def handle_event("close_viral_modal", _params, socket) do
+    {:noreply, assign(socket, :show_viral_modal, false)}
+  end
+
+  @impl true
+  def handle_event("viral_prompt_clicked", %{"prompt_log_id" => log_id}, socket) do
+    # Record click
+    if log_id do
+      ViralPrompts.record_click(String.to_integer(log_id))
+    end
+
+    # Close modal
+    {:noreply, assign(socket, :show_viral_modal, false)}
+  end
+
+  defp trigger_results_rally_prompt(user_id, assessment) do
+    event_data = %{
+      assessment_id: assessment.id,
+      score: assessment.results["overall_score"] || 0,
+      subject: assessment.subject,
+      grade_level: assessment.grade_level
+    }
+
+    case ViralPrompts.trigger_prompt(:diagnostic_completed, user_id, event_data) do
+      {:ok, prompt} ->
+        # Broadcast event for analytics
+        ViralPrompts.broadcast_event(:diagnostic_completed, user_id, event_data)
+        prompt
+
+      {:throttled, reason} ->
+        Logger.info("Viral prompt throttled for user #{user_id}: #{reason}")
+        nil
+
+      {:no_prompt, reason} ->
+        Logger.info("No viral prompt for user #{user_id}: #{reason}")
+        # Fallback to default prompt
+        ViralPrompts.get_default_prompt(:diagnostic_completed)
+    end
+  end
 end

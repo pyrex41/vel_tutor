@@ -129,6 +129,9 @@ defmodule ViralEngineWeb.Router do
   # Buddy challenge routes
   live("/challenge/:token", ChallengeLive)
 
+  # Results Rally routes
+  live("/rally/:token", RallyLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])

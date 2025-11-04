@@ -1055,7 +1055,7 @@
           "6",
           "4"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1066,7 +1066,7 @@
               4
             ],
             "details": "Configure LiveView to stream leaderboard data using assigns and handle stream inserts/updates for rankings based on cohort filtering.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test stream rendering with mock data and verify ranking accuracy under load.",
             "parentId": "undefined"
           },
@@ -1078,7 +1078,7 @@
               1
             ],
             "details": "Use Phoenix.PubSub to subscribe to relevant topics, handle incoming messages in handle_info, and update the stream accordingly for live ranking changes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test subscription and message handling with simulated PubSub events, ensuring updates reflect in the UI.",
             "parentId": "undefined"
           },
@@ -1090,7 +1090,7 @@
               2
             ],
             "details": "Implement token generation logic using secure random strings, store them in the database, and associate with rally sessions for shareable invite URLs.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validate token uniqueness and URL generation, test invite link functionality manually.",
             "parentId": "undefined"
           },
@@ -1102,14 +1102,16 @@
               3
             ],
             "details": "Integrate Phoenix Presence to track user presence, display indicators like avatars or counters in the LiveView, and handle presence diffs for real-time updates.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test presence tracking with multiple users, validate indicator updates, and check performance.",
             "parentId": "undefined"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Expand to leaderboard stream setup, PubSub updates, rally token generation, and presence indicators."
+        "expansionPrompt": "Expand to leaderboard stream setup, PubSub updates, rally token generation, and presence indicators.",
+        "completedAt": "2025-11-04T05:50:40.772762Z",
+        "completionNotes": "Implemented Results Rally Loop with real-time leaderboards and cohort competition:\n\n1. ResultsRally Schema (lib/viral_engine/results_rally.ex):\n   - Rally management: creator_id, rally_name, subject, grade_level\n   - Token system: rally_token (32-char signed), expires after 7 days\n   - Participants: participant_count, invite_count\n   - Status: active, ended, archived\n   - Timestamps: start_date, end_date\n   \n2. RallyParticipant Schema (lib/viral_engine/rally_participant.ex):\n   - Participation tracking: rally_id, user_id, assessment_id\n   - Scoring: score, rank\n   - Attribution: joined_via (creator, invite_link, direct_join), is_creator flag\n   - Unique constraint on [rally_id, user_id]\n   \n3. RallyContext Module (lib/viral_engine/rally_context.ex):\n   - create_rally: Create from diagnostic assessment with signed token\n   - join_rally: Validate token, check subject match, prevent duplicates\n   - get_rally_leaderboard: Real-time rankings with stream support\n   - update_rally_ranks: Auto-recalculate ranks on participant changes\n   - list_user_rallies: Query user rallies with status filtering\n   - get_user_rally_stats: Statistics (first_place, top_three, avg_score)\n   - generate_rally_link: Deep link URL generation\n   - generate_share_message: Shareable text with rally link\n   - end_expired_rallies: Cleanup job for rallies past end_date\n   - calculate_percentile: User percentile calculation within rally\n   - broadcast_rally_event: PubSub notifications (rally_created, participant_joined, ranks_updated)\n   \n4. RallyLive (lib/viral_engine_web/live/rally_live.ex):\n   - Deep link handler for /rally/:token routes\n   - Real-time leaderboard with LiveView streams\n   - Presence tracking: Active users viewing rally\n   - PubSub subscriptions: rally:#{rally.id}, presence:rally:#{rally.id}\n   - Event handlers: join_rally, copy_link, share_rally, refresh_leaderboard\n   - Auto-updates on participant_joined, ranks_updated\n   - Stages: leaderboard, login_required, error\n   - Rank badges: \ud83e\udd47\ud83e\udd48\ud83e\udd49 for top 3\n   - Score coloring by performance\n   - User percentile display\n   \n5. DiagnosticResultsLive Integration:\n   - Triggers results_rally prompt on completion\n   - create_rally event handler\n   - Rally link generation and sharing\n   - Viral modal integration\n   - Close/click event handlers\n   \n6. Migrations:\n   - 20251104100000_create_results_rallies.exs\n   - 20251104100001_create_rally_participants.exs\n   - Indexes: rally_token (unique), creator/user lookups, status queries\n   - Composite: [rally_id, user_id], [rally_id, score], [rally_id, rank]\n   \n7. Real-time Features:\n   - LiveView streams for instant leaderboard updates\n   - PubSub broadcasting on participant join\n   - Automatic rank recalculation\n   - Presence indicators showing active viewers\n   - Real-time rank updates without page refresh\n   \n8. Security & Validation:\n   - Token generation: SHA256-based with salt\n   - Subject matching required to join\n   - Duplicate prevention (unique constraint)\n   - Assessment completion validation\n   - Rally expiry handling\n   \n9. Share Methods:\n   - Deep link sharing (/rally/:token)\n   - Native Web Share API support\n   - Copy to clipboard\n   - Track share method for analytics\n   \n10. Router Integration:\n    - /rally/:token route added\n    \nFeatures Completed:\n\u2705 Leaderboard stream with LiveView\n\u2705 PubSub updates for real-time rankings\n\u2705 Rally token generation (signed, 32-char)\n\u2705 Presence indicators (active viewers)\n\u2705 Cohort filtering by subject/grade\n\u2705 Rank calculation and percentile\n\u2705 Deep link invitation system\n\u2705 Rally creation from diagnostic results\n\u2705 Attribution tracking (joined_via)\n\u2705 Rally statistics (first place, top 3, avg)\n\u2705 Share message generation\n\u2705 Expiry handling (7-day default)\n\nReady for frontend UI (leaderboard visuals, share modal, animated rank changes)."
       },
       {
         "id": 9,
