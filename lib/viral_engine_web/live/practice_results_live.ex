@@ -56,6 +56,7 @@ defmodule ViralEngineWeb.PracticeResultsLive do
     {:ok, socket}
   end
 
+  @impl true
   def handle_info({:leaderboard_update, _data}, socket) do
     # Refresh leaderboard when updates arrive
     session = socket.assigns.session

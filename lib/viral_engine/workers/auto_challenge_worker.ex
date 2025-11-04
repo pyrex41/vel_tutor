@@ -151,9 +151,7 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
     false
   end
 
-  @doc """
-  Triggers a viral prompt to encourage the user to share their challenge.
-  """
+  # Triggers a viral prompt to encourage the user to share their challenge.
   defp trigger_challenge_prompt(user_id, challenge) do
     event_data = %{
       challenge_id: challenge.id,

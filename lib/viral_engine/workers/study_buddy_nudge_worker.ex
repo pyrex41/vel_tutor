@@ -178,9 +178,7 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
     false
   end
 
-  @doc """
-  Triggers viral prompt to invite study buddies.
-  """
+  # Triggers viral prompt to invite study buddies.
   defp trigger_study_buddy_prompt(user_id, study_session, weak_topics) do
     event_data = %{
       study_session_id: study_session.id,

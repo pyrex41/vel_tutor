@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.Live.Components.SubjectPresenceLive do
   use ViralEngineWeb, :live_component
 
+  @impl true
   def mount(assigns) do
     subject_id = assigns.subject_id
     topic = "presence:subject:#{subject_id}"
@@ -16,6 +17,7 @@ defmodule ViralEngineWeb.Live.Components.SubjectPresenceLive do
     {:noreply, assign(socket, users: users, count: count)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="subject-presence-widget p-4 bg-blue-50 rounded-lg">

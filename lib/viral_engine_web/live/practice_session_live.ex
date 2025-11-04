@@ -78,11 +78,13 @@ defmodule ViralEngineWeb.PracticeSessionLive do
     {:ok, socket}
   end
 
+  @impl true
   def handle_info({:presence_diff, _}, socket) do
     users = ViralEngine.Presence.list_subject("practice") |> Map.keys()
     {:noreply, assign(socket, practice_users: users)}
   end
 
+  @impl true
   def handle_info(:tick, socket) do
     if socket.assigns.paused do
       Process.send_after(self(), :tick, 1000)
@@ -202,6 +204,7 @@ defmodule ViralEngineWeb.PracticeSessionLive do
     end
   end
 
+  @impl true
   def handle_info(:next_after_feedback, socket) do
     handle_event("next_step", %{}, socket)
   end

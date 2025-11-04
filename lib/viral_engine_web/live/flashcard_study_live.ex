@@ -100,8 +100,8 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
   end
 
   @impl true
-  def handle_event("generate_ai_deck", %{"subject" => subject, "topic" => topic, "difficulty" => difficulty}, socket) do
-    diff = String.to_integer(difficulty)
+  def handle_event("generate_ai_deck", %{"subject" => subject, "topic" => topic, "difficulty" => _difficulty}, socket) do
+    diff = String.to_integer(_difficulty)
 
     case FlashcardContext.generate_ai_deck(socket.assigns.user.id, subject, topic, diff, 10) do
       {:ok, %{deck: deck}} ->

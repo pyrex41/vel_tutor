@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.Live.Components.GlobalPresenceLive do
   use ViralEngineWeb, :live_component
 
+  @impl true
   def mount(socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:global")
     {:ok, assign(socket, users: ViralEngine.Presence.list_global(), count: 0)}
@@ -12,6 +13,7 @@ defmodule ViralEngineWeb.Live.Components.GlobalPresenceLive do
     {:noreply, assign(socket, users: users, count: count)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="global-presence-widget p-4 bg-gray-100 rounded-lg">

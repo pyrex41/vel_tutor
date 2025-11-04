@@ -244,10 +244,8 @@ defmodule ViralEngine.FlashcardContext do
     |> Repo.one()
   end
 
-  @doc """
-  Calculates spaced repetition values using SM-2 algorithm.
-  Rating: 1=again, 2=hard, 3=good, 4=easy, 5=very easy
-  """
+  # Calculates spaced repetition values using SM-2 algorithm.
+  # Rating: 1=again, 2=hard, 3=good, 4=easy, 5=very easy
   defp calculate_spaced_repetition(previous_review, rating) do
     # Get previous values or defaults
     ease_factor = if previous_review, do: previous_review.ease_factor, else: 2.5
