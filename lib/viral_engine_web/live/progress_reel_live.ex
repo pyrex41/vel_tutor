@@ -155,92 +155,9 @@ defmodule ViralEngineWeb.ProgressReelLive do
     "#{ViralEngineWeb.Endpoint.url()}/reel/#{reel.reel_token}"
   end
 
-  defp share_message(reel) do
-    """
-    Check out my progress on Vel Tutor! #{reel.title}
-    #{reel.subtitle}
-    #{reel_url(reel)}
-    """
-  end
-
-  defp reel_type_icon(reel_type) do
-    case reel_type do
-      "high_score" -> "🌟"
-      "milestone" -> "🎉"
-      "streak" -> "🔥"
-      "level_up" -> "⬆️"
-      _ -> "📊"
-    end
-  end
-
-  defp reel_type_name(reel_type) do
-    case reel_type do
-      "high_score" -> "High Score"
-      "milestone" -> "Milestone"
-      "streak" -> "Streak"
-      "level_up" -> "Level Up"
-      _ -> "Achievement"
-    end
-  end
-
-  defp reel_type_color(reel_type) do
-    case reel_type do
-      "high_score" -> "bg-yellow-100 text-yellow-800 border-yellow-400"
-      "milestone" -> "bg-purple-100 text-purple-800 border-purple-400"
-      "streak" -> "bg-red-100 text-red-800 border-red-400"
-      "level_up" -> "bg-blue-100 text-blue-800 border-blue-400"
-      _ -> "bg-gray-100 text-gray-800 border-gray-400"
-    end
-  end
-
-  defp format_timestamp(datetime) when not is_nil(datetime) do
-    Calendar.strftime(datetime, "%B %d, %Y")
-  end
-  defp format_timestamp(_), do: "Unknown"
-
-  defp time_ago(datetime) when not is_nil(datetime) do
-    seconds = DateTime.diff(DateTime.utc_now(), datetime)
-
-    cond do
-      seconds < 60 -> "Just now"
-      seconds < 3600 -> "#{div(seconds, 60)} minutes ago"
-      seconds < 86400 -> "#{div(seconds, 3600)} hours ago"
-      seconds < 604800 -> "#{div(seconds, 86400)} days ago"
-      true -> format_timestamp(datetime)
-    end
-  end
-  defp time_ago(_), do: "Unknown"
-
-  defp engagement_stats(reel) do
-    views = reel.view_count || 0
-    shares = reel.share_count || 0
-
-    "#{views} views · #{shares} shares"
-  end
-
-  defp is_expired?(reel) do
-    if reel.expires_at do
-      DateTime.compare(DateTime.utc_now(), reel.expires_at) == :gt
-    else
-      false
-    end
-  end
-
-  defp stats_display(reel_data) do
-    reel_data
-    |> Enum.map(fn {key, value} ->
-      formatted_key = key
-        |> Atom.to_string()
-        |> String.replace("_", " ")
-        |> String.capitalize()
-
-      {formatted_key, format_stat_value(value)}
-    end)
-  end
-
-  defp format_stat_value(value) when is_integer(value), do: Integer.to_string(value)
-  defp format_stat_value(value) when is_float(value), do: Float.to_string(value)
-  defp format_stat_value(value) when is_binary(value), do: value
-  defp format_stat_value(value) when is_list(value), do: Enum.join(value, ", ")
-  defp format_stat_value(_), do: "N/A"
+  # Note: Additional UI helper functions have been removed until
+  # a render/1 function or .heex template is implemented.
+  # Functions included: share_message/1, reel_type_icon/1, reel_type_name/1,
+  # reel_type_color/1, format_timestamp/1, time_ago/1, engagement_stats/1,
+  # is_expired?/1, stats_display/1, format_stat_value/1
 end

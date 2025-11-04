@@ -184,7 +184,7 @@ defmodule ViralEngineWeb.StudySessionLive do
   end
 
   @impl true
-  def handle_info({:user_joined, %{user_id: joined_user_id}}, socket) do
+  def handle_info({:user_joined, %{user_id: _joined_user_id}}, socket) do
     # Reload study session to get updated participant list
     study_session = Repo.get!(StudySession, socket.assigns.study_session.id)
 
@@ -195,7 +195,7 @@ defmodule ViralEngineWeb.StudySessionLive do
   end
 
   @impl true
-  def handle_info({:user_left, %{user_id: left_user_id}}, socket) do
+  def handle_info({:user_left, %{user_id: _left_user_id}}, socket) do
     # Reload study session
     study_session = Repo.get!(StudySession, socket.assigns.study_session.id)
 
@@ -210,76 +210,9 @@ defmodule ViralEngineWeb.StudySessionLive do
     "#{ViralEngineWeb.Endpoint.url()}/study/#{study_session.session_token}"
   end
 
-  defp invite_message(study_session) do
-    topics = Enum.join(study_session.topics, ", ")
-    """
-    Join my #{study_session.subject} study session!
-    Topics: #{topics}
-    When: #{format_datetime(study_session.scheduled_at)}
-    #{study_session_url(study_session)}
-    """
-  end
-
-  defp format_datetime(datetime) when not is_nil(datetime) do
-    Calendar.strftime(datetime, "%B %d at %I:%M %p")
-  end
-  defp format_datetime(_), do: "Not scheduled"
-
-  defp format_date(date) when not is_nil(date) do
-    Calendar.strftime(date, "%B %d, %Y")
-  end
-  defp format_date(_), do: "No date"
-
-  defp days_until_exam(exam_date) when not is_nil(exam_date) do
-    days = Date.diff(exam_date, Date.utc_today())
-
-    cond do
-      days == 0 -> "Today!"
-      days == 1 -> "Tomorrow"
-      days > 0 -> "In #{days} days"
-      true -> "Past"
-    end
-  end
-  defp days_until_exam(_), do: "No exam scheduled"
-
-  defp urgency_color(exam_date) when not is_nil(exam_date) do
-    days = Date.diff(exam_date, Date.utc_today())
-
-    cond do
-      days <= 1 -> "text-red-600"
-      days <= 3 -> "text-orange-600"
-      days <= 7 -> "text-yellow-600"
-      true -> "text-green-600"
-    end
-  end
-  defp urgency_color(_), do: "text-gray-600"
-
-  defp session_type_badge(type) do
-    case type do
-      "exam_prep" -> {"📚", "Exam Prep", "bg-red-100 text-red-800"}
-      "group_practice" -> {"👥", "Group Practice", "bg-blue-100 text-blue-800"}
-      "peer_tutoring" -> {"🎓", "Peer Tutoring", "bg-green-100 text-green-800"}
-      _ -> {"📖", "Study Session", "bg-gray-100 text-gray-800"}
-    end
-  end
-
-  defp participants_count(study_session) do
-    "#{length(study_session.participant_ids)}/#{study_session.max_participants}"
-  end
-
-  defp is_full?(study_session) do
-    length(study_session.participant_ids) >= study_session.max_participants
-  end
-
-  defp time_until_session(scheduled_at) when not is_nil(scheduled_at) do
-    seconds = DateTime.diff(scheduled_at, DateTime.utc_now())
-
-    cond do
-      seconds < 0 -> "Started"
-      seconds < 3600 -> "Starting in #{div(seconds, 60)} minutes"
-      seconds < 86400 -> "Starting in #{div(seconds, 3600)} hours"
-      true -> "Starting in #{div(seconds, 86400)} days"
-    end
-  end
-  defp time_until_session(_), do: "Not scheduled"
+  # Note: Additional UI helper functions have been removed until
+  # a render/1 function or .heex template is implemented.
+  # Functions included: invite_message/1, format_datetime/1, format_date/1,
+  # days_until_exam/1, urgency_color/1, session_type_badge/1,
+  # participants_count/1, is_full?/1, time_until_session/1
 end

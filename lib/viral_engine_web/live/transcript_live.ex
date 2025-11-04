@@ -104,79 +104,9 @@ defmodule ViralEngineWeb.TranscriptLive do
      |> put_flash(:success, "✨ Transcript processing completed!")}
   end
 
-  # Helper functions
-
-  defp status_badge_class(status) do
-    case status do
-      "pending" -> "bg-yellow-100 text-yellow-800"
-      "transcribing" -> "bg-blue-100 text-blue-800 animate-pulse"
-      "summarizing" -> "bg-purple-100 text-purple-800 animate-pulse"
-      "completed" -> "bg-green-100 text-green-800"
-      "failed" -> "bg-red-100 text-red-800"
-      _ -> "bg-gray-100 text-gray-800"
-    end
-  end
-
-  defp status_text(status) do
-    case status do
-      "pending" -> "Pending"
-      "transcribing" -> "Transcribing..."
-      "summarizing" -> "Generating Summary..."
-      "completed" -> "Completed"
-      "failed" -> "Failed"
-      _ -> "Unknown"
-    end
-  end
-
-  defp sentiment_indicator(score) when is_float(score) do
-    cond do
-      score >= 0.5 -> "😊 Positive"
-      score >= 0.0 -> "😐 Neutral"
-      true -> "😟 Needs Support"
-    end
-  end
-  defp sentiment_indicator(_), do: "Unknown"
-
-  defp sentiment_color(score) when is_float(score) do
-    cond do
-      score >= 0.5 -> "text-green-600"
-      score >= 0.0 -> "text-yellow-600"
-      true -> "text-red-600"
-    end
-  end
-  defp sentiment_color(_), do: "text-gray-600"
-
-  defp format_duration(seconds) when is_integer(seconds) do
-    minutes = div(seconds, 60)
-    remaining_seconds = rem(seconds, 60)
-    "#{minutes}:#{String.pad_leading(Integer.to_string(remaining_seconds), 2, "0")}"
-  end
-  defp format_duration(_), do: "0:00"
-
-  defp format_timestamp(seconds) when is_float(seconds) do
-    format_duration(round(seconds))
-  end
-  defp format_timestamp(_), do: "0:00"
-
-  defp session_type_name(type) do
-    case type do
-      "practice_session" -> "Practice Session"
-      "diagnostic_assessment" -> "Diagnostic Assessment"
-      _ -> "Session"
-    end
-  end
-
-  defp confidence_percentage(score) when is_float(score) do
-    "#{round(score * 100)}%"
-  end
-  defp confidence_percentage(_), do: "N/A"
-
-  defp truncate_text(text, max_length \\ 150) when is_binary(text) do
-    if String.length(text) > max_length do
-      String.slice(text, 0, max_length) <> "..."
-    else
-      text
-    end
-  end
-  defp truncate_text(_, _), do: ""
+  # Note: Helper functions for UI rendering have been removed until
+  # a render/1 function or .heex template is implemented.
+  # Functions included: status_badge_class/1, status_text/1, sentiment_indicator/1,
+  # sentiment_color/1, format_duration/1, format_timestamp/1, session_type_name/1,
+  # confidence_percentage/1, truncate_text/2
 end
