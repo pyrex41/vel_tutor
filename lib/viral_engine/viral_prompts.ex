@@ -7,7 +7,6 @@ defmodule ViralEngine.ViralPrompts do
   """
 
   alias ViralEngine.{LoopOrchestrator, ViralPromptLog, Repo}
-  alias Phoenix.PubSub
 
   @doc """
   Triggers a viral prompt for a user event.

@@ -56,7 +56,7 @@ defmodule ViralEngine.PresenceTracker do
     # Update user status only if not opted out
     case Repo.get(User, user_id) do
       nil ->
-        Logger.warn("User #{user_id} not found for presence tracking")
+        Logger.warning("User #{user_id} not found for presence tracking")
 
       user ->
         if user.presence_opt_out do
@@ -111,7 +111,7 @@ defmodule ViralEngine.PresenceTracker do
     # Update user status
     case Repo.get(User, user_id) do
       nil ->
-        Logger.warn("User #{user_id} not found for presence untracking")
+        Logger.warning("User #{user_id} not found for presence untracking")
 
       user ->
         Repo.update!(

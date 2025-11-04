@@ -6,7 +6,7 @@ defmodule ViralEngine.StreakContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, UserStreak, PracticeContext}
+  alias ViralEngine.{Repo, UserStreak}
   require Logger
 
   @streak_deadline_hours 24  # Streaks break after 24 hours of inactivity

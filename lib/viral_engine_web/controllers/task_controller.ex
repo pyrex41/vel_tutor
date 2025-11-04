@@ -1,5 +1,9 @@
 defmodule ViralEngineWeb.TaskController do
   use ViralEngineWeb, :controller
+
+  # Deprecated :namespace option - use plug :put_layout instead if needed
+  # Set formats for proper rendering
+  plug :accepts, ["html", "json"]
   alias ViralEngine.{Task, Repo, AuditLogContext}
   import Ecto.Query
   require Logger

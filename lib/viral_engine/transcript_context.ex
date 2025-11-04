@@ -7,7 +7,7 @@ defmodule ViralEngine.TranscriptContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, SessionTranscript, AIClient}
+  alias ViralEngine.{Repo, SessionTranscript}
   require Logger
 
   @transcription_provider Application.compile_env(:viral_engine, :transcription_provider, "openai")

@@ -1,5 +1,9 @@
 defmodule ViralEngineWeb.AgentConfigController do
   use ViralEngineWeb, :controller
+
+  # Deprecated :namespace option - use plug :put_layout instead if needed
+  # Set formats for proper rendering
+  plug :accepts, ["html", "json"]
   alias ViralEngine.{Agent, AgentConfigHistory, Repo}
   alias ViralEngine.Integration.{OpenAIAdapter, GroqAdapter, PerplexityAdapter}
   import Ecto.Query

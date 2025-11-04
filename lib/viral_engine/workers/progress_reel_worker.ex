@@ -11,7 +11,7 @@ defmodule ViralEngine.Workers.ProgressReelWorker do
     queue: :reels,
     max_attempts: 3
 
-  alias ViralEngine.{Repo, ProgressReel, PracticeContext, DiagnosticContext, StreakContext, XPContext, ViralPrompts}
+  alias ViralEngine.{Repo, ProgressReel, PracticeContext, StreakContext, XPContext, ViralPrompts}
   require Logger
 
   @high_score_threshold 90  # Trigger reel for 90+ scores

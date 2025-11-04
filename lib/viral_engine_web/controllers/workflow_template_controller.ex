@@ -1,5 +1,9 @@
 defmodule ViralEngineWeb.WorkflowTemplateController do
   use ViralEngineWeb, :controller
+
+  # Deprecated :namespace option - use plug :put_layout instead if needed
+  # Set formats for proper rendering
+  plug :accepts, ["html", "json"]
   alias ViralEngine.WorkflowTemplateContext
 
   def create(conn, %{"workflow_id" => workflow_id} = params) do

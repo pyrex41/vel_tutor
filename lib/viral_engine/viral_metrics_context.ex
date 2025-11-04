@@ -6,7 +6,7 @@ defmodule ViralEngine.ViralMetricsContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, AttributionLink, AttributionEvent, ChallengeContext}
+  alias ViralEngine.{Repo, AttributionLink, AttributionEvent}
   require Logger
 
   @doc """

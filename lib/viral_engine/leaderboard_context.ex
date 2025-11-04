@@ -6,7 +6,7 @@ defmodule ViralEngine.LeaderboardContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, PracticeContext, DiagnosticContext, StreakContext}
+  alias ViralEngine.Repo
   require Logger
 
   @default_limit 100

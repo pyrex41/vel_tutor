@@ -4,13 +4,10 @@ defmodule ViralEngineWeb.UserSocket do
   ## Channels
   channel("room:*", ViralEngineWeb.RoomChannel)
 
-  ## Transports
-  transport(:websocket, Phoenix.Transports.WebSocket, timeout: 45_000)
+  ## Transports are configured in config/config.exs via Phoenix.Endpoint
 
-  transport(:longpoll, Phoenix.Transports.LongPoll, timeout: 45_000)
-
-  def connect(_params, socket, _connect_info) do
-    socket = assign(socket, :user_id, get_user_id(_params))
+  def connect(params, socket, _connect_info) do
+    socket = assign(socket, :user_id, get_user_id(params))
     {:ok, socket}
   end
 

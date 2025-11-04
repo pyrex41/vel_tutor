@@ -6,6 +6,10 @@ defmodule ViralEngineWeb.FallbackController do
   """
   use ViralEngineWeb, :controller
 
+  # Deprecated :namespace option - use plug :put_layout instead if needed
+  # Set formats for proper rendering
+  plug :accepts, ["html", "json"]
+
   # This clause handles errors returned by Ecto's insert/update/delete.
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn

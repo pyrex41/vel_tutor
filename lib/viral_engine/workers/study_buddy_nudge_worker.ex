@@ -11,10 +11,8 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
     queue: :scheduled,
     max_attempts: 3
 
-  alias ViralEngine.{Repo, PracticeContext, DiagnosticContext, ViralPrompts, StudySession}
+  alias ViralEngine.{Repo, ViralPrompts, StudySession}
   require Logger
-
-  import Ecto.Query
 
   @exam_window_days 7  # Nudge if exam in next 7 days
   @weak_subject_threshold 70  # Subject with <70% avg needs attention

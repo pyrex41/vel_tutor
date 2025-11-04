@@ -4,6 +4,10 @@ defmodule ViralEngineWeb.AdminController do
   """
 
   use ViralEngineWeb, :controller
+
+  # Deprecated :namespace option - use plug :put_layout instead if needed
+  # Set formats for proper rendering
+  plug :accepts, ["html", "json"]
   alias ViralEngine.AuditLogContext
   require Logger
 

@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.PracticeResultsLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, Presence}
+  alias ViralEngine.PracticeContext
   require Logger
 
   @impl true

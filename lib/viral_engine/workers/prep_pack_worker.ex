@@ -8,7 +8,7 @@ defmodule ViralEngine.Workers.PrepPackWorker do
     queue: :prep_packs,
     max_attempts: 3
 
-  alias ViralEngine.{Repo, PrepPack, PracticeContext, DiagnosticContext, ViralPrompts}
+  alias ViralEngine.{Repo, PrepPack, ViralPrompts}
   require Logger
 
   @impl Oban.Worker

@@ -10,7 +10,7 @@ defmodule ViralEngine.Workers.AutoChallengeWorker do
     queue: :scheduled,
     max_attempts: 3
 
-  alias ViralEngine.{PracticeContext, ChallengeContext, ViralPrompts}
+  alias ViralEngine.{ChallengeContext, ViralPrompts}
   require Logger
 
   @session_gap_days 3  # Trigger if no practice for 3+ days

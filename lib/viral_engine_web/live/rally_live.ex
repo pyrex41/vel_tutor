@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.RallyLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{RallyContext, DiagnosticContext, ViralEngine.Presence}
+  alias ViralEngine.{RallyContext, DiagnosticContext}
   require Logger
 
   @impl true

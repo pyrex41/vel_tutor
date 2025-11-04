@@ -8,9 +8,6 @@ defmodule ViralEngine.GuardrailMetricsContext do
   alias ViralEngine.{
     AttributionEvent,
     AttributionLink,
-    ViralLink,
-    Experiment,
-    ExperimentAssignment,
     StudySession,
     ProgressReel,
     ParentShare
