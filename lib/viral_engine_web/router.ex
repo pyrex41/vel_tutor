@@ -152,6 +152,10 @@ defmodule ViralEngineWeb.Router do
   live("/transcripts", TranscriptLive)
   live("/transcripts/:id", TranscriptLive)
 
+  # Study session routes
+  live("/study", StudySessionLive)
+  live("/study/:token", StudySessionLive)
+
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
