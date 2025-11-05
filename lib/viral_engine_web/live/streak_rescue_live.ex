@@ -1,10 +1,10 @@
 defmodule ViralEngineWeb.StreakRescueLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{StreakContext, PracticeContext}
+  alias ViralEngine.{StreakContext, PracticeContext, AttributionContext, RewardContext}
   require Logger
 
   @impl true
-  def mount(_params, %{"user_token" => user_token}, socket) do
+  def mount(params, %{"user_token" => user_token}, socket) do
     user = ViralEngine.Accounts.get_user_by_session_token(user_token)
 
     if connected?(socket) do
@@ -27,6 +27,19 @@ defmodule ViralEngineWeb.StreakRescueLive do
     # Get active users in rescue room
     active_users = get_active_users()
 
+    # Check if this is a rescue via invitation (attribution tracking)
+    inviter_id = params["inviter"]
+    attribution_token = params["token"]
+
+    # Track conversion if coming from invite
+    if inviter_id && attribution_token do
+      track_rescue_conversion(attribution_token, user.id)
+    end
+
+    # Generate attributed invite link
+    {:ok, attribution_link} = create_rescue_attribution_link(user.id)
+    invite_url = build_invite_url(attribution_link.link_token)
+
     socket =
       socket
       |> assign(:user, user)
@@ -34,11 +47,13 @@ defmodule ViralEngineWeb.StreakRescueLive do
       |> assign(:streak_stats, stats)
       |> assign(:active_users, active_users)
       |> assign(:countdown_seconds, stats.hours_remaining * 3600)
-      |> assign(:invite_link, generate_invite_link(user.id))
+      |> assign(:invite_link, invite_url)
+      |> assign(:attribution_link, attribution_link)
       |> assign(:show_invite_modal, false)
       # practice or flashcards
       |> assign(:activity_type, "practice")
       |> assign(:urgency_level, calculate_urgency_level(stats.hours_remaining))
+      |> assign(:inviter_id, inviter_id)
 
     {:ok, socket}
   end
@@ -86,24 +101,31 @@ defmodule ViralEngineWeb.StreakRescueLive do
   @impl true
   def handle_event("start_practice", %{"type" => type}, socket) do
     user = socket.assigns.user
+    inviter_id = socket.assigns[:inviter_id]
 
     case type do
       "practice" ->
-        # Create practice session
+        # Create practice session with rescue metadata
+        rescue_metadata = %{
+          rescue_session: true,
+          inviter_id: inviter_id,
+          attribution_link_id: socket.assigns.attribution_link.id
+        }
+
         {:ok, session} =
           PracticeContext.create_session(%{
             user_id: user.id,
             session_type: "streak_rescue",
             subject: "math",
             total_steps: 5,
-            metadata: %{rescue_session: true}
+            metadata: rescue_metadata
           })
 
         {:noreply, redirect(socket, to: "/practice/#{session.id}")}
 
       "flashcards" ->
-        # Redirect to flashcards
-        {:noreply, redirect(socket, to: "/flashcards")}
+        # Redirect to flashcards with rescue metadata
+        {:noreply, redirect(socket, to: "/flashcards?rescue=true&inviter=#{inviter_id}")}
 
       _ ->
         {:noreply, socket}
@@ -135,9 +157,35 @@ defmodule ViralEngineWeb.StreakRescueLive do
     |> Enum.map(fn %{metas: metas} -> hd(metas) end)
   end
 
-  defp generate_invite_link(user_id) do
+  defp create_rescue_attribution_link(user_id) do
+    expires_at = DateTime.add(DateTime.utc_now(), 7, :day)
+
+    AttributionContext.create_link(%{
+      user_id: user_id,
+      link_type: "streak_rescue",
+      share_method: "copy_link",
+      metadata: %{
+        "rescue_type" => "co_practice",
+        "reward" => "streak_shield"
+      },
+      expires_at: expires_at
+    })
+  end
+
+  defp build_invite_url(link_token) do
     base_url = Application.get_env(:viral_engine, :base_url, "https://app.veltutor.com")
-    "#{base_url}/streak-rescue?inviter=#{user_id}"
+    "#{base_url}/streak-rescue?token=#{link_token}"
+  end
+
+  defp track_rescue_conversion(attribution_token, converter_user_id) do
+    # Track the conversion (friend joined rescue)
+    case AttributionContext.track_conversion(attribution_token, converter_user_id, 0) do
+      {:ok, _conversion} ->
+        Logger.info("Streak rescue conversion tracked for token #{attribution_token}")
+
+      {:error, reason} ->
+        Logger.error("Failed to track rescue conversion: #{inspect(reason)}")
+    end
   end
 
   @impl true

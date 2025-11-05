@@ -4,7 +4,7 @@ defmodule ViralEngine.PracticeContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer, LeaderboardContext}
+  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer, LeaderboardContext, Reward, UserReward}
   require Logger
 
   @doc """
@@ -97,10 +97,82 @@ defmodule ViralEngine.PracticeContext do
           LeaderboardContext.broadcast_update(updated_session.subject)
         end
 
+        # Grant Streak Shield rewards for successful rescue sessions
+        if updated_session.session_type == "streak_rescue" && score >= 60 do
+          grant_streak_rescue_rewards(updated_session)
+        end
+
         {:ok, updated_session}
       end
     else
       {:error, :not_found}
+    end
+  end
+
+  # Private helper for granting Streak Shield rewards
+  defp grant_streak_rescue_rewards(session) do
+    # Grant Streak Shield to the user who completed the rescue
+    grant_streak_shield(session.user_id, "rescue_completion")
+
+    # Grant Streak Shield to inviter if this was a co-practice rescue
+    if session.metadata["inviter_id"] do
+      grant_streak_shield(session.metadata["inviter_id"], "rescue_helper")
+
+      # Track attribution conversion with reward value
+      if session.metadata["attribution_link_id"] do
+        ViralEngine.AttributionContext.track_conversion(
+          session.metadata["attribution_link_id"],
+          session.user_id,
+          50  # XP value of helping with rescue
+        )
+      end
+    end
+
+    Logger.info("Streak Shield rewards granted for rescue session #{session.id}")
+  end
+
+  defp grant_streak_shield(user_id, reason) do
+    # Find or create Streak Shield reward
+    streak_shield = Repo.get_by(ViralEngine.Reward, name: "Streak Shield")
+
+    if streak_shield do
+      # Check if user already has this reward
+      existing = Repo.get_by(ViralEngine.UserReward,
+        user_id: user_id,
+        reward_id: streak_shield.id,
+        uses_remaining: 1  # Only grant if they don't have an unused one
+      )
+
+      if !existing do
+        # Grant new Streak Shield
+        %ViralEngine.UserReward{}
+        |> ViralEngine.UserReward.changeset(%{
+          user_id: user_id,
+          reward_id: streak_shield.id,
+          claimed_at: DateTime.utc_now(),
+          xp_spent: 0,  # Free reward
+          uses_remaining: 1,
+          is_active: true,
+          metadata: %{
+            "granted_for" => reason,
+            "granted_at" => DateTime.utc_now() |> DateTime.to_iso8601()
+          }
+        })
+        |> Repo.insert()
+
+        # Create activity event
+        ViralEngine.Activities.create_event(%{
+          user_id: user_id,
+          event_type: "reward_earned",
+          data: %{
+            reward_name: "Streak Shield",
+            reason: reason
+          },
+          visibility: "public"
+        })
+
+        Logger.info("Granted Streak Shield to user #{user_id} for #{reason}")
+      end
     end
   end
 
