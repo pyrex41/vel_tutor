@@ -1,0 +1,22 @@
+{
+  "name": "vel_tutor_assets",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4001",
+    "build": "vite build",
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview --host 0.0.0.0 --port 4002"
+  },
+  "dependencies": {
+    "morphdom": "^2.7.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^4.0.0-alpha.20",
+    "vite": "^5.0.0"
+  }
+}
