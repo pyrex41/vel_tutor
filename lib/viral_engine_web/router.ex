@@ -212,6 +212,7 @@ defmodule ViralEngineWeb.Router do
     live("/dashboard/benchmarks", BenchmarksLive)
     live("/dashboard/rate-limits", RateLimitsLive)
     live("/dashboard/k-factor", KFactorDashboardLive)
+    live("/dashboard/experiments", ExperimentDashboardLive)
     live("/dashboard/guardrails", GuardrailDashboardLive)
     live("/dashboard/reports", PerformanceReportLive)
     live("/dashboard/reports/:id", PerformanceReportLive)
