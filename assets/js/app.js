@@ -15,6 +15,20 @@ const liveSocket = new LiveSocket("/live", Socket, {
   hooks: {},
 })
 
+// Clipboard copy functionality
+document.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-clipboard-text]')
+  if (target) {
+    const text = target.getAttribute('data-clipboard-text')
+    navigator.clipboard.writeText(text).then(() => {
+      // Visual feedback handled by LiveView flash
+      console.log('Copied to clipboard:', text)
+    }).catch(err => {
+      console.error('Failed to copy:', err)
+    })
+  }
+})
+
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
