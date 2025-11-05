@@ -15,6 +15,7 @@ defmodule ViralEngineWeb.GlobalPresenceLive do
     {:noreply, assign(socket, users: ViralEngine.Presence.list_global() |> Map.keys())}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="global-presence">

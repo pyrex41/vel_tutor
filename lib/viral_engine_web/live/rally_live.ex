@@ -102,7 +102,8 @@ defmodule ViralEngineWeb.RallyLive do
             {:noreply, put_flash(socket, :error, "This rally has ended.")}
 
           {:error, :subject_mismatch} ->
-            {:noreply, put_flash(socket, :error, "Your assessment subject doesn't match this rally.")}
+            {:noreply,
+             put_flash(socket, :error, "Your assessment subject doesn't match this rally.")}
 
           {:error, reason} ->
             {:noreply, put_flash(socket, :error, "Could not join rally: #{reason}")}
@@ -197,29 +198,9 @@ defmodule ViralEngineWeb.RallyLive do
 
   defp get_active_users(rally_id) do
     topic = "rally:#{rally_id}"
+
     ViralEngine.Presence.list(topic)
     |> Map.keys()
     |> length()
-  end
-
-  defp format_score(score) when is_integer(score), do: "#{score}%"
-  defp format_score(_), do: "N/A"
-
-  defp score_color(score) do
-    cond do
-      score >= 90 -> "text-green-600"
-      score >= 70 -> "text-blue-600"
-      score >= 50 -> "text-yellow-600"
-      true -> "text-gray-600"
-    end
-  end
-
-  defp rank_badge(rank) do
-    case rank do
-      1 -> "🥇"
-      2 -> "🥈"
-      3 -> "🥉"
-      _ -> "#{rank}"
-    end
   end
 end

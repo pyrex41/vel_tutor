@@ -74,7 +74,8 @@ defmodule ViralEngineWeb.PracticeResultsLive do
   def handle_event("challenge_friend", _params, socket) do
     session = socket.assigns.session
 
-    challenge_url = "#{socket.assigns.share_url}?challenge=#{session.id}&subject=#{session.subject}"
+    challenge_url =
+      "#{socket.assigns.share_url}?challenge=#{session.id}&subject=#{session.subject}"
 
     {:noreply,
      socket
@@ -193,14 +194,4 @@ defmodule ViralEngineWeb.PracticeResultsLive do
       "#{secs}s"
     end
   end
-
-  defp get_score_color(score) when score >= 90, do: "text-green-600"
-  defp get_score_color(score) when score >= 70, do: "text-yellow-600"
-  defp get_score_color(_score), do: "text-red-600"
-
-  defp get_score_message(score) when score == 100, do: "Perfect score! 🎉"
-  defp get_score_message(score) when score >= 90, do: "Excellent work! 🌟"
-  defp get_score_message(score) when score >= 70, do: "Great job! 👍"
-  defp get_score_message(score) when score >= 50, do: "Good effort! Keep practicing! 💪"
-  defp get_score_message(_score), do: "Keep trying! You'll get better! 🚀"
 end

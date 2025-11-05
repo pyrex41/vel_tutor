@@ -14,9 +14,6 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
   alias ViralEngine.{Repo, ViralPrompts, StudySession}
   require Logger
 
-  @exam_window_days 7  # Nudge if exam in next 7 days
-  @weak_subject_threshold 70  # Subject with <70% avg needs attention
-
   @impl Oban.Worker
   def perform(_job) do
     Logger.info("StudyBuddyNudgeWorker: Checking for users with upcoming exams")
@@ -30,13 +27,17 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
     Enum.each(users_needing_nudge, fn user_data ->
       case generate_study_buddy_nudge(user_data) do
         {:ok, study_session} ->
-          Logger.info("Study buddy nudge created for user #{user_data.user_id}: #{study_session.session_token}")
+          Logger.info(
+            "Study buddy nudge created for user #{user_data.user_id}: #{study_session.session_token}"
+          )
 
         {:skip, reason} ->
           Logger.debug("Skipped study nudge for user #{user_data.user_id}: #{reason}")
 
         {:error, reason} ->
-          Logger.error("Failed to create study nudge for user #{user_data.user_id}: #{inspect(reason)}")
+          Logger.error(
+            "Failed to create study nudge for user #{user_data.user_id}: #{inspect(reason)}"
+          )
       end
     end)
 
@@ -100,7 +101,8 @@ defmodule ViralEngine.Workers.StudyBuddyNudgeWorker do
         session_token: StudySession.generate_token(user_id, subject),
         session_type: "exam_prep",
         scheduled_at: calculate_optimal_study_time(exam_date),
-        duration_minutes: 90,  # 90 min exam prep sessions
+        # 90 min exam prep sessions
+        duration_minutes: 90,
         topics: weak_topics,
         exam_date: exam_date,
         participant_ids: [user_id],

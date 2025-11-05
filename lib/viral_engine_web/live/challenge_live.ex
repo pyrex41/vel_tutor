@@ -177,15 +177,4 @@ defmodule ViralEngineWeb.ChallengeLive do
   defp get_current_user(_), do: nil
 
   # View rendering helpers
-
-  defp format_score(score) when is_integer(score), do: "#{score}%"
-  defp format_score(_), do: "N/A"
-
-  defp score_color(score) do
-    cond do
-      score >= 80 -> "text-green-600"
-      score >= 60 -> "text-yellow-600"
-      true -> "text-red-600"
-    end
-  end
 end

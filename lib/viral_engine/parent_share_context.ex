@@ -55,6 +55,7 @@ defmodule ViralEngine.ParentShareContext do
   """
   def generate_share_token(student_id, share_type) do
     data = "#{student_id}:#{share_type}:#{System.system_time(:second)}"
+
     :crypto.hash(:sha256, data <> @token_salt)
     |> Base.url_encode64(padding: false)
     |> String.slice(0, 32)
@@ -108,17 +109,19 @@ defmodule ViralEngine.ParentShareContext do
     limit = opts[:limit] || 20
     share_type = opts[:share_type]
 
-    base_query = from(s in ParentShare,
-      where: s.student_id == ^student_id,
-      order_by: [desc: s.shared_at],
-      limit: ^limit
-    )
+    base_query =
+      from(s in ParentShare,
+        where: s.student_id == ^student_id,
+        order_by: [desc: s.shared_at],
+        limit: ^limit
+      )
 
-    query = if share_type do
-      from(s in base_query, where: s.share_type == ^share_type)
-    else
-      base_query
-    end
+    query =
+      if share_type do
+        from(s in base_query, where: s.share_type == ^share_type)
+      else
+        base_query
+      end
 
     Repo.all(query)
   end
@@ -159,38 +162,39 @@ defmodule ViralEngine.ParentShareContext do
   Generates a shareable message for parents.
   """
   def generate_share_message(share) do
-    message = case share.share_type do
-      "achievement" ->
-        """
-        Check out this awesome achievement! 🎉
+    message =
+      case share.share_type do
+        "achievement" ->
+          """
+          Check out this awesome achievement! 🎉
 
-        Your student has been making great progress. View the full progress card:
-        """
+          Your student has been making great progress. View the full progress card:
+          """
 
-      "weekly_progress" ->
-        """
-        Here's this week's learning progress! 📊
+        "weekly_progress" ->
+          """
+          Here's this week's learning progress! 📊
 
-        See how much your student has improved:
-        """
+          See how much your student has improved:
+          """
 
-      "milestone" ->
-        """
-        Milestone reached! 🏆
+        "milestone" ->
+          """
+          Milestone reached! 🏆
 
-        Your student has hit an important learning milestone:
-        """
+          Your student has hit an important learning milestone:
+          """
 
-      "report_card" ->
-        """
-        Progress Report Card 📝
+        "report_card" ->
+          """
+          Progress Report Card 📝
 
-        View your student's comprehensive learning report:
-        """
+          View your student's comprehensive learning report:
+          """
 
-      _ ->
-        "Check out this learning progress! "
-    end
+        _ ->
+          "Check out this learning progress! "
+      end
 
     "#{message}\n#{generate_share_link(share)}"
   end
@@ -208,10 +212,11 @@ defmodule ViralEngine.ParentShareContext do
           {:error, :already_used}
         else
           # Update share
-          {:ok, updated} = update_share(share, %{
-            referral_used: true,
-            metadata: Map.put(share.metadata, "parent_user_id", parent_user_id)
-          })
+          {:ok, updated} =
+            update_share(share, %{
+              referral_used: true,
+              metadata: Map.put(share.metadata, "parent_user_id", parent_user_id)
+            })
 
           # Grant rewards asynchronously
           grant_referral_rewards(updated)
@@ -241,9 +246,10 @@ defmodule ViralEngine.ParentShareContext do
 
     %{
       total_sessions: stats.total_sessions || 0,
-      total_practice_time_minutes: div(stats.total_practice_time || 0, 60),
+      total_practice_time_minutes: div(stats.total_time_seconds || 0, 60),
       average_score: stats.average_score || 0,
-      streak_days: 0,  # Would integrate with streak system
+      # Would integrate with streak system
+      streak_days: 0,
       recent_achievements: [
         "Completed 10 practice sessions",
         "Achieved 90%+ score on Math assessment"
@@ -270,17 +276,22 @@ defmodule ViralEngine.ParentShareContext do
     # Get last 7 days of activity
     cutoff = DateTime.utc_now() |> DateTime.add(-7 * 24 * 3600, :second)
 
-    sessions = from(s in ViralEngine.PracticeSession,
-      where: s.user_id == ^student_id and s.inserted_at >= ^cutoff and s.completed == true,
-      select: %{score: s.score, subject: s.subject, completed_at: s.updated_at}
-    )
-    |> Repo.all()
+    sessions =
+      from(s in ViralEngine.PracticeSession,
+        where: s.user_id == ^student_id and s.inserted_at >= ^cutoff and s.completed == true,
+        select: %{score: s.score, subject: s.subject, completed_at: s.updated_at}
+      )
+      |> Repo.all()
 
     %{
       week_range: "#{Date.utc_today() |> Date.add(-7)} to #{Date.utc_today()}",
       sessions_completed: length(sessions),
       subjects_studied: sessions |> Enum.map(& &1.subject) |> Enum.uniq(),
-      average_score: if(length(sessions) > 0, do: Enum.sum(Enum.map(sessions, & &1.score || 0)) / length(sessions), else: 0),
+      average_score:
+        if(length(sessions) > 0,
+          do: Enum.sum(Enum.map(sessions, &(&1.score || 0))) / length(sessions),
+          else: 0
+        ),
       improvement_message: "Great progress this week!",
       daily_activity: [
         %{day: "Mon", sessions: 2},
@@ -296,7 +307,9 @@ defmodule ViralEngine.ParentShareContext do
 
   defp generate_report_card(student_id) do
     stats = PracticeContext.get_user_stats(student_id)
-    diagnostic_assessments = DiagnosticContext.list_user_assessments(student_id, completed: true, limit: 5)
+
+    diagnostic_assessments =
+      DiagnosticContext.list_user_assessments(student_id, completed: true, limit: 5)
 
     %{
       overall_grade: calculate_letter_grade(stats.average_score || 0),
@@ -308,7 +321,7 @@ defmodule ViralEngine.ParentShareContext do
       strengths: ["Problem Solving", "Critical Thinking", "Consistent Practice"],
       areas_for_improvement: ["Speed", "Complex Problems"],
       teacher_comments: "Excellent progress! Shows strong dedication to learning.",
-      total_study_time_hours: div(stats.total_practice_time || 0, 3600),
+      total_study_time_hours: div(stats.total_time_seconds || 0, 3600),
       assessments_completed: length(diagnostic_assessments)
     }
   end
@@ -345,8 +358,10 @@ defmodule ViralEngine.ParentShareContext do
   defp grant_referral_rewards(share) do
     # Grant rewards asynchronously
     Task.start(fn ->
-      student_xp = 100  # Student gets 100 XP for parent signup
-      parent_xp = 50    # Parent gets 50 XP welcome bonus
+      # Student gets 100 XP for parent signup
+      student_xp = 100
+      # Parent gets 50 XP welcome bonus
+      parent_xp = 50
 
       Logger.info("Granting #{student_xp} XP to student #{share.student_id} for parent referral")
       Logger.info("Granting #{parent_xp} XP welcome bonus to parent")

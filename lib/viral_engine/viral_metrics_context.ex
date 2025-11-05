@@ -19,25 +19,28 @@ defmodule ViralEngine.ViralMetricsContext do
     cutoff = DateTime.add(DateTime.utc_now(), -days * 24 * 60 * 60, :second)
 
     # Get total users who sent invites
-    active_users = from(l in AttributionLink,
-      where: l.inserted_at > ^cutoff,
-      select: count(l.referrer_id, :distinct)
-    )
-    |> Repo.one() || 0
+    active_users =
+      from(l in AttributionLink,
+        where: l.inserted_at > ^cutoff,
+        select: count(l.referrer_id, :distinct)
+      )
+      |> Repo.one() || 0
 
     # Get total invites sent
-    total_invites = from(l in AttributionLink,
-      where: l.inserted_at > ^cutoff,
-      select: sum(l.click_count)
-    )
-    |> Repo.one() || 0
+    total_invites =
+      from(l in AttributionLink,
+        where: l.inserted_at > ^cutoff,
+        select: sum(l.click_count)
+      )
+      |> Repo.one() || 0
 
     # Get total conversions
-    total_conversions = from(l in AttributionLink,
-      where: l.inserted_at > ^cutoff,
-      select: sum(l.conversion_count)
-    )
-    |> Repo.one() || 0
+    total_conversions =
+      from(l in AttributionLink,
+        where: l.inserted_at > ^cutoff,
+        select: sum(l.conversion_count)
+      )
+      |> Repo.one() || 0
 
     # Calculate metrics
     avg_invites_per_user = if active_users > 0, do: total_invites / active_users, else: 0.0
@@ -48,9 +51,12 @@ defmodule ViralEngine.ViralMetricsContext do
       k_factor: Float.round(k_factor, 3),
       active_users: active_users,
       total_invites: total_invites,
+      # Total clicks (same as total_invites for now)
+      total_clicks: total_invites,
       total_conversions: total_conversions,
       avg_invites_per_user: Float.round(avg_invites_per_user, 2),
-      conversion_rate: Float.round(conversion_rate * 100, 2),  # As percentage
+      # As percentage
+      conversion_rate: Float.round(conversion_rate * 100, 2),
       period_days: days,
       computed_at: DateTime.utc_now()
     }
@@ -74,17 +80,19 @@ defmodule ViralEngine.ViralMetricsContext do
     )
     |> Repo.all()
     |> Enum.map(fn source_data ->
-      avg_invites = if source_data.active_users > 0 do
-        source_data.total_invites / source_data.active_users
-      else
-        0.0
-      end
+      avg_invites =
+        if source_data.active_users > 0 do
+          source_data.total_invites / source_data.active_users
+        else
+          0.0
+        end
 
-      conv_rate = if source_data.total_invites > 0 do
-        source_data.total_conversions / source_data.total_invites
-      else
-        0.0
-      end
+      conv_rate =
+        if source_data.total_invites > 0 do
+          source_data.total_conversions / source_data.total_invites
+        else
+          0.0
+        end
 
       k_factor = avg_invites * conv_rate
 
@@ -141,11 +149,12 @@ defmodule ViralEngine.ViralMetricsContext do
     )
     |> Repo.all()
     |> Enum.map(fn referrer ->
-      conv_rate = if referrer.total_clicks > 0 do
-        referrer.total_conversions / referrer.total_clicks * 100
-      else
-        0.0
-      end
+      conv_rate =
+        if referrer.total_clicks > 0 do
+          referrer.total_conversions / referrer.total_clicks * 100
+        else
+          0.0
+        end
 
       Map.put(referrer, :conversion_rate, Float.round(conv_rate, 2))
     end)
@@ -159,7 +168,8 @@ defmodule ViralEngine.ViralMetricsContext do
 
     # Get conversions with timestamps
     from(e in AttributionEvent,
-      join: l in AttributionLink, on: e.link_id == l.id,
+      join: l in AttributionLink,
+      on: e.link_id == l.id,
       where: e.event_type == "conversion" and e.inserted_at > ^cutoff,
       select: %{
         link_created: l.inserted_at,
@@ -175,7 +185,8 @@ defmodule ViralEngine.ViralMetricsContext do
         %{avg_cycle_time_hours: 0.0, median_cycle_time_hours: 0.0}
 
       times ->
-        avg = Enum.sum(times) / length(times) / 3600  # Convert to hours
+        # Convert to hours
+        avg = Enum.sum(times) / length(times) / 3600
         median = Enum.at(Enum.sort(times), div(length(times), 2)) / 3600
 
         %{
@@ -192,17 +203,19 @@ defmodule ViralEngine.ViralMetricsContext do
   def compute_viral_coefficient(days \\ 7) do
     cutoff = DateTime.add(DateTime.utc_now(), -days * 24 * 60 * 60, :second)
 
-    total_users = from(l in AttributionLink,
-      where: l.inserted_at > ^cutoff,
-      select: count(l.referrer_id, :distinct)
-    )
-    |> Repo.one() || 0
+    total_users =
+      from(l in AttributionLink,
+        where: l.inserted_at > ^cutoff,
+        select: count(l.referrer_id, :distinct)
+      )
+      |> Repo.one() || 0
 
-    new_users = from(l in AttributionLink,
-      where: l.inserted_at > ^cutoff,
-      select: sum(l.conversion_count)
-    )
-    |> Repo.one() || 0
+    new_users =
+      from(l in AttributionLink,
+        where: l.inserted_at > ^cutoff,
+        select: sum(l.conversion_count)
+      )
+      |> Repo.one() || 0
 
     coefficient = if total_users > 0, do: new_users / total_users, else: 0.0
 

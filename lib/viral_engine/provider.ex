@@ -17,4 +17,11 @@ defmodule ViralEngine.Provider do
     |> cast(attrs, [:name, :cost_per_token, :avg_latency_ms, :reliability_score])
     |> validate_required([:name, :cost_per_token, :avg_latency_ms, :reliability_score])
   end
+
+  @doc """
+  Lists all providers.
+  """
+  def list_providers do
+    ViralEngine.Repo.all(__MODULE__)
+  end
 end

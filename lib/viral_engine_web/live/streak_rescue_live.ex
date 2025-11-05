@@ -36,7 +36,8 @@ defmodule ViralEngineWeb.StreakRescueLive do
       |> assign(:countdown_seconds, stats.hours_remaining * 3600)
       |> assign(:invite_link, generate_invite_link(user.id))
       |> assign(:show_invite_modal, false)
-      |> assign(:activity_type, "practice")  # practice or flashcards
+      # practice or flashcards
+      |> assign(:activity_type, "practice")
       |> assign(:urgency_level, calculate_urgency_level(stats.hours_remaining))
 
     {:ok, socket}
@@ -48,11 +49,12 @@ defmodule ViralEngineWeb.StreakRescueLive do
     new_seconds = max(0, socket.assigns.countdown_seconds - 1)
 
     # Refresh streak stats every minute
-    stats = if rem(new_seconds, 60) == 0 do
-      StreakContext.get_user_stats(socket.assigns.user_id)
-    else
-      socket.assigns.streak_stats
-    end
+    stats =
+      if rem(new_seconds, 60) == 0 do
+        StreakContext.get_user_stats(socket.assigns.user_id)
+      else
+        socket.assigns.streak_stats
+      end
 
     urgency_level = calculate_urgency_level(div(new_seconds, 3600))
 
@@ -140,40 +142,14 @@ defmodule ViralEngineWeb.StreakRescueLive do
 
   defp calculate_urgency_level(hours_remaining) do
     cond do
-      hours_remaining <= 1 -> :critical  # Red, urgent
-      hours_remaining <= 3 -> :high      # Orange, high urgency
-      hours_remaining <= 6 -> :medium    # Yellow, moderate urgency
-      true -> :low                        # Green, low urgency
-    end
-  end
-
-  defp format_countdown(seconds) do
-    hours = div(seconds, 3600)
-    minutes = div(rem(seconds, 3600), 60)
-    secs = rem(seconds, 60)
-
-    if hours > 0 do
-      "#{hours}h #{minutes}m #{secs}s"
-    else
-      "#{minutes}m #{secs}s"
-    end
-  end
-
-  defp urgency_color(urgency_level) do
-    case urgency_level do
-      :critical -> "text-red-600 bg-red-100"
-      :high -> "text-orange-600 bg-orange-100"
-      :medium -> "text-yellow-600 bg-yellow-100"
-      :low -> "text-green-600 bg-green-100"
-    end
-  end
-
-  defp urgency_message(urgency_level, hours) do
-    case urgency_level do
-      :critical -> "⚠️ URGENT: Less than 1 hour to save your streak!"
-      :high -> "🔥 Hurry! #{hours} hours left to save your #{hours}-day streak"
-      :medium -> "⏰ Your streak is at risk! Study now to keep it alive"
-      :low -> "💪 Keep your streak going strong!"
+      # Red, urgent
+      hours_remaining <= 1 -> :critical
+      # Orange, high urgency
+      hours_remaining <= 3 -> :high
+      # Yellow, moderate urgency
+      hours_remaining <= 6 -> :medium
+      # Green, low urgency
+      true -> :low
     end
   end
 end

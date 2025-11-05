@@ -3,7 +3,7 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
   alias ViralEngine.{DiagnosticContext, RallyContext, ViralPrompts, BadgeContext, XPContext}
   require Logger
 
-  on_mount ViralEngineWeb.Live.ViralPromptsHook
+  on_mount(ViralEngineWeb.Live.ViralPromptsHook)
 
   @impl true
   def mount(%{"id" => assessment_id}, %{"user_token" => user_token}, socket) do
@@ -35,8 +35,10 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
 
     # Grant XP for completing assessment (async)
     Task.start(fn ->
-      base_xp = 100  # Base XP for completing assessment
-      score_bonus = round((assessment.score || 0) * 2)  # 2 XP per score point
+      # Base XP for completing assessment
+      base_xp = 100
+      # 2 XP per score point
+      score_bonus = round((assessment.score || 0) * 2)
       XPContext.grant_xp(user.id, base_xp + score_bonus, :diagnostic_assessment)
     end)
 
@@ -196,7 +198,8 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     # Add recommendations for strong skills
     recommendations =
       if length(strong_skills) > 0 do
-        strong_skill_names = Enum.map(strong_skills, fn {skill, _} -> skill end) |> Enum.join(", ")
+        strong_skill_names =
+          Enum.map(strong_skills, fn {skill, _} -> skill end) |> Enum.join(", ")
 
         [
           "Great job on #{strong_skill_names}! Keep up the excellent work",
@@ -213,7 +216,10 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     recommendations =
       cond do
         accuracy >= 90 ->
-          ["You're performing excellently! Consider taking advanced practice tests" | recommendations]
+          [
+            "You're performing excellently! Consider taking advanced practice tests"
+            | recommendations
+          ]
 
         accuracy >= 70 ->
           ["Solid performance! Keep practicing to reach expert level" | recommendations]
@@ -222,7 +228,10 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
           ["Good start! Focus on fundamentals and practice regularly" | recommendations]
 
         true ->
-          ["Don't worry! Everyone starts somewhere. Practice daily and you'll improve" | recommendations]
+          [
+            "Don't worry! Everyone starts somewhere. Practice daily and you'll improve"
+            | recommendations
+          ]
       end
 
     recommendations
@@ -232,21 +241,6 @@ defmodule ViralEngineWeb.DiagnosticResultsLive do
     # In production, this would generate a proper shareable URL
     "https://veltutor.com/diagnostic/results/#{assessment_id}"
   end
-
-  defp get_skill_color(score) when score >= 80, do: "bg-green-500"
-  defp get_skill_color(score) when score >= 60, do: "bg-yellow-500"
-  defp get_skill_color(_score), do: "bg-red-500"
-
-  defp get_percentile_message(percentile) when percentile >= 90,
-    do: "Outstanding! You're in the top 10%"
-
-  defp get_percentile_message(percentile) when percentile >= 75,
-    do: "Great job! You're performing better than most students"
-
-  defp get_percentile_message(percentile) when percentile >= 50,
-    do: "Good work! You're right around average"
-
-  defp get_percentile_message(_percentile), do: "Keep practicing - you can improve!"
 
   defp trigger_results_rally_prompt(user_id, assessment) do
     event_data = %{

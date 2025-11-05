@@ -114,61 +114,60 @@ defmodule ViralEngineWeb.Router do
   end
 
   # Practice session routes
-  live("/practice", PracticeSessionLive)
-  live("/practice/results/:id", PracticeResultsLive)
+  live("/practice", ViralEngineWeb.PracticeSessionLive)
+  live("/practice/results/:id", ViralEngineWeb.PracticeResultsLive)
 
   # Diagnostic assessment routes
-  live("/diagnostic", DiagnosticAssessmentLive)
-  live("/diagnostic/:id", DiagnosticAssessmentLive)
-  live("/diagnostic/results/:id", DiagnosticResultsLive)
+  live("/diagnostic", ViralEngineWeb.DiagnosticAssessmentLive)
+  live("/diagnostic/:id", ViralEngineWeb.DiagnosticAssessmentLive)
+  live("/diagnostic/results/:id", ViralEngineWeb.DiagnosticResultsLive)
 
   # Flashcard study routes
-  live("/flashcards", FlashcardStudyLive)
-  live("/flashcards/study/:deck_id", FlashcardStudyLive)
+  live("/flashcards", ViralEngineWeb.FlashcardStudyLive)
+  live("/flashcards/study/:deck_id", ViralEngineWeb.FlashcardStudyLive)
 
   # Buddy challenge routes
-  live("/challenge/:token", ChallengeLive)
-  live("/auto-challenges", AutoChallengeLive)
+  live("/challenge/:token", ViralEngineWeb.ChallengeLive)
+  live("/auto-challenges", ViralEngineWeb.AutoChallengeLive)
 
   # Results Rally routes
-  live("/rally/:token", RallyLive)
+  live("/rally/:token", ViralEngineWeb.RallyLive)
 
   # Parent Progress routes (COPPA-compliant)
-  live("/parent/progress/:token", ParentProgressLive)
+  live("/parent/progress/:token", ViralEngineWeb.ParentProgressLive)
 
   # Streak Rescue routes
-  live("/streak-rescue", StreakRescueLive)
+  live("/streak-rescue", ViralEngineWeb.StreakRescueLive)
 
   # Leaderboard routes
-  live("/leaderboard", LeaderboardLive)
+  live("/leaderboard", ViralEngineWeb.LeaderboardLive)
 
   # Badge collection routes
-  live("/badges", BadgeLive)
+  live("/badges", ViralEngineWeb.BadgeLive)
 
   # Rewards shop routes
-  live("/rewards", RewardsLive)
+  live("/rewards", ViralEngineWeb.RewardsLive)
 
   # Transcript routes
-  live("/transcripts", TranscriptLive)
-  live("/transcripts/:id", TranscriptLive)
+  live("/transcripts", ViralEngineWeb.TranscriptLive)
+  live("/transcripts/:id", ViralEngineWeb.TranscriptLive)
 
   # Study session routes
-  live("/study", StudySessionLive)
-  live("/study/:token", StudySessionLive)
+  live("/study", ViralEngineWeb.StudySessionLive)
+  live("/study/:token", ViralEngineWeb.StudySessionLive)
 
   # Progress reel routes
-  live("/reels", ProgressReelLive)
-  live("/reel/:token", ProgressReelLive)
+  live("/reels", ViralEngineWeb.ProgressReelLive)
+  live("/reel/:token", ViralEngineWeb.ProgressReelLive)
 
   # Prep pack routes
-  live("/prep-packs", PrepPackLive)
-  live("/prep/:token", PrepPackLive)
+  live("/prep-packs", ViralEngineWeb.PrepPackLive)
+  live("/prep/:token", ViralEngineWeb.PrepPackLive)
 
   # Dashboard routes
   scope "/dashboard", ViralEngineWeb do
     pipe_through([:fetch_session, :protect_from_forgery])
 
-    live("/presence", PresenceLive, :index)
     live("/presence", PresenceLive, :index)
     live("/performance", PerformanceDashboardLive)
     live("/costs", CostDashboardLive)

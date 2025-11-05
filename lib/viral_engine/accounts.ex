@@ -19,4 +19,14 @@ defmodule ViralEngine.Accounts do
     |> User.changeset(attrs)
     |> Repo.insert()
   end
+
+  def change_user_registration(%User{} = user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
+
+  def update_user_registration(%User{} = user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
+  end
 end

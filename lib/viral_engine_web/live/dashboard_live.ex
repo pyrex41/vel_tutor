@@ -3,6 +3,7 @@ defmodule ViralEngineWeb.DashboardLive do
 
   alias ViralEngine.Presence
   alias ViralEngine.Accounts
+  alias ViralEngine.PresenceTracker
 
   @impl true
   def mount(_params, %{"user_token" => user_token}, socket) do
@@ -47,7 +48,7 @@ defmodule ViralEngineWeb.DashboardLive do
     {:ok, updated_user} = Accounts.update_user(user, %{presence_opt_out: new_opt_out})
 
     if new_opt_out do
-      Phoenix.Presence.untrack(self(), "global_users", user.id)
+      PresenceTracker.untrack_user(user.id, nil, "global_users")
     else
       Presence.track_global(self(), user.id, %{name: user.name || "Anonymous"})
     end
@@ -72,6 +73,7 @@ defmodule ViralEngineWeb.DashboardLive do
     {:noreply, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div>

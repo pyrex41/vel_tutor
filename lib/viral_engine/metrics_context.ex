@@ -274,6 +274,18 @@ defmodule ViralEngine.MetricsContext do
   end
 
   @doc """
+  Records provider selection for analytics and optimization.
+  """
+  def record_provider_selection(provider_id, criteria) do
+    # Log the selection for analytics
+    Logger.info("Provider selected: #{provider_id}, criteria: #{inspect(criteria)}")
+
+    # In a real implementation, you might store this in a separate table
+    # for provider selection analytics
+    :ok
+  end
+
+  @doc """
   Starts a background task to aggregate metrics periodically.
   This would typically be called from an application supervisor.
   """

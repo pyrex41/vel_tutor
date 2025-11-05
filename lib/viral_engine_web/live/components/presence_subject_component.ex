@@ -1,5 +1,6 @@
 defmodule ViralEngineWeb.PresenceSubjectComponent do
   use ViralEngineWeb, :live_component
+  alias ViralEngine.PresenceTracker
 
   def render(assigns) do
     ~H"""

@@ -70,6 +70,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
   end
 
   # Timer tick
+  @impl true
   def handle_info(:tick, socket) do
     if socket.assigns.stage == :assessment && socket.assigns.assessment do
       assessment = socket.assigns.assessment
@@ -192,7 +193,8 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
           diagnostic_assessment_id: assessment.id,
           diagnostic_question_id: current_question.id,
           user_answer: answer,
-          time_spent_seconds: current_question.time_allocated_seconds - assessment.time_remaining_seconds
+          time_spent_seconds:
+            current_question.time_allocated_seconds - assessment.time_remaining_seconds
         })
 
       # Show feedback
@@ -225,10 +227,4 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
   end
 
   # Helper functions
-
-  defp format_time(seconds) do
-    minutes = div(seconds, 60)
-    secs = rem(seconds, 60)
-    "#{String.pad_leading(to_string(minutes), 2, "0")}:#{String.pad_leading(to_string(secs), 2, "0")}"
-  end
 end

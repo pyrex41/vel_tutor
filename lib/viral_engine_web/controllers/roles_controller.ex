@@ -3,7 +3,7 @@ defmodule ViralEngineWeb.RolesController do
 
   # Deprecated :namespace option - use plug :put_layout instead if needed
   # Set formats for proper rendering
-  plug :accepts, ["html", "json"]
+  plug(:accepts, ["html", "json"])
 
   alias ViralEngine.RBACContext
   require Logger
@@ -31,7 +31,7 @@ defmodule ViralEngineWeb.RolesController do
           |> put_status(:created)
           |> render(:show, user_role: user_role)
 
-        {:error, changeset} ->
+        {:error, %Ecto.Changeset{} = changeset} ->
           conn
           |> put_status(:unprocessable_entity)
           |> render("error.json", changeset: changeset)

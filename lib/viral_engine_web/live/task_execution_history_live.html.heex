@@ -133,7 +133,7 @@
                 Details
               </button>
               <%= if task.status == "failed" and task.error_message do %>
-                <button onclick={"showErrorDetails('#{Phoenix.HTML.html_escape(task.error_message)}')"} class="btn-error">
+                <button onclick={"showErrorDetails('#{Phoenix.HTML.html_escape(task.error_message) |> Phoenix.HTML.safe_to_string()}')"} class="btn-error">
                   Error
                 </button>
               <% end %>

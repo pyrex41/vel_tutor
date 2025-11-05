@@ -1,10 +1,10 @@
 defmodule ViralEngineWeb.FlashcardStudyLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{ViralPrompts, StreakContext}
+  alias ViralEngine.{ViralPrompts, StreakContext, FlashcardContext}
   # alias ViralEngine.AchievementContext  # Unused - commented for future use
   require Logger
 
-  on_mount ViralEngineWeb.Live.ViralPromptsHook
+  on_mount(ViralEngineWeb.Live.ViralPromptsHook)
 
   @impl true
   def mount(%{"deck_id" => deck_id}, %{"user_token" => user_token}, socket) do
@@ -79,6 +79,7 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
   end
 
   # Timer tick
+  @impl true
   def handle_info(:tick, socket) do
     if socket.assigns.stage == :studying do
       new_duration = socket.assigns.session_duration + 1
@@ -100,11 +101,16 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
   end
 
   @impl true
-  def handle_event("generate_ai_deck", %{"subject" => subject, "topic" => topic, "difficulty" => _difficulty}, socket) do
-    diff = String.to_integer(_difficulty)
+  def handle_event(
+        "generate_ai_deck",
+        %{"subject" => subject, "topic" => topic, "difficulty" => difficulty},
+        socket
+      ) do
+    diff = String.to_integer(difficulty)
 
     # Generate AI deck (always succeeds in current implementation)
-    {:ok, %{deck: deck}} = FlashcardContext.generate_ai_deck(socket.assigns.user.id, subject, topic, diff, 10)
+    {:ok, %{deck: deck}} =
+      FlashcardContext.generate_ai_deck(socket.assigns.user.id, subject, topic, diff, 10)
 
     {:noreply,
      socket
@@ -135,7 +141,11 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
 
     # Update session stats
     cards_reviewed = socket.assigns.cards_reviewed + 1
-    cards_mastered = if review.is_mastered, do: socket.assigns.cards_mastered + 1, else: socket.assigns.cards_mastered
+
+    cards_mastered =
+      if review.is_mastered,
+        do: socket.assigns.cards_mastered + 1,
+        else: socket.assigns.cards_mastered
 
     # Update database session
     FlashcardContext.update_study_session(session, %{
@@ -218,15 +228,18 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
       cond do
         session.score == 100 ->
           Logger.info("Achievement unlocked: Perfect Session for user #{user_id}")
-          # AchievementContext.unlock_achievement(user_id, "perfect_flashcard_session")
+
+        # AchievementContext.unlock_achievement(user_id, "perfect_flashcard_session")
 
         session.score >= 80 ->
           Logger.info("Achievement progress: High Scorer for user #{user_id}")
-          # AchievementContext.increment_achievement(user_id, "high_scorer", 1)
+
+        # AchievementContext.increment_achievement(user_id, "high_scorer", 1)
 
         session.cards_reviewed >= 50 ->
           Logger.info("Achievement unlocked: Flashcard Master for user #{user_id}")
-          # AchievementContext.unlock_achievement(user_id, "flashcard_master_50")
+
+        # AchievementContext.unlock_achievement(user_id, "flashcard_master_50")
 
         true ->
           :ok
@@ -235,39 +248,6 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
   end
 
   # Helper functions
-
-  defp format_duration(seconds) do
-    minutes = div(seconds, 60)
-    secs = rem(seconds, 60)
-
-    if minutes > 0 do
-      "#{minutes}m #{secs}s"
-    else
-      "#{secs}s"
-    end
-  end
-
-  defp get_rating_text(rating) do
-    case rating do
-      1 -> "Again"
-      2 -> "Hard"
-      3 -> "Good"
-      4 -> "Easy"
-      5 -> "Very Easy"
-      _ -> "Rate"
-    end
-  end
-
-  defp get_rating_color(rating) do
-    case rating do
-      1 -> "bg-red-500"
-      2 -> "bg-orange-500"
-      3 -> "bg-yellow-500"
-      4 -> "bg-green-500"
-      5 -> "bg-blue-500"
-      _ -> "bg-gray-500"
-    end
-  end
 
   defp trigger_completion_prompt(user_id, session) do
     event_data = %{
