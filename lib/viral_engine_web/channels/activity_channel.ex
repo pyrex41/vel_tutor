@@ -1,22 +1,40 @@
 defmodule ViralEngineWeb.ActivityChannel do
+  @moduledoc """
+  Channel for real-time activity updates.
+  Handles global and subject-specific activity streams.
+  """
+
   use ViralEngineWeb, :channel
   alias ViralEngine.{Activities, PubSubHelper}
 
+  # Use same limit as Activities context for consistency
+  @initial_activities_limit 50
+
   @impl true
   def join("activity:global", _payload, socket) do
-    # Subscribe to activity PubSub topic
-    PubSubHelper.subscribe_to_activity()
+    # Authentication check - COPPA/FERPA compliance
+    if socket.assigns[:user_id] do
+      # Subscribe to activity PubSub topic
+      PubSubHelper.subscribe_to_activity()
 
-    # Send recent activities
-    recent_activities = Activities.list_recent_activities(limit: 50)
-    {:ok, %{activities: recent_activities}, socket}
+      # Send recent activities
+      recent_activities = Activities.list_recent_activities(limit: @initial_activities_limit)
+      {:ok, %{activities: recent_activities}, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
   end
 
   def join("activity:subject:" <> subject_id, _payload, socket) do
-    PubSubHelper.subscribe_to_subject_activity(subject_id)
+    # Authentication check - COPPA/FERPA compliance
+    if socket.assigns[:user_id] do
+      PubSubHelper.subscribe_to_subject_activity(subject_id)
 
-    recent_activities = Activities.list_subject_activities(subject_id, limit: 50)
-    {:ok, %{activities: recent_activities}, socket}
+      recent_activities = Activities.list_subject_activities(subject_id, limit: @initial_activities_limit)
+      {:ok, %{activities: recent_activities}, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
   end
 
   @impl true

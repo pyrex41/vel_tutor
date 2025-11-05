@@ -6,9 +6,18 @@ export default defineConfig(({ mode }) => ({
   plugins: [],
   resolve: {
     alias: {
-      phoenix: resolve(__dirname, '../deps/phoenix/assets/js/phoenix/index.js'),
-      phoenix_html: resolve(__dirname, '../deps/phoenix_html/priv/static/phoenix_html.js'),
-      phoenix_live_view: resolve(__dirname, '../deps/phoenix_live_view/assets/js/phoenix_live_view/index.ts'),
+      // Phoenix dependencies are in Elixir deps, not npm
+      // These paths are standard across Phoenix projects
+      // If deps location changes, update via MIX_DEPS_PATH env var
+      phoenix: process.env.MIX_DEPS_PATH
+        ? resolve(process.env.MIX_DEPS_PATH, 'phoenix/assets/js/phoenix/index.js')
+        : resolve(__dirname, '../deps/phoenix/assets/js/phoenix/index.js'),
+      phoenix_html: process.env.MIX_DEPS_PATH
+        ? resolve(process.env.MIX_DEPS_PATH, 'phoenix_html/priv/static/phoenix_html.js')
+        : resolve(__dirname, '../deps/phoenix_html/priv/static/phoenix_html.js'),
+      phoenix_live_view: process.env.MIX_DEPS_PATH
+        ? resolve(process.env.MIX_DEPS_PATH, 'phoenix_live_view/assets/js/phoenix_live_view/index.ts')
+        : resolve(__dirname, '../deps/phoenix_live_view/assets/js/phoenix_live_view/index.ts'),
       morphdom: resolve(__dirname, 'node_modules/morphdom/dist/morphdom-esm.js')
     }
   },

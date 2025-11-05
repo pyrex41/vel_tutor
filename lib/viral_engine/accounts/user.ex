@@ -6,6 +6,7 @@ defmodule ViralEngine.Accounts.User do
     field(:email, :string)
     field(:name, :string)
     field(:presence_opt_out, :boolean, default: false)
+    field(:activity_opt_out, :boolean, default: false)
     field(:presence_status, :string, default: "offline")
     field(:last_seen_at, :utc_datetime)
     field(:session_token, :string)
@@ -21,6 +22,7 @@ defmodule ViralEngine.Accounts.User do
       :email,
       :name,
       :presence_opt_out,
+      :activity_opt_out,
       :presence_status,
       :last_seen_at,
       :session_token
