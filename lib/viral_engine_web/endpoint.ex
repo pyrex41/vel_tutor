@@ -20,7 +20,7 @@ defmodule ViralEngineWeb.Endpoint do
     at: "/",
     from: :viral_engine,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: ~w(assets css js fonts images favicon.ico robots.txt)
   )
 
   # Code reloading can be explicitly enabled under the

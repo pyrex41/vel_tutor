@@ -385,7 +385,7 @@ defmodule ViralEngineWeb.BadgeLive do
     <!-- Share Modal -->
     <%= if @show_share_modal && @selected_badge do %>
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" phx-click="close_share_modal">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" phx-click={JS.exec("phx-remove", to: ".share-modal")}>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" phx-click={Phoenix.LiveView.JS.exec("phx-remove", to: ".share-modal")}>
           <div class="text-center">
             <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 mb-4 text-6xl">
               <%= badge_icon(@selected_badge.badge.category) %>

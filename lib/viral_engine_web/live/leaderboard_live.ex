@@ -491,7 +491,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
     <!-- Invite Modal -->
     <%= if @show_invite_modal do %>
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" phx-click="toggle_invite_modal">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" phx-click={JS.exec("phx-remove", to: ".invite-modal")}>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" phx-click={Phoenix.LiveView.JS.exec("phx-remove", to: ".invite-modal")}>
           <div class="text-center">
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
               <svg class="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

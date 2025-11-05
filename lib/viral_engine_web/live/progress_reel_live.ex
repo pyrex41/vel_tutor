@@ -497,23 +497,6 @@ defmodule ViralEngineWeb.ProgressReelLive do
     end
   end
 
-  defp reel_type_color(type) do
-    case type do
-      "weekly" -> "text-blue-600"
-      "monthly" -> "text-green-600"
-      "achievement" -> "text-yellow-600"
-      "milestone" -> "text-purple-600"
-      _ -> "text-gray-600"
-    end
-  end
-
-  defp format_timestamp(timestamp) do
-    case timestamp do
-      %DateTime{} = dt -> Calendar.strftime(dt, "%b %d, %Y at %I:%M %p")
-      _ -> "Unknown time"
-    end
-  end
-
   defp time_ago(timestamp) do
     case timestamp do
       %DateTime{} = dt ->
@@ -537,11 +520,6 @@ defmodule ViralEngineWeb.ProgressReelLive do
     views = story.views || 0
     reactions = length(story.reactions || [])
     "#{views} views • #{reactions} reactions"
-  end
-
-  defp is_expired?(reel) do
-    # Simple expiration check - could be more sophisticated
-    false
   end
 
   defp stats_display(reel) do
