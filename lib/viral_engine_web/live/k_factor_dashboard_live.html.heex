@@ -1,0 +1,416 @@
+<div class="k-factor-dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">📊 K-Factor & Viral Analytics Dashboard</h1>
+    <div class="last-updated">Last updated: <%= time_ago(@last_updated) %></div>
+  </div>
+
+  <!-- Period Selector -->
+  <div class="period-selector">
+    <form phx-change="change_period">
+      <label for="days">Time Period:</label>
+      <select name="days" id="days">
+        <option value="7" selected={@period_days == 7}>Last 7 Days</option>
+        <option value="14" selected={@period_days == 14}>Last 14 Days</option>
+        <option value="30" selected={@period_days == 30}>Last 30 Days</option>
+        <option value="90" selected={@period_days == 90}>Last 90 Days</option>
+      </select>
+    </form>
+    <button phx-click="refresh" class="btn-refresh">🔄 Refresh</button>
+  </div>
+
+  <!-- Key Metrics Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Overall K-Factor</div>
+      <div class={"metric-value " <> k_factor_status(@k_factor_data.k_factor)}>
+        <%= format_decimal(@k_factor_data.k_factor) %>
+      </div>
+      <div class="metric-description">
+        <%= k_factor_description(@k_factor_data.k_factor) %>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Viral Coefficient</div>
+      <div class="metric-value">
+        <%= format_decimal(@viral_coefficient.viral_coefficient) %>
+      </div>
+      <div class="metric-description">
+        New users per existing user
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Conversion Rate</div>
+      <div class="metric-value">
+        <%= format_percentage(@k_factor_data.conversion_rate) %>
+      </div>
+      <div class="metric-description">
+        <%= @k_factor_data.total_conversions %> / <%= @k_factor_data.total_invites %> invites
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Cycle Time</div>
+      <div class="metric-value">
+        <%= format_decimal(@cycle_time.median_cycle_time_hours) %>h
+      </div>
+      <div class="metric-description">
+        Median time to conversion
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Active Referrers</div>
+      <div class="metric-value">
+        <%= @k_factor_data.active_users %>
+      </div>
+      <div class="metric-description">
+        Users who sent invites
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Avg Invites/User</div>
+      <div class="metric-value">
+        <%= format_decimal(@k_factor_data.avg_invites_per_user) %>
+      </div>
+      <div class="metric-description">
+        Average sharing activity
+      </div>
+    </div>
+  </div>
+
+  <!-- K-Factor by Loop Type -->
+  <div class="section">
+    <h2 class="section-title">K-Factor by Viral Loop</h2>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Loop Type</th>
+            <th>K-Factor</th>
+            <th>Active Users</th>
+            <th>Total Invites</th>
+            <th>Conversions</th>
+            <th>Conv. Rate</th>
+            <th>Avg Invites/User</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for source <- @k_by_source do %>
+            <tr>
+              <td><strong><%= source_display_name(source.source) %></strong></td>
+              <td>
+                <span class={"k-factor-badge " <> k_factor_status(source.k_factor)}>
+                  <%= format_decimal(source.k_factor) %>
+                </span>
+              </td>
+              <td><%= source.active_users %></td>
+              <td><%= source.total_invites %></td>
+              <td><%= source.total_conversions %></td>
+              <td><%= format_percentage(source.conversion_rate) %></td>
+              <td><%= format_decimal(source.avg_invites_per_user) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Top Referrers -->
+  <div class="section">
+    <h2 class="section-title">🏆 Top Referrers</h2>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>User ID</th>
+            <th>Links Created</th>
+            <th>Total Clicks</th>
+            <th>Conversions</th>
+            <th>Conv. Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for {referrer, index} <- Enum.with_index(@top_referrers, 1) do %>
+            <tr>
+              <td>
+                <%= if index <= 3 do %>
+                  <span class="rank-badge">🥇<%= index %></span>
+                <% else %>
+                  <span class="rank-number"><%= index %></span>
+                <% end %>
+              </td>
+              <td>#<%= referrer.referrer_id %></td>
+              <td><%= referrer.links_created %></td>
+              <td><%= referrer.total_clicks %></td>
+              <td><%= referrer.total_conversions %></td>
+              <td><%= format_percentage(referrer.conversion_rate) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Growth Timeline Chart -->
+  <div class="section">
+    <h2 class="section-title">📈 Growth Timeline</h2>
+    <div class="chart-container">
+      <canvas id="growth-chart" phx-hook="GrowthChart" data-timeline={Jason.encode!(@timeline)}></canvas>
+    </div>
+  </div>
+
+  <!-- Detailed Metrics -->
+  <div class="section">
+    <h2 class="section-title">📋 Detailed Metrics</h2>
+    <div class="details-grid">
+      <div class="detail-item">
+        <strong>Total Invites Sent:</strong> <%= @k_factor_data.total_invites %>
+      </div>
+      <div class="detail-item">
+        <strong>Total Conversions:</strong> <%= @k_factor_data.total_conversions %>
+      </div>
+      <div class="detail-item">
+        <strong>Avg Cycle Time:</strong> <%= format_decimal(@cycle_time.avg_cycle_time_hours) %> hours
+      </div>
+      <div class="detail-item">
+        <strong>Sample Size:</strong> <%= Map.get(@cycle_time, :sample_size, 0) %> conversions
+      </div>
+      <div class="detail-item">
+        <strong>New Users (Referred):</strong> <%= @viral_coefficient.new_users_referred %>
+      </div>
+      <div class="detail-item">
+        <strong>Existing Users:</strong> <%= @viral_coefficient.existing_users %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.k-factor-dashboard {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+.last-updated {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.period-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.period-selector select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.btn-refresh {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-refresh:hover {
+  background: #2563eb;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.metric-value.excellent {
+  color: #10b981;
+}
+
+.metric-value.good {
+  color: #3b82f6;
+}
+
+.metric-value.warning {
+  color: #f59e0b;
+}
+
+.metric-value.poor {
+  color: #ef4444;
+}
+
+.metric-description {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: #f9fafb;
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.k-factor-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.k-factor-badge.excellent {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.k-factor-badge.good {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.k-factor-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.k-factor-badge.poor {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.rank-badge {
+  font-size: 16px;
+}
+
+.rank-number {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.chart-container {
+  height: 400px;
+  padding: 16px 0;
+}
+
+#growth-chart {
+  max-width: 100%;
+  max-height: 400px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.detail-item {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.detail-item strong {
+  color: #6b7280;
+  font-weight: 500;
+}
+</style>
+
+<script>
+window.addEventListener('phx:page-loading-stop', () => {
+  // Auto-refresh every 60 seconds
+  setTimeout(() => {
+    const refreshBtn = document.querySelector('.btn-refresh');
+    if (refreshBtn) {
+      refreshBtn.click();
+    }
+  }, 60000);
+});
+</script>

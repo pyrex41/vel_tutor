@@ -1,7 +1,11 @@
 defmodule ViralEngineWeb.RallyLive do
   use ViralEngineWeb, :live_view
   alias ViralEngine.{RallyContext, DiagnosticContext}
+  alias ViralEngineWeb.Live.ViralPromptsHook
   require Logger
+
+  # Use the viral prompts hook for experiment tracking
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(%{"token" => token}, session, socket) do
@@ -55,6 +59,9 @@ defmodule ViralEngineWeb.RallyLive do
       |> assign(:active_users, active_users)
       |> assign(:share_link, RallyContext.generate_rally_link(rally))
       |> stream(:participants, leaderboard.participants, id: fn p -> "user-#{p.user_id}" end)
+
+    # Log exposure for results_rally experiment when leaderboard/share UI is shown
+    ViralPromptsHook.log_variant_exposure(socket, "results_rally")
 
     {:ok, socket}
   end
