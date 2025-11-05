@@ -9,6 +9,11 @@ defmodule ViralEngineWeb.Router do
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
 
+    # Development authentication bypass for MVP testing
+    if Mix.env() == :dev do
+      plug(ViralEngineWeb.Plugs.DevAuthPlug)
+    end
+
     # Test-only authentication bypass for E2E tests
     if Mix.env() == :test do
       plug(ViralEngineWeb.Plugs.TestAuthPlug)
