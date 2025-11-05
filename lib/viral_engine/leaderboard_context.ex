@@ -3,6 +3,7 @@ defmodule ViralEngine.LeaderboardContext do
   Context module for managing leaderboards across different scopes.
 
   Supports global, subject-specific, and cohort-based leaderboards with fairness filters.
+  Includes caching for performance optimization.
   """
 
   import Ecto.Query
@@ -11,6 +12,7 @@ defmodule ViralEngine.LeaderboardContext do
 
   @default_limit 100
   @default_time_period 7  # days
+  @cache_ttl 60_000  # 60 seconds cache TTL
 
   @doc """
   Gets global leaderboard across all subjects.
@@ -46,18 +48,30 @@ defmodule ViralEngine.LeaderboardContext do
   end
 
   @doc """
-  Gets subject-specific leaderboard.
+  Gets subject-specific leaderboard with caching.
 
   ## Parameters
   - subject: Subject name (e.g., "math", "science")
-  - opts: Options (limit, time_period, metric, grade_level)
+  - opts: Options (limit, time_period, metric, grade_level, use_cache)
   """
   def get_subject_leaderboard(subject, opts \\ []) do
     limit = opts[:limit] || @default_limit
     time_period = opts[:time_period] || @default_time_period
     metric = opts[:metric] || :total_score
     grade_level = opts[:grade_level]
+    use_cache = opts[:use_cache] != false  # Default to true
 
+    if use_cache do
+      cache_key = build_cache_key(:subject, subject, metric, time_period, grade_level, limit)
+      get_cached_or_compute(cache_key, fn ->
+        fetch_subject_leaderboard(subject, limit, time_period, metric, grade_level)
+      end)
+    else
+      fetch_subject_leaderboard(subject, limit, time_period, metric, grade_level)
+    end
+  end
+
+  defp fetch_subject_leaderboard(subject, limit, time_period, metric, grade_level) do
     cutoff = DateTime.utc_now() |> DateTime.add(-time_period * 24 * 3600, :second)
 
     case metric do
@@ -294,6 +308,112 @@ defmodule ViralEngine.LeaderboardContext do
 
       {:not_ranked, _} ->
         []
+    end
+  end
+
+  @doc """
+  Gets mini-leaderboard for display on subject pages (top 10, daily/weekly).
+
+  Optimized with caching for frequent access.
+  """
+  def get_mini_leaderboard(subject, period \\ :daily) do
+    time_period = case period do
+      :daily -> 1
+      :weekly -> 7
+      _ -> 1
+    end
+
+    get_subject_leaderboard(subject,
+      limit: 10,
+      time_period: time_period,
+      metric: :total_score,
+      use_cache: true
+    )
+  end
+
+  @doc """
+  Invalidates leaderboard cache for a subject.
+
+  Should be called when scores are updated to refresh the leaderboard.
+  """
+  def invalidate_cache(subject) do
+    # Invalidate daily and weekly caches for all metrics
+    for period <- [1, 7],
+        metric <- [:total_score, :average_score, :sessions],
+        limit <- [10, 100] do
+      cache_key = build_cache_key(:subject, subject, metric, period, nil, limit)
+      :ets.delete(:leaderboard_cache, cache_key)
+    end
+
+    # Broadcast cache invalidation to other nodes if clustered
+    Phoenix.PubSub.broadcast(
+      ViralEngine.PubSub,
+      "leaderboard:#{subject}",
+      {:cache_invalidated, subject}
+    )
+
+    :ok
+  end
+
+  @doc """
+  Broadcasts leaderboard update to subscribed clients.
+  """
+  def broadcast_update(subject) do
+    # Get fresh leaderboard data
+    daily = get_mini_leaderboard(subject, :daily)
+    weekly = get_mini_leaderboard(subject, :weekly)
+
+    Phoenix.PubSub.broadcast(
+      ViralEngine.PubSub,
+      "leaderboard:#{subject}",
+      {:leaderboard_updated, %{daily: daily, weekly: weekly, subject: subject}}
+    )
+
+    :ok
+  end
+
+  # Private caching functions
+
+  defp build_cache_key(scope, subject, metric, time_period, grade_level, limit) do
+    {scope, subject, metric, time_period, grade_level, limit}
+  end
+
+  defp get_cached_or_compute(cache_key, compute_fn) do
+    # Initialize ETS table if not exists
+    ensure_cache_table()
+
+    case :ets.lookup(:leaderboard_cache, cache_key) do
+      [{^cache_key, value, expires_at}] ->
+        if DateTime.compare(DateTime.utc_now(), expires_at) == :lt do
+          # Cache hit, return cached value
+          value
+        else
+          # Cache expired, recompute
+          compute_and_cache(cache_key, compute_fn)
+        end
+
+      [] ->
+        # Cache miss, compute and cache
+        compute_and_cache(cache_key, compute_fn)
+    end
+  end
+
+  defp compute_and_cache(cache_key, compute_fn) do
+    value = compute_fn.()
+    expires_at = DateTime.add(DateTime.utc_now(), @cache_ttl, :millisecond)
+
+    :ets.insert(:leaderboard_cache, {cache_key, value, expires_at})
+
+    value
+  end
+
+  defp ensure_cache_table do
+    case :ets.whereis(:leaderboard_cache) do
+      :undefined ->
+        :ets.new(:leaderboard_cache, [:set, :public, :named_table])
+
+      _ ->
+        :ok
     end
   end
 end

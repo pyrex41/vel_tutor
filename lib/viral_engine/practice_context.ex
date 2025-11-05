@@ -4,7 +4,7 @@ defmodule ViralEngine.PracticeContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer}
+  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer, LeaderboardContext}
   require Logger
 
   @doc """
@@ -77,7 +77,7 @@ defmodule ViralEngine.PracticeContext do
 
       result = update_session(session, %{completed: true, score: score})
 
-      # Create activity event for practice completion
+      # Create activity event and update leaderboards
       with {:ok, updated_session} <- result do
         ViralEngine.Activities.create_event(%{
           user_id: updated_session.user_id,
@@ -90,6 +90,12 @@ defmodule ViralEngine.PracticeContext do
           },
           visibility: "public"
         })
+
+        # Invalidate leaderboard cache and broadcast update
+        if updated_session.subject do
+          LeaderboardContext.invalidate_cache(updated_session.subject)
+          LeaderboardContext.broadcast_update(updated_session.subject)
+        end
 
         {:ok, updated_session}
       end
