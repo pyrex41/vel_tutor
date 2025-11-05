@@ -86,7 +86,7 @@ defmodule ViralEngineWeb.DashboardLive do
 
         <!-- Quick Actions -->
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <a href="/diagnostic" class="bg-card text-card-foreground rounded-lg border p-6 hover:shadow-md transition-all hover:scale-[1.02] block" aria-label="Start diagnostic assessment">
+          <a href="/diagnostic" class="card-hover bg-card text-card-foreground rounded-lg border p-6 block" aria-label="Start diagnostic assessment">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -100,7 +100,7 @@ defmodule ViralEngineWeb.DashboardLive do
             </div>
           </a>
 
-          <a href="/practice" class="bg-card text-card-foreground rounded-lg border p-6 hover:shadow-md transition-all hover:scale-[1.02] block" aria-label="Start practice session">
+          <a href="/practice" class="card-hover bg-card text-card-foreground rounded-lg border p-6 block" aria-label="Start practice session">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -114,7 +114,7 @@ defmodule ViralEngineWeb.DashboardLive do
             </div>
           </a>
 
-          <a href="/study" class="bg-card text-card-foreground rounded-lg border p-6 hover:shadow-md transition-all hover:scale-[1.02] block" aria-label="Join study session">
+          <a href="/study" class="card-hover bg-card text-card-foreground rounded-lg border p-6 block" aria-label="Join study session">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -128,7 +128,7 @@ defmodule ViralEngineWeb.DashboardLive do
             </div>
           </a>
 
-          <a href="/flashcards" class="bg-card text-card-foreground rounded-lg border p-6 hover:shadow-md transition-all hover:scale-[1.02] block" aria-label="Study flashcards">
+          <a href="/flashcards" class="card-hover bg-card text-card-foreground rounded-lg border p-6 block" aria-label="Study flashcards">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
