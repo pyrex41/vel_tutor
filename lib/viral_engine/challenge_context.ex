@@ -6,7 +6,7 @@ defmodule ViralEngine.ChallengeContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, BuddyChallenge, PracticeContext}
+  alias ViralEngine.{Repo, BuddyChallenge, PracticeContext, MicroDeck, AttributionContext}
   require Logger
 
   @challenge_expiry_days 7
@@ -29,27 +29,44 @@ defmodule ViralEngine.ChallengeContext do
     session = PracticeContext.get_session(session_id)
 
     if session && session.user_id == challenger_id && session.completed do
-      # Generate signed token
-      token = generate_challenge_token(challenger_id, session_id)
-      expires_at = DateTime.utc_now() |> DateTime.add(@challenge_expiry_days * 24 * 3600, :second)
+      # Generate 5-question micro-deck
+      case MicroDeck.generate(session_id, strategy: opts[:strategy] || :learning_focused) do
+        {:ok, micro_deck} ->
+          # Generate signed token
+          token = generate_challenge_token(challenger_id, session_id)
+          expires_at = DateTime.utc_now() |> DateTime.add(@challenge_expiry_days * 24 * 3600, :second)
 
-      attrs = %{
-        challenger_id: challenger_id,
-        challenged_user_id: opts[:challenged_user_id],
-        challenged_email: opts[:challenged_email],
-        session_id: session_id,
-        subject: session.subject,
-        challenger_score: session.score || 0,
-        challenge_token: token,
-        status: "pending",
-        expires_at: expires_at,
-        share_method: opts[:share_method] || "link",
-        metadata: opts[:metadata] || %{}
-      }
+          # Create attribution link for tracking
+          {:ok, attribution_link} = create_challenge_attribution_link(challenger_id, session_id, token)
 
-      %BuddyChallenge{}
-      |> BuddyChallenge.changeset(attrs)
-      |> Repo.insert()
+          metadata = Map.merge(opts[:metadata] || %{}, %{
+            "micro_deck" => micro_deck,
+            "attribution_link_id" => attribution_link.id,
+            "attribution_token" => attribution_link.link_token
+          })
+
+          attrs = %{
+            challenger_id: challenger_id,
+            challenged_user_id: opts[:challenged_user_id],
+            challenged_email: opts[:challenged_email],
+            session_id: session_id,
+            subject: session.subject,
+            challenger_score: session.score || 0,
+            challenge_token: token,
+            status: "pending",
+            expires_at: expires_at,
+            share_method: opts[:share_method] || "link",
+            metadata: metadata
+          }
+
+          %BuddyChallenge{}
+          |> BuddyChallenge.changeset(attrs)
+          |> Repo.insert()
+
+        {:error, reason} ->
+          Logger.error("Failed to generate micro-deck for session #{session_id}: #{inspect(reason)}")
+          {:error, :micro_deck_generation_failed}
+      end
     else
       {:error, :invalid_session}
     end
@@ -63,6 +80,33 @@ defmodule ViralEngine.ChallengeContext do
     :crypto.hash(:sha256, data <> @token_salt)
     |> Base.url_encode64(padding: false)
     |> String.slice(0, 32)
+  end
+
+  @doc """
+  Creates an attribution link for tracking buddy challenge conversions.
+  """
+  defp create_challenge_attribution_link(challenger_id, session_id, challenge_token) do
+    target_url = "/challenge/#{challenge_token}"
+
+    AttributionContext.create_attribution_link(
+      challenger_id,
+      "buddy_challenge",
+      target_url,
+      campaign: "micro_deck_challenge",
+      metadata: %{
+        session_id: session_id,
+        challenge_token: challenge_token
+      },
+      expires_in_days: @challenge_expiry_days
+    )
+  end
+
+  @doc """
+  Generates a shareable challenge URL.
+  """
+  def generate_challenge_url(challenge) do
+    base_url = ViralEngineWeb.Endpoint.url()
+    "#{base_url}/challenge/#{challenge.challenge_token}"
   end
 
   @doc """
@@ -263,18 +307,50 @@ defmodule ViralEngine.ChallengeContext do
 
   defp grant_challenge_rewards(%BuddyChallenge{reward_granted: true}), do: :ok
   defp grant_challenge_rewards(challenge) do
-    # Grant XP/rewards to both users
+    # Grant Streak Shields and XP to both users
     Task.start(fn ->
-      # Winner gets 50 XP, challenger gets 25 XP for creating challenge
-      winner_xp = 50
-      creator_xp = 25
+      # Both users get Streak Shield for completing the challenge
+      # Winner gets bonus XP
+      streak_shield_reward = "streak_shield"
+      winner_xp = 75
+      participant_xp = 50
+
+      Logger.info(
+        "Granting Streak Shield to challenger #{challenge.challenger_id} and challenged #{challenge.challenged_user_id}"
+      )
 
       Logger.info("Granting #{winner_xp} XP to winner #{challenge.winner_id}")
-      Logger.info("Granting #{creator_xp} XP to challenger #{challenge.challenger_id}")
+      Logger.info("Granting #{participant_xp} XP to participant")
 
-      # In production, would call RewardsContext.grant_xp/2
+      # Track attribution conversion for viral metric
+      if challenge.metadata["attribution_token"] do
+        AttributionContext.track_conversion(
+          challenge.metadata["attribution_token"],
+          challenge.challenged_user_id,
+          participant_xp
+        )
+      end
+
+      # In production, integrate with RewardsContext for Streak Shield
+      # RewardsContext.grant_streak_shield(challenge.challenger_id)
+      # RewardsContext.grant_streak_shield(challenge.challenged_user_id)
       # RewardsContext.grant_xp(challenge.winner_id, winner_xp)
-      # RewardsContext.grant_xp(challenge.challenger_id, creator_xp)
+      # RewardsContext.grant_xp(other_user_id, participant_xp)
+
+      # Broadcast reward notifications
+      Phoenix.PubSub.broadcast(
+        ViralEngine.PubSub,
+        "user:#{challenge.challenger_id}:rewards",
+        {:reward_granted, %{type: streak_shield_reward, xp: participant_xp}}
+      )
+
+      if challenge.challenged_user_id do
+        Phoenix.PubSub.broadcast(
+          ViralEngine.PubSub,
+          "user:#{challenge.challenged_user_id}:rewards",
+          {:reward_granted, %{type: streak_shield_reward, xp: participant_xp}}
+        )
+      end
 
       # Mark rewards as granted
       update_challenge(challenge, %{reward_granted: true})
