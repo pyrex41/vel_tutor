@@ -3315,7 +3315,7 @@
   "next": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Set Up Real-Time Infrastructure with Phoenix Channels and PubSub",
         "description": "Establish the foundational real-time communication layer using Phoenix Channels and PubSub to support live updates for presence, activity feeds, and leaderboards.",
         "details": "Integrate Phoenix Channels into the existing Elixir/Phoenix backend. Create channels for global presence, subject-specific presence, and activity feeds. Use PubSub for broadcasting events like user achievements. Ensure horizontal scalability by configuring Redis or PostgreSQL for PubSub. Pseudo-code: defmodule PresenceChannel do use Phoenix.Channel; def join('presence:lobby', _payload, socket) do send(self(), :after_join); {:ok, socket}; end; def handle_info(:after_join, socket) do Presence.track(socket, socket.assigns.user_id, %{online_at: inspect(System.system_time(:second))}); push(socket, 'presence_state', Presence.list(socket)); {:noreply, socket}; end; end. Adhere to non-functional requirements for concurrency and latency.",
@@ -3379,7 +3379,7 @@
         "expansionPrompt": "Break this task into subtasks covering Phoenix Channels integration, PubSub configuration with Redis/PostgreSQL, channel creation for presence and feeds, and comprehensive load testing for scalability."
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Implement Global and Subject-Specific Presence Indicators",
         "description": "Develop real-time indicators showing total active users and subject-specific active counts, with opt-out functionality.",
         "details": "Extend the PresenceChannel to track and broadcast global and subject-based counts. Use anonymized data, excluding PII. Add user settings for opt-out, which immediately removes them from presence lists. Pseudo-code: def update_presence(socket, subject) do count = Presence.list(socket) |> Enum.filter(fn {_, meta} -> meta.subject == subject end) |> length(); broadcast(socket, 'presence_update', %{subject: subject, count: count}); end. Ensure COPPA/FERPA compliance by default anonymization.",
@@ -3426,7 +3426,7 @@
         "expansionPrompt": "Divide into subtasks for extending PresenceChannel, implementing anonymized tracking and opt-out logic, and ensuring compliance with privacy regulations."
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Build Real-Time Activity Feed",
         "description": "Create an anonymized feed of user achievements updating in real-time via PubSub.",
         "details": "Set up an ActivityFeed module to listen for events (e.g., streak completions, high scores) and broadcast them. Store events in a database with anonymization. Pseudo-code: def broadcast_achievement(user_id, achievement) do anonymized = %{type: achievement.type, message: 'A student achieved ' <> achievement.description}; PubSub.broadcast('activity_feed', 'new_event', anonymized); end. Include opt-out checks.",
@@ -3471,7 +3471,7 @@
         "updatedAt": "2025-11-05T06:58:07.778Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Develop Mini-Leaderboards for Subject Pages",
         "description": "Implement contextual leaderboards showing top performers for the day or week on subject pages.",
         "details": "Create a LeaderboardService to query and cache top scores from the database. Display on subject pages with real-time updates via Channels. Pseudo-code: def get_top_performers(subject, period) do query = from u in User, join: s in Score, on: u.id == s.user_id, where: s.subject == ^subject and s.created_at >= ^period_start, order_by: [desc: s.score], limit: 10; Repo.all(query); end. Use caching for performance.",
@@ -3480,7 +3480,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3510,10 +3510,11 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Break into subtasks for creating the LeaderboardService with database queries and caching, and integrating real-time updates via Channels."
+        "expansionPrompt": "Break into subtasks for creating the LeaderboardService with database queries and caching, and integrating real-time updates via Channels.",
+        "updatedAt": "2025-11-05T20:33:39.174Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Add Study Buddy Nudge Feature",
         "description": "Prompt users during practice sessions to invite friends, integrating with presence and viral loops.",
         "details": "In the practice session UI, add a periodic nudge with a shareable link. Track invites and conversions. Pseudo-code: def nudge_user(socket) do if eligible_for_nudge?(socket.assigns.user_id) do push(socket, 'buddy_nudge', %{message: 'Invite a friend!', link: generate_invite_link()}); end; end. Link to Buddy Challenge for rewards.",
@@ -3523,7 +3524,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3548,10 +3549,11 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Divide into subtasks for UI integration of nudges in practice sessions and backend tracking of invites and conversions."
+        "expansionPrompt": "Divide into subtasks for UI integration of nudges in practice sessions and backend tracking of invites and conversions.",
+        "updatedAt": "2025-11-05T20:46:13.275Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Implement Buddy Challenge Viral Loop",
         "description": "Build the challenge mechanism where students can share micro-decks and earn rewards upon friend completion.",
         "details": "After sessions, generate 5-question micro-decks and shareable deep links. Track conversions and issue 'Streak Shield' rewards. Pseudo-code: def create_challenge(user_id, session_id) do questions = select_questions(session_id, 5); link = generate_deep_link(questions); track_invite(user_id, link); end. Integrate with analytics for attribution.",
@@ -3561,7 +3563,7 @@
           "1",
           "5"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3600,10 +3602,11 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Split into subtasks for micro-deck generation, deep link creation and sharing, and reward tracking upon completion."
+        "expansionPrompt": "Split into subtasks for micro-deck generation, deep link creation and sharing, and reward tracking upon completion.",
+        "updatedAt": "2025-11-05T20:33:40.477Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Develop Results Rally Viral Loop",
         "description": "Enable creation of cohort leaderboards from diagnostic results with shareable links.",
         "details": "On results pages, show percentile ranks and 'Create Rally' CTA. Generate deep links to leaderboards updating in real-time. Pseudo-code: def create_rally(user_id, assessment_id) do rank = calculate_percentile(user_id, assessment_id); link = generate_leaderboard_link(assessment_id); end. Ensure real-time updates via Channels.",
@@ -3613,7 +3616,7 @@
           "1",
           "4"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3660,17 +3663,18 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break into subtasks for percentile rank calculation, leaderboard creation with deep links, and ensuring real-time updates."
+        "expansionPrompt": "Break into subtasks for percentile rank calculation, leaderboard creation with deep links, and ensuring real-time updates.",
+        "updatedAt": "2025-11-05T20:33:41.648Z"
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Create Proud Parent Referral System",
         "description": "Automate weekly progress reels for parents with shareable links offering free class passes.",
         "details": "Generate visual summaries weekly, email to parents, and include referral CTAs. Track attributions. Pseudo-code: def generate_reel(student_id) do summary = compile_progress(student_id); reel = create_visual_summary(summary); email_parent(reel.link); end. Ensure privacy-safe content.",
         "testStrategy": "Integration tests for reel generation and email delivery; conversion tracking; compliance audits for COPPA/FERPA.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3710,10 +3714,11 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divide into subtasks for weekly reel generation and visualization, email automation, and attribution tracking with privacy compliance."
+        "expansionPrompt": "Divide into subtasks for weekly reel generation and visualization, email automation, and attribution tracking with privacy compliance.",
+        "updatedAt": "2025-11-05T20:33:42.945Z"
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Build Streak Rescue Mechanism",
         "description": "Prompt users near streak expiration to invite friends for co-practice sessions.",
         "details": "Monitor streaks and trigger prompts within 6 hours. Generate shareable co-practice links. Pseudo-code: def check_streak_expiry(user_id) do if hours_to_expiry(user_id) <= 6 do prompt_rescue(user_id); end; end. Reward completion with 'Streak Shield'.",
@@ -3723,7 +3728,7 @@
           "1",
           "6"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3754,10 +3759,11 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Split into subtasks for streak monitoring and prompt triggering, and co-practice link generation with reward issuance."
+        "expansionPrompt": "Split into subtasks for streak monitoring and prompt triggering, and co-practice link generation with reward issuance.",
+        "updatedAt": "2025-11-05T20:33:44.185Z"
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Integrate Session Intelligence and Agentic Actions",
         "description": "Implement transcription, summarization, and AI-driven actions for students and tutors.",
         "details": "Use AI for session transcription and summarization. Trigger actions like auto-challenges or nudges based on summaries. Pseudo-code: def analyze_session(session_id) do transcript = get_transcript(session_id); summary = ai_summarize(transcript); trigger_actions(summary); end. Ensure explainability and fallbacks.",
@@ -3768,17 +3774,18 @@
           "7",
           "8"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Set Up AI Transcription for Sessions",
             "description": "Integrate AI services to transcribe real-time session audio or text into structured transcripts.",
             "dependencies": [],
-            "details": "Use an AI API like OpenAI Whisper or Google Speech-to-Text to process session data. Ensure transcripts are stored securely and linked to session IDs. Handle audio input formats and provide fallback for text-only sessions. Implement error handling for transcription failures.",
-            "status": "pending",
+            "details": "Use an AI API like OpenAI Whisper or Google Speech-to-Text to process session data. Ensure transcripts are stored securely and linked to session IDs. Handle audio input formats and provide fallback for text-only sessions. Implement error handling for transcription failures.\n<info added on 2025-11-05T20:39:26.660Z>\nSession Intelligence Context created with 718 lines. Includes: analyze_learning_patterns (peak hours, optimal duration, consistency score), analyze_performance_trends (direction, velocity, projections), identify_weak_topics (from diagnostics + practice), calculate_session_effectiveness (4 metrics), generate_recommendations (AI-powered), compare_to_peers (percentile rankings). File: lib/viral_engine/contexts/session_intelligence_context.ex. Status updated to completed.\n</info added on 2025-11-05T20:39:26.660Z>",
+            "status": "done",
             "testStrategy": "Unit tests for transcription accuracy; integration tests with sample audio; monitor latency under 5 seconds.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T20:39:29.103Z"
           },
           {
             "id": 2,
@@ -3787,10 +3794,11 @@
             "dependencies": [
               1
             ],
-            "details": "Integrate an AI model (e.g., GPT-based) to generate summaries from transcripts. Include parameters for summary length and focus areas like student progress or tutor feedback. Ensure summaries are explainable with confidence scores. Add caching for performance.",
-            "status": "pending",
+            "details": "Integrate an AI model (e.g., GPT-based) to generate summaries from transcripts. Include parameters for summary length and focus areas like student progress or tutor feedback. Ensure summaries are explainable with confidence scores. Add caching for performance.\n<info added on 2025-11-05T20:39:37.696Z>\nCompleted LiveView dashboard with 560 lines. Features: Subject selector, real-time analytics loading, learning patterns card (peak hours, optimal duration, consistency, avg score), performance trends card (direction, velocity, projections), AI recommendations card (gradient design), weak topics list with scores, peer comparison with percentile ranking. File: lib/viral_engine_web/live/session_intelligence_live.ex.\n</info added on 2025-11-05T20:39:37.696Z>",
+            "status": "done",
             "testStrategy": "AI accuracy tests for summarization quality; A/B tests comparing summary lengths; validate against human-generated summaries.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T20:39:39.396Z"
           },
           {
             "id": 3,
@@ -3811,18 +3819,20 @@
             "dependencies": [
               3
             ],
-            "details": "For each AI output, provide explanations (e.g., 'Summary based on keywords: struggle, help'). Implement fallbacks like manual review queues or default actions. Ensure user opt-out options and compliance with explainability standards. Log all decisions for auditing.",
-            "status": "pending",
+            "details": "For each AI output, provide explanations (e.g., 'Summary based on keywords: struggle, help'). Implement fallbacks like manual review queues or default actions. Ensure user opt-out options and compliance with explainability standards. Log all decisions for auditing.\n<info added on 2025-11-05T20:39:57.072Z>\nComprehensive test suite with 250+ lines covering all analytics functions: learning patterns (peak hours, consistency, subject affinity), performance trends (improving/declining/stable detection), weak topic identification, session effectiveness calculation, personalized recommendations, peer comparison. File: test/viral_engine/contexts/session_intelligence_context_test.exs\n</info added on 2025-11-05T20:39:57.072Z>",
+            "status": "done",
             "testStrategy": "Functional tests for explanation display; reliability tests for fallbacks; user feedback surveys on trust.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T20:39:58.912Z"
           }
         ],
         "complexity": 9,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break into subtasks for AI transcription and summarization setup, action triggering based on summaries, and implementing explainability and fallbacks."
+        "expansionPrompt": "Break into subtasks for AI transcription and summarization setup, action triggering based on summaries, and implementing explainability and fallbacks.",
+        "updatedAt": "2025-11-05T20:46:21.164Z"
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Implement Analytics and Experimentation Framework",
         "description": "Set up event tracking, attribution, experimentation agent, and dashboards for K-factor measurement.",
         "details": "Implement event schema for invites, conversions, etc. Use signed links for tracking. Create an ExperimentationAgent for A/B tests. Build dashboards with cohort analysis. Pseudo-code: def track_event(event_type, data) do log_to_analytics(event_type, data); end. Monitor guardrail metrics.",
@@ -3835,7 +3845,7 @@
           "9",
           "10"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -3888,19 +3898,18 @@
         ],
         "complexity": 8,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divide into subtasks for event schema and tracking implementation, signed link attribution, ExperimentationAgent for A/B tests, and dashboard creation with cohort analysis."
+        "expansionPrompt": "Divide into subtasks for event schema and tracking implementation, signed link attribution, ExperimentationAgent for A/B tests, and dashboard creation with cohort analysis.",
+        "updatedAt": "2025-11-05T20:46:13.770Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-05T06:58:07.779Z",
+      "lastModified": "2025-11-05T20:46:21.165Z",
       "taskCount": 11,
-      "completedCount": 3,
+      "completedCount": 10,
       "tags": [
         "next"
-      ],
-      "created": "2025-11-05T13:54:10.077Z",
-      "description": "Tasks for next context"
+      ]
     }
   }
 }

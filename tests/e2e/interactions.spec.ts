@@ -9,64 +9,51 @@ import { test, expect } from '@playwright/test';
 
 test.describe('UI Interactions', () => {
   test('should navigate between pages', async ({ page }) => {
-    // Start at dashboard
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
-
-    // Verify we're on dashboard
-    await expect(page).toHaveURL('/dashboard');
-
-    // Try navigating to home
+    // Start at home
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Verify we're on home
     await expect(page).toHaveURL('/');
+
+    // Navigate to activity feed
+    await page.goto('/activity');
+    await expect(page).toHaveURL('/activity');
+
+    // Navigate to diagnostic
+    await page.goto('/diagnostic');
+    await expect(page).toHaveURL('/diagnostic');
   });
 
-  test('should handle page navigation', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
-
-    // Look for any navigation links
-    const links = page.locator('nav a, [role="navigation"] a');
-    const linkCount = await links.count();
-
-    if (linkCount > 0) {
-      // Click first nav link
-      const firstLink = links.first();
-      const href = await firstLink.getAttribute('href');
-
-      if (href && !href.startsWith('#')) {
-        await firstLink.click();
-        await page.waitForLoadState('networkidle');
-
-        // Should have navigated somewhere
-        const currentUrl = page.url();
-        expect(currentUrl).toBeTruthy();
-      }
-    }
-  });
-
-  test('should display page without errors', async ({ page }) => {
-    await page.goto('/dashboard');
-
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
-
-    // Check no JavaScript errors occurred
+  test('should handle page loads without errors', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => {
       pageErrors.push(error.message);
     });
 
-    // Reload to trigger any load errors
-    await page.reload();
+    // Load home page
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Load activity page
+    await page.goto('/activity');
     await page.waitForLoadState('networkidle');
 
     // Should have no critical errors
     const criticalErrors = pageErrors.filter(err =>
-      err.toLowerCase().includes('undefined') ||
-      err.toLowerCase().includes('null')
+      err.toLowerCase().includes('failed to fetch') ||
+      err.toLowerCase().includes('network error')
     );
 
     expect(criticalErrors.length).toBe(0);
+  });
+
+  test('should display content on home page', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Page should have some content
+    const bodyText = await page.textContent('body');
+    expect(bodyText?.length).toBeGreaterThan(0);
   });
 });

@@ -1,0 +1,82 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "Vel Tutor" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - heading "Vel Tutor" [level=1] [ref=e7]
+        - paragraph [ref=e8]: v0.1.0
+      - generic [ref=e9]:
+        - link "Practice" [ref=e10] [cursor=pointer]:
+          - /url: /practice
+        - link "Leaderboard" [ref=e11] [cursor=pointer]:
+          - /url: /leaderboard
+        - link "Badges" [ref=e12] [cursor=pointer]:
+          - /url: /badges
+  - main [ref=e13]:
+    - main [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - heading "Vel Tutor" [level=1] [ref=e18]
+          - paragraph [ref=e19]: AI-powered learning platform designed for collaborative growth and academic excellence
+        - link "Get Started" [ref=e21] [cursor=pointer]:
+          - /url: /diagnostic
+          - img [ref=e22]
+          - generic [ref=e24]: Get Started
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img [ref=e28]
+            - heading "Practice Sessions" [level=3] [ref=e30]
+            - paragraph [ref=e31]: Interactive learning with adaptive content tailored to your needs
+          - generic [ref=e32]:
+            - img [ref=e34]
+            - heading "Progress Tracking" [level=3] [ref=e36]
+            - paragraph [ref=e37]: Monitor your improvement with detailed analytics and insights
+          - generic [ref=e38]:
+            - img [ref=e40]
+            - heading "Collaborative Learning" [level=3] [ref=e42]
+            - paragraph [ref=e43]: Study together with friends through challenges and group sessions
+        - generic [ref=e44]:
+          - heading "Explore Features" [level=2] [ref=e45]
+          - generic [ref=e46]:
+            - link "Start practice sessions" [ref=e47] [cursor=pointer]:
+              - /url: /practice
+              - img [ref=e48]
+              - generic [ref=e50]:
+                - generic [ref=e51]: Practice
+                - generic [ref=e52]: Start learning
+            - link "View leaderboard" [ref=e53] [cursor=pointer]:
+              - /url: /leaderboard
+              - img [ref=e54]
+              - generic [ref=e56]:
+                - generic [ref=e57]: Leaderboard
+                - generic [ref=e58]: See rankings
+            - link "View badges and achievements" [ref=e59] [cursor=pointer]:
+              - /url: /badges
+              - img [ref=e60]
+              - generic [ref=e62]:
+                - generic [ref=e63]: Badges
+                - generic [ref=e64]: Achievements
+            - link "Study with flashcards" [ref=e65] [cursor=pointer]:
+              - /url: /flashcards
+              - img [ref=e66]
+              - generic [ref=e68]:
+                - generic [ref=e69]: Flashcards
+                - generic [ref=e70]: Quick review
+            - link "Take diagnostic assessment" [ref=e71] [cursor=pointer]:
+              - /url: /diagnostic
+              - img [ref=e72]
+              - generic [ref=e74]:
+                - generic [ref=e75]: Diagnostic
+                - generic [ref=e76]: Assess level
+            - link "View dashboard" [ref=e77] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e78]
+              - generic [ref=e81]:
+                - generic [ref=e82]: Dashboard
+                - generic [ref=e83]: Overview
+        - paragraph [ref=e84]: Most features require authentication to access personalized content.
+```
