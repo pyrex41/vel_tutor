@@ -20,6 +20,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
       socket
       |> stream(:activities, recent_activities)
       |> assign(:connected, connected?(socket))
+      |> assign(:activity_count, length(recent_activities))
 
     {:ok, socket}
   end
@@ -29,7 +30,13 @@ defmodule ViralEngineWeb.ActivityFeedLive do
     # Only show public activities that haven't been opted out
     if event.visibility == "public" and not opted_out?(event.user_id) do
       anonymized = anonymize_activity(event)
-      {:noreply, stream_insert(socket, :activities, anonymized, at: 0)}
+
+      socket =
+        socket
+        |> stream_insert(:activities, anonymized, at: 0)
+        |> update(:activity_count, &(&1 + 1))
+
+      {:noreply, socket}
     else
       {:noreply, socket}
     end
@@ -71,7 +78,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
         <% end %>
       </div>
 
-      <%= if Enum.empty?(@streams.activities) do %>
+      <%= if @activity_count == 0 do %>
         <div class="text-center py-12">
           <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-muted mb-4">
             <svg class="h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
