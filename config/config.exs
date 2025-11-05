@@ -13,13 +13,13 @@ config :viral_engine,
 # Configures the endpoint
 config :viral_engine, ViralEngineWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "your_secret_key_base",
+  secret_key_base: "IFNkwaytjkGkpPv4NcxnGDmGa8f6ZFaekt0y9oFh9A4IXqs3A1rdAY2Uq7FVuEEK",
   render_errors: [
     formats: [html: ViralEngineWeb.ErrorHTML, json: ViralEngineWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: ViralEngine.PubSub,
-  live_view: [signing_salt: "your_signing_salt"]
+  live_view: [signing_salt: "p4IkoYNl9S0/xqcNlooUUiLi4aD1wEnjWukzITQMLTUYN2Ax+lLE/sboxwDeDiMa"]
 
 # Configures Elixir's Logger
 config :logger, :console,

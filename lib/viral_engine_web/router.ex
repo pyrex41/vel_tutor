@@ -1,6 +1,15 @@
 defmodule ViralEngineWeb.Router do
   use ViralEngineWeb, :router
 
+  pipeline :browser do
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, html: {ViralEngineWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
+  end
+
   pipeline :api do
     plug(:accepts, ["json"])
     plug(ViralEngineWeb.Plugs.TenantContextPlug)
@@ -113,72 +122,76 @@ defmodule ViralEngineWeb.Router do
     get("/:agent/health", AgentController, :health)
   end
 
-  # Practice session routes
-  live("/practice", ViralEngineWeb.PracticeSessionLive)
-  live("/practice/results/:id", ViralEngineWeb.PracticeResultsLive)
+  # Frontend routes (LiveView)
+  scope "/", ViralEngineWeb do
+    pipe_through(:browser)
 
-  # Diagnostic assessment routes
-  live("/diagnostic", ViralEngineWeb.DiagnosticAssessmentLive)
-  live("/diagnostic/:id", ViralEngineWeb.DiagnosticAssessmentLive)
-  live("/diagnostic/results/:id", ViralEngineWeb.DiagnosticResultsLive)
+    # Root route (no auth required)
+    live("/", HomeLive)
 
-  # Flashcard study routes
-  live("/flashcards", ViralEngineWeb.FlashcardStudyLive)
-  live("/flashcards/study/:deck_id", ViralEngineWeb.FlashcardStudyLive)
+    # Practice session routes
+    live("/practice", PracticeSessionLive)
+    live("/practice/results/:id", PracticeResultsLive)
 
-  # Buddy challenge routes
-  live("/challenge/:token", ViralEngineWeb.ChallengeLive)
-  live("/auto-challenges", ViralEngineWeb.AutoChallengeLive)
+    # Diagnostic assessment routes
+    live("/diagnostic", DiagnosticAssessmentLive)
+    live("/diagnostic/:id", DiagnosticAssessmentLive)
+    live("/diagnostic/results/:id", DiagnosticResultsLive)
 
-  # Results Rally routes
-  live("/rally/:token", ViralEngineWeb.RallyLive)
+    # Flashcard study routes
+    live("/flashcards", FlashcardStudyLive)
+    live("/flashcards/study/:deck_id", FlashcardStudyLive)
 
-  # Parent Progress routes (COPPA-compliant)
-  live("/parent/progress/:token", ViralEngineWeb.ParentProgressLive)
+    # Buddy challenge routes
+    live("/challenge/:token", ChallengeLive)
+    live("/auto-challenges", AutoChallengeLive)
 
-  # Streak Rescue routes
-  live("/streak-rescue", ViralEngineWeb.StreakRescueLive)
+    # Results Rally routes
+    live("/rally/:token", RallyLive)
 
-  # Leaderboard routes
-  live("/leaderboard", ViralEngineWeb.LeaderboardLive)
+    # Parent Progress routes (COPPA-compliant)
+    live("/parent/progress/:token", ParentProgressLive)
 
-  # Badge collection routes
-  live("/badges", ViralEngineWeb.BadgeLive)
+    # Streak Rescue routes
+    live("/streak-rescue", StreakRescueLive)
 
-  # Rewards shop routes
-  live("/rewards", ViralEngineWeb.RewardsLive)
+    # Leaderboard routes
+    live("/leaderboard", LeaderboardLive)
 
-  # Transcript routes
-  live("/transcripts", ViralEngineWeb.TranscriptLive)
-  live("/transcripts/:id", ViralEngineWeb.TranscriptLive)
+    # Badge collection routes
+    live("/badges", BadgeLive)
 
-  # Study session routes
-  live("/study", ViralEngineWeb.StudySessionLive)
-  live("/study/:token", ViralEngineWeb.StudySessionLive)
+    # Rewards shop routes
+    live("/rewards", RewardsLive)
 
-  # Progress reel routes
-  live("/reels", ViralEngineWeb.ProgressReelLive)
-  live("/reel/:token", ViralEngineWeb.ProgressReelLive)
+    # Transcript routes
+    live("/transcripts", TranscriptLive)
+    live("/transcripts/:id", TranscriptLive)
 
-  # Prep pack routes
-  live("/prep-packs", ViralEngineWeb.PrepPackLive)
-  live("/prep/:token", ViralEngineWeb.PrepPackLive)
+    # Study session routes
+    live("/study", StudySessionLive)
+    live("/study/:token", StudySessionLive)
 
-  # Dashboard routes
-  scope "/dashboard", ViralEngineWeb do
-    pipe_through([:fetch_session, :protect_from_forgery])
+    # Progress reel routes
+    live("/reels", ProgressReelLive)
+    live("/reel/:token", ProgressReelLive)
 
-    live("/presence", PresenceLive, :index)
-    live("/performance", PerformanceDashboardLive)
-    live("/costs", CostDashboardLive)
-    live("/alerts", AlertDashboardLive)
-    live("/tasks", TaskExecutionHistoryLive)
-    live("/benchmarks", BenchmarksLive)
-    live("/rate-limits", RateLimitsLive)
-    live("/k-factor", KFactorDashboardLive)
-    live("/guardrails", GuardrailDashboardLive)
-    live("/reports", PerformanceReportLive)
-    live("/reports/:id", PerformanceReportLive)
+    # Prep pack routes
+    live("/prep-packs", PrepPackLive)
+    live("/prep/:token", PrepPackLive)
+
+    # Dashboard routes
+    live("/dashboard/presence", PresenceLive, :index)
+    live("/dashboard/performance", PerformanceDashboardLive)
+    live("/dashboard/costs", CostDashboardLive)
+    live("/dashboard/alerts", AlertDashboardLive)
+    live("/dashboard/tasks", TaskExecutionHistoryLive)
+    live("/dashboard/benchmarks", BenchmarksLive)
+    live("/dashboard/rate-limits", RateLimitsLive)
+    live("/dashboard/k-factor", KFactorDashboardLive)
+    live("/dashboard/guardrails", GuardrailDashboardLive)
+    live("/dashboard/reports", PerformanceReportLive)
+    live("/dashboard/reports/:id", PerformanceReportLive)
   end
 
   # Enable LiveDashboard in development
@@ -186,7 +199,7 @@ defmodule ViralEngineWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through([:fetch_session, :protect_from_forgery])
+      pipe_through(:browser)
       live_dashboard("/dashboard/phoenix", metrics: ViralEngineWeb.Telemetry)
     end
   end

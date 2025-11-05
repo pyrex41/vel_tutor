@@ -48,7 +48,7 @@ defmodule ViralEngineWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {ViralEngineWeb.LayoutView, :live}
+        layout: {ViralEngineWeb.Layouts, :live}
 
       unquote(view_helpers())
     end

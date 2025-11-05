@@ -27,7 +27,14 @@ config :viral_engine, ViralEngineWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "b1jnEqxSbRMF+xSc5UQSJSiAfaFjwMDpjBO9pnVaGu3IcFBSBe7mxxuKHIn7ZaMp",
-  watchers: []
+  watchers: [],
+  live_reload: [
+    patterns: [
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"lib/viral_engine_web/(live|views)/.*(ex)$",
+      ~r"lib/viral_engine_web/templates/.*(eex)$"
+    ]
+  ]
 
 # ## SSL Support
 #
@@ -52,16 +59,6 @@ config :viral_engine, ViralEngineWeb.Endpoint,
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
 # different ports.
-
-# Watch static and templates for browser reloading.
-config :viral_engine, ViralEngineWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/viral_engine_web/(live|views)/.*(ex)$",
-      ~r"lib/viral_engine_web/templates/.*(eex)$"
-    ]
-  ]
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

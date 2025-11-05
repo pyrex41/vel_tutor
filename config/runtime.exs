@@ -6,13 +6,22 @@ config :viral_engine, ViralEngine.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
 # Configures the endpoint
-config :viral_engine, ViralEngineWeb.Endpoint,
+# Only override secret_key_base in production where SECRET_KEY_BASE env var is set
+endpoint_config = [
   url: [host: System.get_env("PHX_HOST") || "localhost"],
   http: [
     ip: {0, 0, 0, 0, 0, 0, 0, 0},
     port: String.to_integer(System.get_env("PORT") || "4000")
-  ],
-  secret_key_base: System.get_env("SECRET_KEY_BASE")
+  ]
+]
+
+endpoint_config = if secret_key_base = System.get_env("SECRET_KEY_BASE") do
+  Keyword.put(endpoint_config, :secret_key_base, secret_key_base)
+else
+  endpoint_config
+end
+
+config :viral_engine, ViralEngineWeb.Endpoint, endpoint_config
 
 # MCP Orchestrator configuration
 config :viral_engine, :mcp_orchestrator,
