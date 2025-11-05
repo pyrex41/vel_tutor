@@ -23,24 +23,27 @@ defmodule ViralEngineWeb.LeaderboardLive do
     grade_level = 5
 
     # Get leaderboard
-    leaderboard = get_leaderboard(scope, %{
-      metric: metric,
-      time_period: time_period,
-      subject: subject,
-      grade_level: grade_level
-    })
+    leaderboard =
+      get_leaderboard(scope, %{
+        metric: metric,
+        time_period: time_period,
+        subject: subject,
+        grade_level: grade_level
+      })
 
     # Get user's rank
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(user.id, scope, %{
-      metric: metric,
-      time_period: time_period
-    })
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(user.id, scope, %{
+        metric: metric,
+        time_period: time_period
+      })
 
     # Get user's percentile
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(user.id, scope, %{
-      metric: metric,
-      time_period: time_period
-    })
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(user.id, scope, %{
+        metric: metric,
+        time_period: time_period
+      })
 
     socket =
       socket
@@ -55,6 +58,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
       |> assign(:rank_status, rank_status)
       |> assign(:percentile, percentile)
       |> assign(:show_invite_modal, false)
+      |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
       |> stream(:leaderboard_entries, leaderboard, id: fn entry -> "user-#{entry.user_id}" end)
 
     {:ok, socket}
@@ -72,8 +76,12 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(new_scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, new_scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, new_scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, new_scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, new_scope, opts)
 
     {:noreply,
      socket
@@ -81,6 +89,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -96,8 +105,12 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(socket.assigns.scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
 
     {:noreply,
      socket
@@ -105,6 +118,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -120,8 +134,12 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(socket.assigns.scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
 
     {:noreply,
      socket
@@ -129,6 +147,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -142,8 +161,12 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(socket.assigns.scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
 
     {:noreply,
      socket
@@ -151,6 +174,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -166,8 +190,12 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(socket.assigns.scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
 
     {:noreply,
      socket
@@ -175,6 +203,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -185,7 +214,8 @@ defmodule ViralEngineWeb.LeaderboardLive do
 
   @impl true
   def handle_event("copy_invite_link", _params, socket) do
-    {:noreply, put_flash(socket, :success, "Invite link copied! Share to climb the leaderboard together.")}
+    {:noreply,
+     put_flash(socket, :success, "Invite link copied! Share to climb the leaderboard together.")}
   end
 
   @impl true
@@ -205,14 +235,19 @@ defmodule ViralEngineWeb.LeaderboardLive do
     }
 
     leaderboard = get_leaderboard(socket.assigns.scope, opts)
-    {rank_status, user_rank} = LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
-    {:ok, percentile} = LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {rank_status, user_rank} =
+      LeaderboardContext.get_user_rank(socket.assigns.user_id, socket.assigns.scope, opts)
+
+    {:ok, percentile} =
+      LeaderboardContext.get_user_percentile(socket.assigns.user_id, socket.assigns.scope, opts)
 
     {:noreply,
      socket
      |> assign(:user_rank, user_rank)
      |> assign(:rank_status, rank_status)
      |> assign(:percentile, percentile)
+     |> assign(:leaderboard_empty, Enum.empty?(leaderboard))
      |> stream(:leaderboard_entries, leaderboard, reset: true)}
   end
 
@@ -474,7 +509,7 @@ defmodule ViralEngineWeb.LeaderboardLive do
         </div>
 
         <!-- Empty State -->
-        <%= if Enum.empty?(@streams.leaderboard_entries) do %>
+        <%= if @leaderboard_empty do %>
           <div class="bg-white rounded-xl shadow-lg p-12 text-center">
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 mb-4">
               <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

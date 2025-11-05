@@ -49,6 +49,8 @@ defmodule ViralEngineWeb.TranscriptLive do
       |> assign(:user, user)
       |> assign(:user_id, user.id)
       |> assign(:transcripts, transcripts)
+      |> assign(:transcript, nil)
+      |> assign(:selected_transcript, nil)
       |> assign(:selected_transcript, nil)
 
     {:ok, socket}

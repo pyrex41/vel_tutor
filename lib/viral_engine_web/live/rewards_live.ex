@@ -34,6 +34,7 @@ defmodule ViralEngineWeb.RewardsLive do
       |> assign(:user_id, user.id)
       |> assign(:user_xp, user_xp)
       |> assign(:rewards, rewards)
+      |> assign(:filtered_rewards, rewards)
       |> assign(:user_rewards, user_rewards)
       |> assign(:grouped_rewards, grouped_rewards)
       |> assign(:claimed_ids, claimed_ids)
@@ -251,12 +252,12 @@ defmodule ViralEngineWeb.RewardsLive do
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-muted-foreground">Level Progress</span>
-              <span class="text-foreground font-medium"><%= @user_xp.xp_in_level %> / <%= @user_xp.xp_for_next_level %> XP</span>
+              <span class="text-foreground font-medium"><%= @user_xp.current_xp %> / <%= @user_xp.xp_to_next_level %> XP</span>
             </div>
             <div class="w-full bg-secondary rounded-full h-3">
               <div
                 class="bg-primary h-3 rounded-full transition-all duration-300"
-                style={"width: #{min(100, (@user_xp.xp_in_level / @user_xp.xp_for_next_level) * 100)}%"}
+                style={"width: #{min(100, (@user_xp.current_xp / @user_xp.xp_to_next_level) * 100)}%"}
               ></div>
             </div>
           </div>

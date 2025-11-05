@@ -55,6 +55,7 @@ defmodule ViralEngineWeb.ProgressReelLive do
       |> assign(:user, user)
       |> assign(:user_id, user.id)
       |> assign(:reels, reels)
+      |> assign(:reel, nil)
       |> assign(:selected_reel, nil)
       |> assign(:show_share_modal, false)
       |> assign(:public_view, false)
