@@ -45,9 +45,7 @@ export default defineConfig(({ mode }) => ({
     manifest: mode === 'production'  // Generate manifest.json in production
   },
   css: {
-    postcss: {
-      plugins: [require('@tailwindcss/postcss'), require('autoprefixer')]
-    }
+    postcss: './postcss.config.js'
   },
   server: {
     host: '0.0.0.0',

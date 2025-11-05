@@ -38,6 +38,22 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
     {:ok, socket}
   end
 
+  def mount(_params, _session, socket) do
+    socket =
+      socket
+      |> assign(:user, nil)
+      |> assign(:stage, :subject_selection)
+      |> assign(:selected_subject, nil)
+      |> assign(:selected_grade, nil)
+      |> assign(:assessment, nil)
+      |> assign(:current_question, nil)
+      |> assign(:feedback, "")
+      |> assign(:time_warning, false)
+      |> assign(:loading, false)
+
+    {:ok, socket}
+  end
+
   defp initialize_assessment(socket, user, assessment) do
     if assessment.completed do
       # Redirect to results page
@@ -149,33 +165,40 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
     grade = socket.assigns.selected_grade
 
     if subject && grade do
-      # Create assessment
-      {:ok, assessment} =
-        DiagnosticContext.create_assessment(%{
-          user_id: socket.assigns.user.id,
-          subject: subject,
-          grade_level: grade,
-          total_questions: 20
-        })
+      if socket.assigns.user do
+        # Create assessment
+        {:ok, assessment} =
+          DiagnosticContext.create_assessment(%{
+            user_id: socket.assigns.user.id,
+            subject: subject,
+            grade_level: grade,
+            total_questions: 20
+          })
 
-      # Generate initial questions at medium difficulty (5)
-      {:ok, _questions} =
-        DiagnosticContext.generate_questions(assessment.id, subject, 5, 1)
+        # Generate initial questions at medium difficulty (5)
+        {:ok, _questions} =
+          DiagnosticContext.generate_questions(assessment.id, subject, 5, 1)
 
-      # Reload assessment with questions
-      assessment = DiagnosticContext.get_assessment(assessment.id)
-      current_question = DiagnosticContext.get_question(assessment.id, 1)
+        # Reload assessment with questions
+        assessment = DiagnosticContext.get_assessment(assessment.id)
+        current_question = DiagnosticContext.get_question(assessment.id, 1)
 
-      # Start timer
-      Process.send_after(self(), :tick, 1000)
+        # Start timer
+        Process.send_after(self(), :tick, 1000)
 
-      {:noreply,
-       socket
-       |> assign(:stage, :assessment)
-       |> assign(:assessment, assessment)
-       |> assign(:current_question, current_question)
-       |> assign(:time_warning, false)
-       |> put_flash(:info, "Assessment started! Good luck!")}
+        {:noreply,
+         socket
+         |> assign(:stage, :assessment)
+         |> assign(:assessment, assessment)
+         |> assign(:current_question, current_question)
+         |> assign(:time_warning, false)
+         |> put_flash(:info, "Assessment started! Good luck!")}
+      else
+        {:noreply,
+         socket
+         |> put_flash(:error, "Please authenticate to start the assessment")
+         |> redirect(to: "/")}
+      end
     else
       {:noreply, put_flash(socket, :error, "Please select both subject and grade level")}
     end
