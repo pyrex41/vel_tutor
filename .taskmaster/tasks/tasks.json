@@ -2199,7 +2199,7 @@
   "migration": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Validate All Implementation Files Present",
         "description": "Verify that all 7 implementation files are present in the PR branch and routes are added correctly.",
         "details": "Check the presence of files: lib/viral_engine/guardrail_metrics_context.ex, lib/viral_engine_web/live/guardrail_dashboard_live.ex, lib/viral_engine/performance_report.ex, lib/viral_engine/performance_report_context.ex, lib/viral_engine/workers/performance_report_worker.ex, lib/viral_engine_web/live/performance_report_live.ex, and the migration file. Ensure routes /dashboard/guardrails and /dashboard/reports are added to router.ex. Run 'mix compile --warnings-as-errors' to verify compilation.",
@@ -2265,7 +2265,7 @@
         "updatedAt": "2025-11-04T16:01:01.204Z"
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Add Unit Tests for GuardrailMetricsContext",
         "description": "Create comprehensive unit tests for the GuardrailMetricsContext module covering fraud detection, bot behavior, opt-out rates, PII scanning, and health score computation.",
         "details": "Create test/viral_engine/guardrail_metrics_context_test.exs with tests for detect_suspicious_clicks/1, detect_bot_behavior/1, compute_opt_out_rates/1, scan_for_pii/1, and compute_health_score/1. Use ExUnit with async: true and ViralEngine.DataCase. Include sample tests as provided in the PRD, ensuring edge cases like empty data and threshold enforcement.",
@@ -2333,7 +2333,7 @@
         "updatedAt": "2025-11-04T16:11:31.647Z"
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Add Unit Tests for PerformanceReportContext",
         "description": "Create unit tests for PerformanceReportContext focusing on report generation, trend calculations, and insights.",
         "details": "Create test/viral_engine/performance_report_context_test.exs with tests for generate_weekly_report/1, generate_monthly_report/1, determine_trend/2, and insights generation. Use ViralEngine.DataCase and include tests for empty data scenarios.",
@@ -2391,7 +2391,7 @@
         "updatedAt": "2025-11-04T16:15:27.227Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Add Integration Tests for LiveViews",
         "description": "Create integration tests for GuardrailDashboardLive and PerformanceReportLive to ensure proper rendering and functionality.",
         "details": "Create test/viral_engine_web/live/guardrail_dashboard_live_test.exs and similar for performance reports. Use Phoenix.LiveViewTest to test mounting and rendering of health scores, fraud metrics, etc.",
@@ -2429,7 +2429,7 @@
         "updatedAt": "2025-11-04T16:18:13.161Z"
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Add Database Indexes for Fraud and Bot Detection",
         "description": "Create migrations to add indexes on attribution_events for IP addresses, device fingerprints, and composite indexes for performance.",
         "details": "Create migrations like AddFraudDetectionIndexes and AddBotDetectionIndexes using Ecto.Migration with concurrently: true for safety. Add indexes: idx_attribution_events_ip_address, idx_attribution_events_fraud_detection, idx_attribution_events_device_fingerprint, etc.",
@@ -2467,7 +2467,7 @@
         "updatedAt": "2025-11-04T16:18:57.365Z"
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Add Health Score Query Indexes",
         "description": "Add indexes for tables used in health score computations like study_sessions, parent_shares, and attribution_links.",
         "details": "Create a migration AddHealthScoreIndexes with indexes on inserted_at and relevant fields, using concurrently: true.",
@@ -2497,7 +2497,7 @@
         "updatedAt": "2025-11-04T16:18:57.883Z"
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Externalize Configuration to runtime.exs",
         "description": "Move hardcoded thresholds to config/runtime.exs with environment variable support.",
         "details": "Add :viral_guardrails config in config/runtime.exs with keys for fraud, bot, health score, etc. Update GuardrailMetricsContext to read from Application.get_env. Update .env.example with new variables.",
@@ -2574,7 +2574,7 @@
         "updatedAt": "2025-11-04T16:20:04.903Z"
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Optimize Oban Queue Configuration",
         "description": "Increase concurrency for performance_reports queue and add email_delivery queue with retry policies.",
         "details": "Update config/config.exs for Oban queues: performance_reports: 5, email_delivery: 10. Add retry policies to PerformanceReportWorker with max_attempts: 3.",
@@ -2652,7 +2652,7 @@
         "updatedAt": "2025-11-04T16:20:05.403Z"
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Implement Email Delivery System with UI Feedback",
         "description": "Create EmailDeliveryWorker and add UI elements for email queuing with placeholder feedback.",
         "details": "Implement ViralEngine.Workers.EmailDeliveryWorker with Oban, queue: :email_delivery. Update PerformanceReportLive to show 'Coming Soon' badge and handle email queuing events.",
@@ -2690,7 +2690,7 @@
         "updatedAt": "2025-11-04T16:20:05.914Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Add Telemetry Events and Documentation",
         "description": "Implement telemetry for guardrail health and report generation, and document the health score algorithm and admin guides.",
         "details": "Add :telemetry.execute calls in contexts for events like [:viral_engine, :guardrails, :health_score]. Create .taskmaster/docs/health-score-algorithm.md and admin guides with inline comments.",
@@ -2739,7 +2739,577 @@
       "completedCount": 10,
       "tags": [
         "migration"
-      ]
+      ],
+      "created": "2025-11-05T02:14:38.682Z",
+      "description": "Tasks for migration context"
+    }
+  },
+  "style": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Modern UI Design for DiagnosticAssessmentLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the DiagnosticAssessmentLive component, including clean styling, progress indicators, and an interactive question interface, ensuring it is linked from the home page as a high-priority feature.",
+        "details": "Begin by reviewing the existing DiagnosticAssessmentLive component structure and its integration with the home page. Adopt a v0-inspired design philosophy, focusing on minimalism, clean lines, and intuitive interactions—use a neutral color palette (e.g., whites, grays, and subtle accents), sans-serif fonts like Inter or Roboto, and ample whitespace for readability. Implement progress indicators using a horizontal bar or step-based visualization (e.g., via CSS or a library like ProgressBar.js) that updates dynamically as users navigate questions. For the interactive question interface, create reusable components for different question types (e.g., multiple-choice, text input, sliders) with smooth animations (using CSS transitions or Framer Motion) for transitions between questions. Ensure accessibility by adding ARIA labels, keyboard navigation, and screen reader support. Integrate responsive design with media queries to handle mobile and desktop views. Link the component from the home page via a prominent button or card, ensuring the route is properly configured (e.g., using React Router). Consider performance by lazy-loading the component and optimizing images/icons. Code example: For progress indicator, use `<div className='progress-bar'><div className='progress-fill' style={{width: `${progress}%`}}></div></div>` with CSS for styling. Test for cross-browser compatibility and ensure no layout shifts during interactions.",
+        "testStrategy": "Verify the implementation by first checking the home page for a visible, accessible link or button to DiagnosticAssessmentLive; click it to ensure navigation works without errors. On the assessment page, inspect the UI for v0-inspired elements: clean layout, consistent typography, and neutral colors. Test progress indicators by advancing through questions and confirming visual updates (e.g., bar fills incrementally). Interact with question interfaces: select options, input text, and submit to ensure responsiveness and animations. Use browser dev tools to simulate mobile views and verify responsiveness. Conduct accessibility audits with tools like Lighthouse or WAVE, checking for ARIA compliance and keyboard navigation. Perform cross-browser testing (Chrome, Firefox, Safari) for consistency. Run unit tests for component rendering and state updates, and integration tests for routing and data flow. Finally, gather user feedback in a staging environment to confirm intuitive usability.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review Existing DiagnosticAssessmentLive Component Structure",
+            "description": "Examine the current DiagnosticAssessmentLive component code, its integration with the home page, and any existing routing or backend connections to understand the baseline for modernization.",
+            "dependencies": [],
+            "details": "Start by locating the DiagnosticAssessmentLive component files in the codebase. Review the component's props, state management, and how it renders questions. Check the home page for any existing links or buttons pointing to this component. Document the current structure, including any dependencies on libraries like React Router, and note areas that need v0-inspired updates for minimalism and intuitiveness.\n<info added on 2025-11-05T02:33:54.715Z>\nReviewed existing DiagnosticAssessmentLive: Phoenix LiveView with HEEx, current UI has gradients and emojis, needs v0-inspired redesign using neutral palette, Geist fonts, and Tailwind classes from style guide. Component handles subject/grade selection, timer, progress bar, and multiple-choice/text questions.\n</info added on 2025-11-05T02:33:54.715Z>",
+            "status": "done",
+            "testStrategy": "Manually inspect the component files and home page code to confirm the structure is documented accurately, ensuring no breaking changes are introduced.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T02:33:56.436Z"
+          },
+          {
+            "id": 2,
+            "title": "Design v0-Inspired UI Elements for Progress Indicators and Question Interfaces",
+            "description": "Create design specifications for progress bars, step visualizations, and interactive question components using a neutral color palette, sans-serif fonts, and smooth animations.",
+            "dependencies": [
+              1
+            ],
+            "details": "Adopt a v0-inspired design with whites, grays, and subtle accents. Design a horizontal progress bar that updates dynamically (e.g., using CSS width property). Create reusable components for question types like multiple-choice, text input, and sliders, incorporating CSS transitions or Framer Motion for animations. Ensure ample whitespace and clean lines for readability. Sketch wireframes or write CSS examples for styling, such as the progress bar code provided.\n<info added on 2025-11-05T02:34:02.627Z>\nDesigned v0 UI elements: Progress bar using Tailwind classes (bg-secondary rounded-full h-3 with bg-primary fill); Question cards with bg-card, border, rounded-lg, p-6; Multiple-choice options as labeled radio buttons with hover effects; Text inputs with bg-input border; Timer display with font-mono; All using neutral oklch colors, Geist fonts, and responsive grid layouts.\n</info added on 2025-11-05T02:34:02.627Z>",
+            "status": "done",
+            "testStrategy": "Use design tools like Figma to prototype the UI elements and verify they match v0 aesthetics, then test in a browser for visual consistency.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T02:34:04.818Z"
+          },
+          {
+            "id": 3,
+            "title": "Implement Responsive, Accessible Features and Home Page Integration",
+            "description": "Add responsive design, accessibility features, and integrate the component with the home page via routing, ensuring performance optimizations.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement media queries for mobile and desktop responsiveness. Add ARIA labels, keyboard navigation, and screen reader support for accessibility. Link from the home page using React Router with a prominent button or card. Optimize with lazy-loading and image optimization. Ensure cross-browser compatibility and no layout shifts during question transitions. Test on various devices and browsers.\n<info added on 2025-11-05T02:35:45.250Z>\nUpdated HEEx template with v0-inspired classes (bg-card, text-foreground, border, etc.); added ARIA labels (aria-label, aria-live, role); made progress bar accessible with role='progressbar'; used fieldset/legend for radio groups; ensured mobile responsiveness with grid layouts; home page link already exists at /diagnostic; removed gradients and emojis for clean design.\n</info added on 2025-11-05T02:35:45.250Z>",
+            "status": "done",
+            "testStrategy": "Navigate from the home page to the component, verify responsive behavior on mobile/desktop, check accessibility with tools like Lighthouse or screen readers, and confirm no errors in routing or performance.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T02:35:47.197Z"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Generate subtasks for reviewing the existing component structure, designing v0-inspired UI elements like progress indicators and question interfaces, implementing responsive and accessible features, and integrating with the home page.",
+        "updatedAt": "2025-11-05T02:35:47.197Z"
+      },
+      {
+        "id": 2,
+        "title": "Implement Modern UI Design for DiagnosticResultsLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the DiagnosticResultsLive component, incorporating score visualization, performance charts, and a recommendations display to provide users with clear, actionable insights from their diagnostic assessment.",
+        "details": "Begin by reviewing the existing DiagnosticResultsLive component structure, ensuring it integrates seamlessly with the completed DiagnosticAssessmentLive component. Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for scores), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For score visualization, implement a prominent, easy-to-read score display (e.g., a large circular progress indicator or gauge using CSS or a library like Chart.js), showing the overall score with color-coded thresholds (e.g., red for low, yellow for medium, green for high). Add performance charts, such as bar charts or line graphs, to visualize scores across different categories or over time if applicable, leveraging libraries like D3.js or Chart.js for interactivity and responsiveness. Include a recommendations display section with a clean list or card-based layout, presenting personalized suggestions based on the assessment results, using icons or bullet points for clarity. Ensure the layout is responsive across devices, with mobile-first considerations like collapsible sections or swipeable charts. Integrate smooth animations for chart loading and score reveals to enhance user engagement, while maintaining accessibility standards (e.g., alt text for charts, keyboard navigation). Consider data flow from the assessment component to populate the visualizations accurately, and implement error handling for cases where data might be incomplete. Finally, link this component appropriately from the assessment completion flow, ensuring a cohesive user experience.",
+        "testStrategy": "Verify the implementation by first completing the DiagnosticAssessmentLive assessment to generate results data, then navigating to the DiagnosticResultsLive page. Inspect the UI for v0-inspired elements: confirm a clean, minimalist layout with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Check the score visualization for accuracy and visual appeal—ensure the score is prominently displayed (e.g., in a gauge or circle), with appropriate color coding and responsiveness on different screen sizes. Test performance charts by interacting with them (e.g., hovering for tooltips, resizing the window), verifying data accuracy against expected assessment outputs and smooth animations. Review the recommendations display for clarity, ensuring suggestions are listed in an organized manner (e.g., cards or bullets) with relevant icons, and that they align with the assessment scores. Perform cross-browser testing (e.g., Chrome, Firefox, Safari) and device testing (e.g., desktop, mobile) to confirm responsiveness and accessibility, using tools like Lighthouse for performance metrics. Finally, simulate edge cases such as incomplete data or low scores to ensure error handling and graceful degradation.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review and Integrate DiagnosticResultsLive with DiagnosticAssessmentLive",
+            "description": "Examine the existing DiagnosticResultsLive component structure and ensure seamless integration with the completed DiagnosticAssessmentLive component, including data flow and error handling for incomplete data.",
+            "dependencies": [],
+            "details": "Start by analyzing the current code structure of DiagnosticResultsLive, verify how it receives data from DiagnosticAssessmentLive upon assessment completion, and implement necessary adjustments for data population. Include error handling for cases where assessment data is missing or incomplete, ensuring the component renders gracefully without crashing.\n<info added on 2025-11-05T02:36:09.387Z>\nDiagnosticResultsLive is a Phoenix LiveView component featuring an extensive template that displays score, stats cards, skill heatmap, AI recommendations, action buttons, and modals. The current UI utilizes gradients and emojis and requires a v0 redesign with a neutral palette, clean cards, and enhanced accessibility. Integration with DiagnosticAssessmentLive is already in place via redirect upon assessment completion.\n</info added on 2025-11-05T02:36:09.387Z>",
+            "status": "done",
+            "testStrategy": "Test by completing a diagnostic assessment and navigating to the results page, checking for proper data display and no errors when data is partial.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T02:36:12.258Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement Score Visualization with Color-Coded Indicators",
+            "description": "Create a prominent score display using a circular progress indicator or gauge, incorporating color-coded thresholds for low, medium, and high scores.",
+            "dependencies": [
+              1
+            ],
+            "details": "Utilize CSS or Chart.js to build a large, easy-to-read circular gauge showing the overall diagnostic score. Apply a neutral color palette with accents: red for low (e.g., below 50%), yellow for medium (50-75%), and green for high (above 75%). Ensure the visualization is responsive and accessible with alt text and keyboard navigation support.",
+            "status": "done",
+            "testStrategy": "Verify the score display by inputting various score values and confirming color changes and accuracy across different screen sizes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add Performance Charts Using Chart Libraries",
+            "description": "Implement interactive bar charts or line graphs to visualize scores across categories or over time, leveraging libraries like Chart.js or D3.js.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate Chart.js or D3.js to create responsive charts for category-wise scores or historical performance if applicable. Add interactivity such as tooltips and hover effects, ensuring charts load with smooth animations. Maintain v0-inspired minimalism with clean lines and ample whitespace, and include accessibility features like screen reader support.",
+            "status": "done",
+            "testStrategy": "Test chart rendering by providing sample data sets, checking interactivity, responsiveness on mobile devices, and animation smoothness.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Ensure Responsive Design with Animations and Recommendations Display",
+            "description": "Design a responsive layout with collapsible sections, swipeable charts, and smooth animations, including a recommendations section with icons and bullet points.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Adopt a mobile-first approach for the overall UI, using CSS media queries for responsiveness. Implement smooth animations for chart loading and score reveals using CSS transitions or JavaScript. Create a clean recommendations display with card-based layout, personalized suggestions, and icons for clarity. Ensure full accessibility compliance across devices.",
+            "status": "done",
+            "testStrategy": "Inspect the UI on various devices (desktop, tablet, mobile), verifying animations, responsiveness, and recommendations display after assessment completion.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Create subtasks for examining the component integration with DiagnosticAssessmentLive, implementing score visualizations and charts using libraries, and ensuring responsive design with animations.",
+        "updatedAt": "2025-11-05T02:36:12.258Z"
+      },
+      {
+        "id": 3,
+        "title": "Implement Modern UI Design for ChallengeLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the ChallengeLive component, featuring challenge cards for buddy challenges, accept/decline UI elements, and seamless leaderboard integration to enhance user engagement and competition.",
+        "details": "Begin by reviewing the existing ChallengeLive component structure, ensuring it integrates with any related backend services for buddy challenges and leaderboards. Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For challenge cards, create card-based layouts displaying challenge details (e.g., title, description, participants, and rewards) with hover effects and animations for interactivity. Implement accept/decline UI using buttons or toggles with clear visual feedback, such as color changes or icons (e.g., checkmark for accept, X for decline). Integrate leaderboard functionality by embedding a sortable table or list showing rankings, scores, and user avatars, possibly using a library like react-table or custom CSS grids. Ensure responsive design for mobile and desktop, with accessibility features like keyboard navigation and screen reader support. Consider state management for challenge acceptance/decline actions, updating the UI dynamically without full page reloads. Use CSS-in-JS (e.g., styled-components) or Tailwind CSS for styling consistency with other components. Test for performance to avoid lag in leaderboard updates.",
+        "testStrategy": "Verify the implementation by navigating to the ChallengeLive page from the main app interface. Inspect the UI for v0-inspired elements: confirm a clean, minimalist layout with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test challenge cards by hovering or clicking to ensure details display correctly and animations are smooth. Interact with accept/decline buttons: accept a challenge and verify UI updates (e.g., card status changes, notification appears); decline and confirm removal or graying out. Check leaderboard integration: ensure it loads user rankings accurately, sorts by score or other criteria, and updates in real-time if applicable. Test responsiveness by resizing the browser window or using mobile emulation, confirming elements adapt properly. Use browser developer tools to check for accessibility (e.g., ARIA labels on buttons) and performance (e.g., no excessive re-renders). If backend integration is involved, simulate API calls to ensure data fetches correctly without errors.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Subdivide into reviewing backend integration for challenges, designing card-based UI with accept/decline elements, and adding leaderboard functionality with real-time updates."
+      },
+      {
+        "id": 4,
+        "title": "Implement Modern UI Design for StudySessionLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the StudySessionLive component, incorporating a participant list, chat interface, and shared progress visualization to facilitate collaborative study sessions.",
+        "details": "Begin by reviewing the existing StudySessionLive component structure, ensuring it integrates with any related backend services for real-time collaboration, participant management, and progress tracking. Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for active elements), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For the participant list, create a sidebar or panel displaying user avatars, names, and online status with hover effects for quick interactions. Implement the chat interface as a collapsible chat window with message bubbles, input field, and real-time updates, using libraries like Socket.io for live messaging if not already integrated. For shared progress, add a central dashboard with progress bars, timers, or milestone trackers that update in real-time for all participants, possibly using charts from libraries like Chart.js or D3.js. Ensure responsive design for mobile and desktop, with smooth animations for transitions (e.g., via CSS transitions or Framer Motion). Consider accessibility features like keyboard navigation and screen reader support. Integrate seamlessly with the app's navigation, perhaps linking from a study hub or home page. Handle edge cases such as empty participant lists, chat moderation, and progress synchronization across devices.",
+        "testStrategy": "Verify the implementation by navigating to the StudySessionLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test the participant list by adding/removing mock participants (via backend simulation or UI toggles) and checking for accurate display of avatars, names, and status indicators, including hover interactions. For the chat interface, send and receive test messages in real-time, verifying message bubbles, timestamps, and input responsiveness; test collapsing/expanding the chat window. Evaluate shared progress by simulating session activities (e.g., updating progress via buttons or timers) and confirming that visualizations update dynamically for all participants, with accurate data representation in charts or bars. Perform cross-device testing on mobile and desktop to ensure responsiveness and smooth animations. Use browser developer tools to inspect for accessibility compliance (e.g., ARIA labels) and performance (e.g., no excessive re-renders). Conduct user flow tests to ensure intuitive navigation and integration with other app sections.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Participant List and Chat Interface",
+            "description": "Design and implement the participant list as a sidebar or panel displaying user avatars, names, and online status with hover effects, and the chat interface as a collapsible chat window with message bubbles, input field, and real-time updates.",
+            "dependencies": [],
+            "details": "Utilize React components for the sidebar and chat window, integrate Socket.io for live messaging if not already in place, apply v0-inspired styling with neutral colors, sans-serif fonts like Inter, and generous whitespace. Include hover effects for quick interactions in the participant list and ensure message bubbles are styled for readability.",
+            "status": "done",
+            "testStrategy": "Test by adding multiple participants to the session, verifying avatar display and status updates, then send messages in the chat to confirm real-time updates and UI responsiveness.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Shared Progress Visualization",
+            "description": "Add a central dashboard with progress bars, timers, or milestone trackers that update in real-time for all participants to facilitate collaborative study sessions.",
+            "dependencies": [],
+            "details": "Incorporate libraries like Chart.js or D3.js for visualizing progress, integrate with backend services for real-time data fetching, and style using a neutral color palette with subtle accents for active elements. Ensure the dashboard is central and updates dynamically as participants progress.",
+            "status": "done",
+            "testStrategy": "Simulate progress updates for multiple participants and verify that progress bars, timers, and milestones display accurately and update in real-time without errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Set Up Real-Time Collaboration",
+            "description": "Integrate with backend services for real-time collaboration, participant management, and progress tracking to enable seamless collaborative study sessions.",
+            "dependencies": [],
+            "details": "Review existing StudySessionLive component structure and backend integrations, set up WebSockets or LiveView subscriptions for real-time updates, handle participant joining/leaving, and ensure synchronization of progress data across devices. Address edge cases like empty lists and moderation.",
+            "status": "done",
+            "testStrategy": "Test by connecting multiple users to the session, verifying real-time synchronization of participant lists, chat messages, and progress updates across different devices and browsers.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement Responsive Design and Testing",
+            "description": "Ensure the UI is responsive for mobile and desktop, incorporating smooth animations, accessibility features, and seamless integration with app navigation.",
+            "dependencies": [],
+            "details": "Apply CSS media queries for responsiveness, use Framer Motion or CSS transitions for smooth animations, implement keyboard navigation and screen reader support. Link the component from study hub or home page, and handle edge cases like empty states.",
+            "status": "done",
+            "testStrategy": "Test the UI on various devices (mobile, tablet, desktop), verify smooth animations and transitions, check accessibility with keyboard navigation and screen readers, and ensure no errors when navigating from the app's main interface.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into subtasks for participant list and chat interface implementation, shared progress visualization, real-time collaboration setup, and responsive design testing."
+      },
+      {
+        "id": 5,
+        "title": "Implement Modern UI Design for ActivityFeedLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the ActivityFeedLive component, featuring activity cards, filters, and real-time updates to create an engaging social feed experience.",
+        "details": "Begin by reviewing the existing ActivityFeedLive component structure, ensuring it integrates with backend services for fetching activity data, user interactions, and real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for active elements), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For activity cards, design card-based layouts with rounded corners, shadows for depth, and icons or avatars to represent different activity types (e.g., study sessions, challenges, achievements). Implement filters as a horizontal bar or dropdown menu allowing users to filter by activity type, time period, or user relevance, ensuring smooth animations for filter application. Incorporate real-time updates by displaying new activities at the top with subtle animations (e.g., fade-in or slide-down effects) and indicators for live status. Ensure responsiveness across devices, using CSS Grid or Flexbox for layout, and consider accessibility features like keyboard navigation and screen reader support. Integrate with any existing global styles from task 1 to maintain consistency. If needed, use libraries like Phoenix LiveView for real-time features or Tailwind CSS for styling. Consider performance optimizations, such as lazy loading for activity cards and debouncing for filter inputs.",
+        "testStrategy": "Verify the implementation by navigating to the ActivityFeedLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test activity cards by scrolling through the feed, checking for proper display of content, avatars, and timestamps; hover or click on cards to ensure interactive elements work. Test filters by selecting different options (e.g., 'All Activities', 'Study Sessions', 'This Week') and verifying that the feed updates accordingly without full page reloads, with smooth transitions. Simulate real-time updates by triggering new activities (e.g., via backend simulation or another user session) and observe that new cards appear at the top with animations, and a live indicator is present. Check responsiveness by resizing the browser window or testing on mobile devices, ensuring the layout adapts properly. Use browser developer tools to inspect CSS for adherence to v0 principles and run accessibility audits to confirm keyboard navigation and ARIA compliance.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Activity Cards Layout",
+            "description": "Create the visual design for activity cards in the ActivityFeedLive component, including rounded corners, shadows, icons, and avatars to represent different activity types like study sessions and achievements.",
+            "dependencies": [
+              5
+            ],
+            "details": "Using Tailwind CSS or similar, implement card-based layouts with a neutral color palette (whites, grays, blues/greens for accents), sans-serif fonts like Inter, and generous whitespace. Ensure cards are modular and reusable for various activity types.",
+            "status": "done",
+            "testStrategy": "Visually inspect cards on the feed page to confirm clean design, proper icons, and readability across different activity types.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Filter Functionality",
+            "description": "Add a horizontal bar or dropdown menu for filtering activities by type, time period, or user relevance, with smooth animations for filter application.",
+            "dependencies": [
+              5
+            ],
+            "details": "Integrate filters using Phoenix LiveView for dynamic updates. Use debouncing for input efficiency and ensure filters apply seamlessly to the activity list, maintaining performance with lazy loading if needed.",
+            "status": "done",
+            "testStrategy": "Test filter options by selecting different criteria and verify that the activity list updates correctly with animations, without errors or delays.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Real-Time Updates",
+            "description": "Incorporate real-time updates for new activities, displaying them at the top with subtle animations like fade-in or slide-down effects, and indicators for live status.",
+            "dependencies": [
+              5
+            ],
+            "details": "Utilize WebSockets or LiveView subscriptions to push new activity data. Add animations using CSS transitions and ensure updates integrate with existing backend services for fetching and displaying activities.",
+            "status": "done",
+            "testStrategy": "Simulate real-time events and check that new activities appear at the top with animations, and live indicators update appropriately without page reloads.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Ensure Responsive and Accessible Feed Interactions",
+            "description": "Make the ActivityFeedLive component responsive across devices using CSS Grid or Flexbox, and add accessibility features like keyboard navigation and screen reader support.",
+            "dependencies": [
+              5
+            ],
+            "details": "Implement responsive layouts that adapt to mobile, tablet, and desktop. Add ARIA labels, keyboard shortcuts for interactions, and ensure compliance with WCAG guidelines, integrating with global styles from task 1 for consistency.",
+            "status": "done",
+            "testStrategy": "Test on various devices and screen sizes to confirm layout adapts properly, and use accessibility tools to verify keyboard navigation and screen reader compatibility.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Generate subtasks for activity card design with filters, implementing real-time updates, and ensuring responsive and accessible feed interactions."
+      },
+      {
+        "id": 6,
+        "title": "Implement Modern UI Design for RallyLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the RallyLive component, featuring team displays, progress bars, and competitive elements to enhance group challenges and user engagement.",
+        "details": "Begin by reviewing the existing RallyLive component structure, ensuring it integrates with backend services for group challenge data, team management, progress tracking, and real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for competitive highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For team displays, implement card-based layouts or grids showing team members, avatars, and roles; incorporate progress bars using CSS or a library like ProgressBar.js to visualize individual and team advancement; add competitive elements such as leaderboards, badges, or animated transitions for milestones. Ensure responsive design for mobile and desktop, with accessibility features like keyboard navigation and screen reader support. Integrate seamlessly with existing app navigation and consider performance optimizations for real-time data handling.",
+        "testStrategy": "Verify the implementation by navigating to the RallyLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test team displays by checking that team members are shown with avatars and roles, and verify progress bars update dynamically during challenges. Interact with competitive elements, such as leaderboards, to ensure they reflect real-time data accurately; test responsiveness by resizing the browser window and checking mobile views. Use browser developer tools to inspect for accessibility compliance and performance issues.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Create subtasks for team displays and progress bars, competitive elements integration, and responsive design for group challenges."
+      },
+      {
+        "id": 7,
+        "title": "Implement Modern UI Design for AutoChallengeLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the AutoChallengeLive component, featuring auto-challenge displays, matching UI elements, and challenge settings to enhance automated challenge experiences and user engagement.",
+        "details": "Begin by reviewing the existing AutoChallengeLive component structure, ensuring it integrates with backend services for auto-challenge data, settings management, and real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for active elements), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For auto-challenge displays, create card-based layouts or list views with clear icons, progress indicators, and settings toggles; incorporate interactive elements like buttons for starting, pausing, or configuring challenges. Ensure the UI matches the overall app's v0 style, including consistent spacing, typography, and responsive design for mobile and desktop. Consider accessibility features such as high contrast modes and keyboard navigation. If backend integration is needed for challenge settings, collaborate with backend developers to ensure seamless data flow. Use CSS frameworks like Tailwind CSS or custom styles to achieve the minimalist aesthetic, and test for performance to avoid layout shifts during real-time updates.",
+        "testStrategy": "Verify the implementation by navigating to the AutoChallengeLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test auto-challenge displays by interacting with challenge cards or lists, verifying that settings toggles update in real-time and match the UI style; check progress indicators for accuracy and responsiveness. Perform cross-device testing on mobile and desktop to ensure responsive design. Use browser developer tools to inspect CSS for adherence to v0 principles, and conduct accessibility audits with tools like Lighthouse to confirm usability. If integrated with real-time features, simulate updates to verify UI stability.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Subdivide into auto-challenge display design, matching UI elements, and settings management with real-time updates."
+      },
+      {
+        "id": 8,
+        "title": "Implement Modern UI Design for RewardsLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the RewardsLive component, featuring reward cards, point totals display, and a redemption interface to enhance user engagement with the rewards system.",
+        "details": "Begin by reviewing the existing RewardsLive component structure, ensuring it integrates with backend services for fetching user points, available rewards, redemption logic, and any real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for reward highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For reward cards, create card-based layouts with clear titles, descriptions, point costs, and redeem buttons, using subtle shadows or borders for definition without clutter. Implement a prominent point totals section at the top or sidebar, displaying current points with large, bold typography and progress indicators if applicable (e.g., towards next reward tier). Design the redemption interface as a modal or overlay with confirmation steps, ensuring accessibility and responsiveness across devices. Consider integrating animations for smooth transitions (e.g., card flips on hover or fade-ins for redeemed items) using CSS or a library like Animate.css. Ensure consistency with other v0-inspired components by reusing shared styles or mixins. Handle edge cases such as insufficient points (disable redeem buttons and show tooltips) and empty reward lists (display friendly placeholders). Optimize for performance by lazy-loading images or icons for rewards.",
+        "testStrategy": "Verify the implementation by navigating to the RewardsLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test the point totals display by checking accuracy against backend data and responsiveness on different screen sizes. Interact with reward cards by hovering to verify visual feedback (e.g., subtle animations or highlights), and attempt redemptions to ensure the interface handles confirmations, success messages, and error states (e.g., insufficient points) correctly. Use browser developer tools to inspect CSS for adherence to v0 principles, such as whitespace and color usage. Test accessibility by navigating with keyboard and screen readers, ensuring redeem buttons and modals are properly labeled. Perform cross-browser testing (e.g., Chrome, Firefox, Safari) and mobile responsiveness checks to confirm the layout adapts seamlessly.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break into reward card implementation, point totals display, and redemption interface with animations and accessibility."
+      },
+      {
+        "id": 9,
+        "title": "Implement Modern UI Design for StreakRescueLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the StreakRescueLive component, incorporating urgency indicators, a countdown timer, and quick action buttons to motivate users to rescue their streaks.",
+        "details": "Begin by reviewing the existing StreakRescueLive component structure, ensuring it integrates with backend services for streak data, timer logic, and user actions (e.g., via LiveView subscriptions for real-time updates). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like reds or oranges for urgency indicators), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. Implement urgency indicators using visual cues like color gradients or icons (e.g., warning symbols) to highlight the risk of losing the streak. Add a countdown timer with a circular or linear progress bar (e.g., using CSS animations or a library like ProgressBar.js) that updates in real-time, displaying remaining time in a clear, prominent format (e.g., MM:SS). Include quick action buttons for rescuing the streak, such as 'Rescue Now' or 'Extend Streak', styled with rounded corners, hover effects, and primary accent colors for high visibility. Ensure responsive design for mobile and desktop, with touch-friendly buttons on mobile. Consider accessibility by adding ARIA labels for timers and buttons, and ensure high contrast for urgency elements. Integrate seamlessly with existing app navigation and styling consistency from Task 1.",
+        "testStrategy": "Verify the implementation by navigating to the StreakRescueLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test urgency indicators by simulating a streak at risk, checking for visible color changes or icons that convey urgency. Validate the countdown timer by observing real-time updates (e.g., decrementing seconds) and ensuring it matches expected behavior (e.g., resets or triggers actions at zero). Interact with quick action buttons by clicking them, verifying they perform the intended actions (e.g., rescuing the streak) and provide feedback like success messages or redirects. Test responsiveness by resizing the browser window or using mobile emulation, ensuring elements adapt properly. Use browser developer tools to inspect for accessibility compliance, such as ARIA attributes and color contrast ratios.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Generate subtasks for urgency indicators and countdown timer, quick action buttons, and responsive integration with streak data."
+      },
+      {
+        "id": 10,
+        "title": "Implement Modern UI Design for PracticeResultsLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the PracticeResultsLive component, featuring score visualization, performance metrics, and next steps to provide users with clear insights and guidance after practice sessions.",
+        "details": "Begin by reviewing the existing PracticeResultsLive component structure, ensuring it integrates with backend services for fetching practice session data, score calculations, performance metrics, and any real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for positive metrics, reds or oranges for areas needing improvement), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For score visualization, implement a progress bar or circular chart (e.g., using SVG or a library like Chart.js) to display overall scores and breakdowns by category. Include performance metrics such as accuracy percentages, time spent, and comparative benchmarks, presented in clean cards or tables. Add a 'next steps' section with actionable recommendations, quick action buttons (e.g., 'Retry Practice', 'View Weak Areas'), and links to related features like challenges or study sessions. Ensure responsive design for mobile and desktop, with smooth animations for loading results. Consider accessibility features like alt text for charts and keyboard navigation. Integrate with existing app navigation and styling consistency across components.",
+        "testStrategy": "Verify the implementation by navigating to the PracticeResultsLive page after completing a practice session from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test score visualization by checking that charts or bars accurately reflect practice data, updating dynamically if needed. Validate performance metrics display by verifying accuracy calculations, time metrics, and benchmarks against expected values. Interact with the next steps section to ensure buttons and links function correctly, redirecting to appropriate pages (e.g., retry practice or view challenges). Test responsiveness by resizing the browser window and checking layout on mobile devices. Use browser developer tools to inspect for accessibility compliance, such as proper ARIA labels on interactive elements.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Create subtasks for score visualization and charts, performance metrics display, and next steps UI with responsive design."
+      },
+      {
+        "id": 11,
+        "title": "Implement Modern UI Design for PrepPackLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the PrepPackLive component, featuring pack cards, content preview, and purchase/access UI to enhance user engagement with prep pack offerings.",
+        "details": "Begin by reviewing the existing PrepPackLive component structure, ensuring it integrates with backend services for fetching prep pack data, content previews, purchase logic, and user access management (e.g., via LiveView subscriptions for real-time updates). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for purchase highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For pack cards, create card-based layouts with clear titles, descriptions, and visual previews of content; implement a content preview section using modals or expandable views to showcase sample questions or materials without full access; design the purchase/access UI with prominent call-to-action buttons, pricing displays, and secure checkout integration (e.g., via Stripe or similar), including states for purchased vs. unpurchased packs. Ensure responsive design for mobile and desktop, with smooth animations for interactions like card hovers or preview expansions. Consider accessibility features such as keyboard navigation and screen reader support. Leverage existing CSS frameworks or Tailwind CSS for consistency with other v0-inspired components, and integrate any necessary JavaScript for dynamic content loading or payment handling.",
+        "testStrategy": "Verify the implementation by navigating to the PrepPackLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test pack cards by hovering or clicking to ensure they display titles, descriptions, and previews accurately; interact with the content preview feature to verify it shows sample content in a modal or expandable view without granting full access. Test the purchase/access UI by simulating purchase flows (using test payment methods if integrated), checking for proper state changes (e.g., from 'Purchase' to 'Access' buttons), pricing accuracy, and secure handling; ensure responsive behavior on different screen sizes. Conduct accessibility testing with tools like WAVE or manual checks for keyboard navigation and screen reader compatibility. Monitor for any integration issues with backend services, such as data fetching or real-time updates.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Subdivide into pack card design, content preview modals, purchase/access UI with payment integration, and responsive testing."
+      },
+      {
+        "id": 12,
+        "title": "Implement Modern UI Design for UserSettingsLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the UserSettingsLive component, featuring organized sections for settings, toggle switches for preferences, and a save confirmation mechanism to enhance user control and experience.",
+        "details": "Begin by reviewing the existing UserSettingsLive component structure, ensuring it integrates with backend services for fetching and updating user settings data, preference management, and any real-time updates (e.g., via LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for active elements), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. Organize settings into logical sections (e.g., Account, Notifications, Privacy) using card-based layouts or grouped containers for clarity. Implement toggle switches for binary preferences (e.g., enable/disable notifications) with smooth animations and clear labels. Add a save confirmation mechanism, such as a modal dialog or inline notification that appears after changes are submitted, confirming successful updates and providing options to undo if needed. Ensure accessibility by adding proper ARIA labels, keyboard navigation support, and high contrast modes. Consider responsive design to adapt sections and toggles for mobile and desktop views. Integrate with form validation to prevent invalid submissions and provide user feedback on errors. Use CSS frameworks like Tailwind CSS for consistent styling, and ensure the design aligns with other v0-inspired components in the app for a cohesive user experience.",
+        "testStrategy": "Verify the implementation by navigating to the UserSettingsLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test organized sections by verifying that settings are grouped logically (e.g., Account, Notifications) and that sections expand/collapse if implemented. Interact with toggle switches to ensure they toggle states smoothly, update the UI immediately, and persist changes upon saving. Test the save confirmation by making changes, submitting the form, and checking that a confirmation message appears (e.g., 'Settings saved successfully') with options like undo. Validate form behavior by attempting invalid inputs and ensuring error messages display. Test responsiveness by resizing the browser window and confirming sections and toggles adapt appropriately. Use browser developer tools to inspect for accessibility compliance, such as ARIA attributes and keyboard navigation.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break into settings sections organization, toggle switches implementation, and save confirmation with form validation."
+      },
+      {
+        "id": 13,
+        "title": "Implement Modern UI Design for ParentProgressLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the ParentProgressLive component, featuring child progress charts, activity timeline, and performance insights to provide parents with an engaging dashboard for monitoring their child's learning journey.",
+        "details": "Begin by reviewing the existing ParentProgressLive component structure, ensuring it integrates with backend services for fetching child progress data, activity logs, performance metrics, and real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for progress indicators, reds or oranges for areas needing attention), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For child progress charts, implement responsive chart visualizations (e.g., using libraries like Chart.js or Phoenix LiveView's built-in charting) to display metrics like scores over time, subject-wise performance, and comparative benchmarks; ensure charts are interactive with hover details and tooltips. Design an activity timeline as a scrollable feed of recent activities, using card-based layouts with icons, timestamps, and brief descriptions for each entry. Incorporate performance insights section with key metrics (e.g., average scores, streak counts, improvement trends) presented in clean widgets or infographics. Ensure the layout is mobile-responsive, with collapsible sections for smaller screens, and includes accessibility features like high contrast modes and screen reader support. Integrate user authentication to ensure only authorized parents can access their child's data, and handle cases where multiple children are associated with a parent account. Consider performance optimizations for real-time data updates to avoid UI lag. Finally, align the design with the overall app's v0-inspired theme for consistency across components.",
+        "testStrategy": "Verify the implementation by navigating to the ParentProgressLive page from the parent dashboard interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test child progress charts by checking for accurate data rendering, interactivity (e.g., hovering over data points shows details), and responsiveness across devices. Validate the activity timeline by scrolling through entries, confirming chronological order, and ensuring real-time updates reflect new activities. Assess performance insights by verifying metric calculations match backend data and display correctly in widgets. Test user authentication by attempting access with invalid credentials and confirming data privacy for multiple children. Perform cross-browser and mobile device testing to ensure layout integrity, and use tools like Lighthouse for accessibility audits.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Generate subtasks for child progress charts, activity timeline, performance insights, and multi-child authentication handling."
+      },
+      {
+        "id": 14,
+        "title": "Implement Modern UI Design for TranscriptLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the TranscriptLive component, featuring a transcript view with conversation history, timestamps, and export options to provide users with an intuitive way to review and share session transcripts.",
+        "details": "Begin by reviewing the existing TranscriptLive component structure, ensuring it integrates with backend services for fetching transcript data, conversation history, timestamp generation, and export functionality (e.g., via LiveView subscriptions for real-time updates if applicable). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. For the transcript view, implement a scrollable list or card-based layout displaying conversation history with clear timestamps (e.g., formatted as 'HH:MM:SS' or relative times like '2 minutes ago'), speaker identification (if applicable), and message content. Include export options such as buttons for downloading transcripts in formats like PDF, TXT, or CSV, with modal dialogs for customization (e.g., date range selection or anonymization). Ensure responsive design for mobile and desktop, with accessibility features like keyboard navigation and screen reader support. Consider performance optimizations for large transcripts, such as lazy loading or pagination. Integrate with any related components for seamless navigation, and align with the overall app's design system established in foundational tasks.",
+        "testStrategy": "Verify the implementation by navigating to the TranscriptLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test the transcript view by loading sample conversation history, verifying timestamps are accurately displayed and formatted, and checking that the history scrolls smoothly. Test export options by selecting different formats (e.g., PDF, TXT), confirming downloads work correctly, and validating exported content matches the displayed transcript. Perform cross-device testing on mobile and desktop to ensure responsiveness. Use browser developer tools to inspect for accessibility compliance (e.g., ARIA labels) and performance (e.g., no excessive load times for large transcripts). Simulate real-time updates if applicable, and check integration with backend services by verifying data accuracy and error handling.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Create subtasks for transcript view with timestamps, export options implementation, and responsive design for large data."
+      },
+      {
+        "id": 15,
+        "title": "Implement Modern UI Design for ProgressReelLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the ProgressReelLive component, featuring story-style cards, swipe navigation, and achievement highlights to showcase user progress and milestones in an engaging, narrative format.",
+        "details": "Begin by reviewing the existing ProgressReelLive component structure, ensuring it integrates with backend services for fetching user progress data, achievement milestones, and real-time updates (e.g., via WebSockets or LiveView subscriptions). Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for achievement highlights), sans-serif fonts such as Inter or Roboto, and generous whitespace for readability. Implement story-style cards as horizontal, card-based layouts resembling social media stories, each displaying progress snapshots, achievements, or milestones with visual elements like progress bars, icons, or badges. Add swipe navigation for seamless left/right swiping between cards, using touch gestures or arrow controls, ensuring smooth animations and transitions (e.g., via CSS transitions or JavaScript libraries like Swiper.js). Incorporate achievement highlights with prominent visual cues, such as glowing effects, celebratory animations, or pop-up notifications for unlocked milestones. Ensure responsiveness across devices, with cards adapting to screen sizes while maintaining the minimalist aesthetic. Consider accessibility features like keyboard navigation for swipe actions and screen reader support for card content. Integrate with user data to personalize the reel, pulling from progress tracking systems (potentially linking to components like PracticeResultsLive or RewardsLive for data sources). Use Phoenix LiveView for dynamic updates, allowing the reel to refresh with new achievements without full page reloads. Code example for a basic card structure: `<div class=\"progress-card\" phx-click=\"swipe-next\"> <img src=\"achievement-icon.png\" alt=\"Achievement\"> <h3>Achievement Unlocked</h3> <p>Details here</p> </div>`, styled with CSS for v0 aesthetics.",
+        "testStrategy": "Verify the implementation by navigating to the ProgressReelLive page from the main app interface, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test story-style cards by checking their horizontal layout, visual elements (e.g., progress bars, icons), and content accuracy against user progress data. Test swipe navigation by performing left/right swipes on touch devices or using arrow keys/clicks on desktop, verifying smooth transitions and correct card sequencing without glitches. Test achievement highlights by triggering or simulating milestone unlocks (e.g., via backend data manipulation), ensuring visual cues like glows or animations appear appropriately. Check responsiveness by resizing the browser window or testing on mobile devices, confirming cards adapt fluidly. Validate accessibility by using keyboard navigation for swipes and screen readers for card content. Monitor for real-time updates by making progress changes in another session and observing the reel refresh dynamically.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Subdivide into story-style cards design, swipe navigation implementation, and achievement highlights with animations."
+      },
+      {
+        "id": 16,
+        "title": "Implement Modern UI Design for DashboardLive",
+        "description": "Design and implement a modern, v0-inspired user interface for the DashboardLive component, featuring a personalized dashboard with quick access to prep packs, recent sessions, progress summaries, and notifications to provide users with an engaging entry point to the app.",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "medium",
+        "details": "Adopt a v0-inspired design philosophy, emphasizing minimalism, clean lines, and intuitive interactions—utilize a neutral color palette (e.g., whites, grays, and subtle accents like blues or greens for highlights), sans-serif fonts such as Inter or similar for readability, and incorporate ample whitespace, subtle shadows for depth, and responsive grid layouts for adaptability across devices. Structure the dashboard with modular sections: a hero banner for welcome messages, a grid of quick-access cards for prep packs and sessions, a progress summary widget with charts or icons, and a notifications panel with dismissible alerts. Ensure accessibility by implementing proper ARIA labels, keyboard navigation, and high-contrast modes. Consider performance optimizations like lazy loading for images or data, and integrate with existing authentication to personalize content based on user roles (e.g., student vs. parent). Use CSS frameworks like Tailwind CSS for rapid prototyping, and ensure the design aligns with the created v0 style guide for consistency across the app. Handle edge cases such as empty states (e.g., no recent sessions) with friendly placeholders and call-to-action buttons. Finally, collaborate with backend developers to define API endpoints for data fetching and ensure seamless integration.",
+        "testStrategy": "Verify the implementation by logging into the app and navigating to the DashboardLive page as the default landing page or from the main navigation, ensuring it loads without errors and displays the v0-inspired layout: confirm a clean, minimalist design with neutral colors, consistent typography (e.g., Inter font), and ample whitespace. Test the modular sections by checking that quick-access cards link correctly to prep packs and sessions, progress summaries display accurate data (e.g., compare with backend data), and notifications update in real-time or on refresh. Perform cross-device testing on desktop, tablet, and mobile to ensure responsive behavior, such as grid layouts adapting to screen sizes. Validate accessibility by using screen readers to confirm ARIA labels and keyboard navigation through interactive elements. Test edge cases by simulating scenarios like no data (e.g., new user with empty dashboard) and verify placeholders appear correctly. Conduct performance tests to ensure load times are under 2 seconds, and run automated tests for component rendering and data integration. Finally, gather user feedback in a staging environment to confirm intuitive interactions.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Complete preparation phase: Review codebase and create v0 style guide",
+            "description": "Review the existing DashboardLive component structure, expand tasks, and create the v0 style guide for consistency across the app.",
+            "dependencies": [],
+            "details": "Codebase reviewed, tasks expanded, v0 style guide created. Ready for core implementation. This includes ensuring integration points with backend services for user-specific data.\n<info added on 2025-11-05T03:56:03.074Z>\nCompleted: Migrated HomePageLive to design token system with enhanced hero section, feature cards, and CTA buttons.\n</info added on 2025-11-05T03:56:03.074Z>",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Adopt v0 design philosophy and plan modular sections",
+            "description": "Establish the overall design approach with minimalism, neutral colors, and responsive layouts, and plan the structure for hero banner, quick-access cards, progress widget, and notifications panel. [Updated: 11/4/2025]",
+            "dependencies": [
+              1
+            ],
+            "details": "Utilize a neutral color palette (whites, grays, blues/greens), sans-serif fonts like Inter, ample whitespace, subtle shadows, and grid layouts. Define the modular sections to ensure intuitive interactions and adaptability across devices.\n<info added on 2025-11-05T03:56:12.549Z>\nUpdated DashboardLive with design tokens, enhanced stat cards and quick action buttons.\n</info added on 2025-11-05T03:56:12.549Z>",
+            "status": "pending",
+            "testStrategy": "Review design mockups against v0 style guide for consistency and minimalism.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement hero banner for welcome messages",
+            "description": "Create and integrate the hero banner section with personalized welcome messages and basic user greetings.",
+            "dependencies": [
+              2
+            ],
+            "details": "Design a clean hero banner that displays welcome messages, integrates with authentication for personalization (e.g., student vs. parent roles), and ensures responsive behavior on all devices.\n<info added on 2025-11-05T03:56:26.360Z>\nDiagnosticAssessmentLive migrated with accessibility improvements (ARIA labels, semantic HTML), enhanced timer with warning state, improved subject/grade selection.\n</info added on 2025-11-05T03:56:26.360Z>",
+            "status": "pending",
+            "testStrategy": "Test loading and display of personalized messages, verify responsiveness, and check alignment with v0 style guide.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement grid of quick-access cards for prep packs and sessions",
+            "description": "Develop the quick-access cards grid linking to prep packs and recent sessions for easy navigation.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create cards with previews or icons for prep packs and sessions, ensure links work correctly, and handle empty states with placeholders. Integrate with backend for data fetching.\n<info added on 2025-11-05T03:56:40.223Z>\nCompleted: DiagnosticResultsLive with SVG-based circular progress indicator, skill performance bar chart, heatmap visualization, all with proper ARIA labels.\n</info added on 2025-11-05T03:56:40.223Z>",
+            "status": "pending",
+            "testStrategy": "Verify card links navigate correctly, data accuracy from backend, and responsive grid layout on different screen sizes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement progress summary widget with charts or icons",
+            "description": "Build the progress summary section displaying user metrics with visual elements like charts or icons.",
+            "dependencies": [
+              2
+            ],
+            "details": "Incorporate charts or icons for progress tracking, fetch data from backend services, and ensure real-time updates if applicable. Handle cases with no progress data.\n<info added on 2025-11-05T03:57:05.332Z>\nCompleted: PracticeSessionLive migrated to design tokens, enhanced question navigation UI, improved timer and score displays\n</info added on 2025-11-05T03:57:05.332Z>",
+            "status": "pending",
+            "testStrategy": "Compare displayed progress data with backend sources, test visual elements for accuracy, and check updates on refresh.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Implement notifications panel with dismissible alerts",
+            "description": "Develop the notifications section with real-time or refresh-based alerts that users can dismiss.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a panel for notification alerts, integrate with WebSockets or LiveView for real-time updates, and add dismiss functionality. Ensure accessibility with ARIA labels.",
+            "status": "pending",
+            "testStrategy": "Test notification display and real-time updates, verify dismiss actions, and use screen readers for accessibility.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Ensure accessibility features across the dashboard",
+            "description": "Implement ARIA labels, keyboard navigation, and high-contrast modes for all interactive elements.",
+            "dependencies": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Add proper ARIA labels to sections and elements, enable keyboard navigation, and support high-contrast modes. Test with assistive technologies.",
+            "status": "pending",
+            "testStrategy": "Use screen readers and keyboard-only navigation to confirm full accessibility, including high-contrast mode.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Optimize performance and handle edge cases",
+            "description": "Apply performance optimizations like lazy loading and manage empty states with friendly placeholders.",
+            "dependencies": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Implement lazy loading for images/data, ensure load times under 2 seconds, and create placeholders for no-data scenarios with call-to-action buttons.\n<info added on 2025-11-05T03:57:22.654Z>\nStudySessionLive has been completed with new features: real-time chat via PubSub, group progress visualization, participant presence tracking, enhanced session stats.\n</info added on 2025-11-05T03:57:22.654Z>",
+            "status": "pending",
+            "testStrategy": "Conduct performance tests for load times, simulate empty states, and verify placeholders and CTAs function correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Integrate with backend and conduct final testing",
+            "description": "Collaborate on API endpoints, integrate fully, and run comprehensive tests including user feedback.",
+            "dependencies": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "details": "Define and integrate API endpoints for data fetching, ensure seamless backend integration, and perform cross-device and accessibility tests. Gather feedback in staging.\n<info added on 2025-11-05T03:57:35.451Z>\nCompleted: ChallengeLive with 7 states updated, social sharing UI (WhatsApp/Messenger with SVG icons), enhanced challenge cards and countdown timer.\n</info added on 2025-11-05T03:57:35.451Z>",
+            "status": "pending",
+            "testStrategy": "Run full test suite including automated tests, cross-device checks, performance metrics, and user feedback sessions to confirm intuitive interactions.",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-11-05T02:33:40.972Z"
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-11-05T02:36:12.259Z",
+      "taskCount": 16,
+      "completedCount": 2,
+      "tags": [
+        "style"
+      ],
+      "created": "2025-11-05T03:00:47.588Z",
+      "description": "Tasks for style context",
+      "updated": "2025-11-05T03:12:45.389Z"
     }
   }
 }

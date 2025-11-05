@@ -294,4 +294,11 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       end
     end)
   end
+
+  # Helper function for template
+  defp format_time(seconds) do
+    minutes = div(seconds, 60)
+    secs = rem(seconds, 60)
+    "#{String.pad_leading(Integer.to_string(minutes), 2, "0")}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
+  end
 end

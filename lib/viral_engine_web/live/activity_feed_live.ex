@@ -86,77 +86,79 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="feed-container p-4 max-w-4xl mx-auto">
+    <div class="bg-background min-h-screen p-4 max-w-4xl mx-auto" role="main">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Activity Feed</h2>
-        <div class="flex space-x-2">
-          <button phx-click="filter-type" phx-value-type="all" 
-            class={"px-4 py-2 rounded-md text-sm font-medium " <> 
-              if(@type_filter == "all", do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700")}>
+        <h1 class="text-2xl font-bold text-foreground">Activity Feed</h1>
+        <div class="flex space-x-2" role="group" aria-label="Filter activities">
+          <button phx-click="filter-type" phx-value-type="all"
+            class={"px-4 py-2 rounded-md text-sm font-medium transition-colors " <>
+              if(@type_filter == "all", do: "bg-primary text-primary-foreground", else: "bg-muted text-muted-foreground hover:bg-muted/80")}
+            aria-pressed={@type_filter == "all"}>
             All
           </button>
-          <button phx-click="filter-type" phx-value-type="achievement" 
-            class={"px-4 py-2 rounded-md text-sm font-medium " <> 
-              if(@type_filter == "achievement", do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700")}>
+          <button phx-click="filter-type" phx-value-type="achievement"
+            class={"px-4 py-2 rounded-md text-sm font-medium transition-colors " <>
+              if(@type_filter == "achievement", do: "bg-primary text-primary-foreground", else: "bg-muted text-muted-foreground hover:bg-muted/80")}
+            aria-pressed={@type_filter == "achievement"}>
             Achievements
           </button>
-          <button phx-click="filter-type" phx-value-type="like" 
-            class={"px-4 py-2 rounded-md text-sm font-medium " <> 
-              if(@type_filter == "like", do: "bg-blue-600 text-white", else: "bg-gray-200 text-gray-700")}>
+          <button phx-click="filter-type" phx-value-type="like"
+            class={"px-4 py-2 rounded-md text-sm font-medium transition-colors " <>
+              if(@type_filter == "like", do: "bg-primary text-primary-foreground", else: "bg-muted text-muted-foreground hover:bg-muted/80")}
+            aria-pressed={@type_filter == "like"}>
             Interactions
           </button>
         </div>
       </div>
 
-      <div id="feed" class="space-y-4">
+      <div id="feed" class="space-y-4" role="feed" aria-label="Activity feed">
         <%= for {id, activity} <- @streams.activities do %>
-          <div class="activity-card bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+          <article class="activity-card bg-card text-card-foreground border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow" aria-labelledby={"activity-#{id}-content"}>
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0">
-                <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{
-                  case activity.type do
-                    "like" -> "bg-green-100 text-green-800"
-                    "achievement" -> "bg-purple-100 text-purple-800"
-                    "follow" -> "bg-indigo-100 text-indigo-800"
-                    _ -> "bg-blue-100 text-blue-800"
-                  end
-                }"}>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                   <%= String.capitalize(activity.type) %>
                 </span>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm text-gray-900"><%= activity.content %></p>
-                <p class="text-xs text-gray-500 mt-1">
+                <p id={"activity-#{id}-content"} class="text-sm text-foreground"><%= activity.content %></p>
+                <p class="text-xs text-muted-foreground mt-1">
                   By <%= activity.user.name %> • <%= Calendar.strftime(activity.inserted_at, "%b %d, %Y %H:%M") %>
                 </p>
                 <%= if activity.type != "like" do %>
-                  <button 
-                    phx-click="toggle-like" 
+                  <button
+                    phx-click="toggle-like"
                     phx-value-activity_id={activity.id}
-                    class="mt-2 px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    class="mt-2 px-3 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                    aria-label={if has_user_liked?(assigns, activity.id), do: "Unlike this activity", else: "Like this activity"}>
                     <%= if has_user_liked?(assigns, activity.id), do: "Unlike", else: "Like" %>
                   </button>
                 <% end %>
               </div>
             </div>
-          </div>
+          </article>
         <% end %>
       </div>
 
       <%= if @has_more do %>
         <div class="text-center mt-8">
-          <button phx-click="load-more" 
-            class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium">
+          <button phx-click="load-more"
+            class="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors font-medium shadow-sm hover:shadow-md"
+            aria-label="Load more activities">
             Load More Activities
           </button>
         </div>
       <% end %>
 
       <%= if Enum.empty?(@streams.activities) do %>
-        <div class="text-center py-12 text-gray-500">
-          <div class="text-6xl mb-4">📭</div>
-          <p class="text-lg">No activities yet.</p>
-          <p class="text-sm mt-2">Start interacting to see updates here!</p>
+        <div class="text-center py-12">
+          <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-muted mb-4">
+            <svg class="h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <p class="text-lg text-muted-foreground">No activities yet.</p>
+          <p class="text-sm text-muted-foreground mt-2">Start interacting to see updates here!</p>
         </div>
       <% end %>
     </div>
