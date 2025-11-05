@@ -274,4 +274,141 @@ defmodule ViralEngineWeb.FlashcardStudyLive do
         ViralPrompts.get_default_prompt(:flashcard_session_completed)
     end
   end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div class="max-w-4xl mx-auto">
+        <%= if @stage == :deck_selection do %>
+          <!-- Deck Selection Stage -->
+          <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">📚 Flashcard Study</h1>
+            <p class="text-gray-600 mb-8">Select a deck or generate one with AI</p>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+              <%= for deck <- @decks do %>
+                <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer" phx-click="select_deck" phx-value-deck_id={deck.id}>
+                  <h3 class="text-lg font-bold text-gray-900 mb-2"><%= deck.title %></h3>
+                  <p class="text-sm text-gray-600 mb-3"><%= deck.description %></p>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500"><%= deck.card_count || 0 %> cards</span>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium"><%= deck.subject %></span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <button phx-click="show_ai_generator" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md">
+              ✨ Generate AI Deck
+            </button>
+
+            <%= if @show_ai_generator do %>
+              <form phx-submit="generate_ai_deck" class="mt-6 p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
+                <h3 class="font-bold text-gray-900 mb-4">AI Deck Generator</h3>
+                <div class="space-y-3">
+                  <input type="text" name="subject" placeholder="Subject (e.g., Math)" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg" required />
+                  <input type="text" name="topic" placeholder="Topic (e.g., Algebra)" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg" required />
+                  <select name="difficulty" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg">
+                    <option value="1">Easy</option>
+                    <option value="2" selected>Medium</option>
+                    <option value="3">Hard</option>
+                  </select>
+                  <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg">
+                    Generate Deck
+                  </button>
+                </div>
+              </form>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%= if @stage == :studying do %>
+          <!-- Study Stage -->
+          <div class="mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-4 flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-gray-900"><%= @deck.title %></h2>
+                <p class="text-sm text-gray-600">Card <%= @current_card_index + 1 %> of <%= length(@cards) %></p>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-blue-600"><%= format_time(@session_duration) %></p>
+                <p class="text-xs text-gray-600">Mastered: <%= @cards_mastered %></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flashcard -->
+          <div class="mb-6">
+            <div class="bg-white rounded-2xl shadow-2xl p-12 min-h-[400px] flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-3xl" phx-click="flip_card">
+              <%= if !@show_back do %>
+                <div class="text-center">
+                  <p class="text-sm font-medium text-gray-500 mb-4">QUESTION</p>
+                  <h3 class="text-3xl font-bold text-gray-900 mb-8"><%= @current_card.front_text %></h3>
+                  <p class="text-sm text-gray-400">Click to reveal answer</p>
+                </div>
+              <% else %>
+                <div class="text-center">
+                  <p class="text-sm font-medium text-gray-500 mb-4">ANSWER</p>
+                  <h3 class="text-2xl font-semibold text-blue-600 mb-8"><%= @current_card.back_text %></h3>
+                  <p class="text-sm text-gray-400">Rate your confidence below</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Rating Buttons (only show when answer is revealed) -->
+          <%= if @show_back do %>
+            <div class="grid grid-cols-3 gap-4">
+              <button phx-click="rate_card" phx-value-rating="1" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-lg shadow-md">
+                Again
+              </button>
+              <button phx-click="rate_card" phx-value-rating="3" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-4 rounded-lg shadow-md">
+                Good
+              </button>
+              <button phx-click="rate_card" phx-value-rating="5" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-lg shadow-md">
+                Easy
+              </button>
+            </div>
+          <% end %>
+        <% end %>
+
+        <%= if @stage == :completed do %>
+          <!-- Completion Stage -->
+          <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
+              <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Session Complete!</h2>
+            <div class="grid md:grid-cols-3 gap-4 my-8">
+              <div class="p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-gray-600">Cards Reviewed</p>
+                <p class="text-3xl font-bold text-blue-600"><%= @session.cards_reviewed %></p>
+              </div>
+              <div class="p-4 bg-green-50 rounded-lg">
+                <p class="text-sm text-gray-600">Cards Mastered</p>
+                <p class="text-3xl font-bold text-green-600"><%= @session.cards_mastered %></p>
+              </div>
+              <div class="p-4 bg-purple-50 rounded-lg">
+                <p class="text-sm text-gray-600">Score</p>
+                <p class="text-3xl font-bold text-purple-600"><%= round(@session.score || 0) %>%</p>
+              </div>
+            </div>
+            <a href="/flashcards" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg shadow-md">
+              Back to Flashcards
+            </a>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp format_time(seconds) do
+    minutes = div(seconds, 60)
+    secs = rem(seconds, 60)
+    "#{String.pad_leading(Integer.to_string(minutes), 2, "0")}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
+  end
 end

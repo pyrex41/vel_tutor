@@ -18,6 +18,19 @@ defmodule ViralEngine.Presence do
         |> Map.put(:user_id, user_id)
       )
 
+      # Create/update presence session
+      session_id = "global_#{user_id}_#{:erlang.system_time(:second)}"
+
+      ViralEngine.PresenceTracking.create_session(%{
+        user_id: user_id,
+        session_id: session_id,
+        status: meta[:status] || "online",
+        current_activity: meta[:current_activity],
+        metadata: meta,
+        last_seen_at: DateTime.utc_now(),
+        connected_at: DateTime.utc_now()
+      })
+
       ViralEngine.PresenceTracker.track_user(user_id, nil, "global_users", meta)
     end
   end
@@ -36,6 +49,20 @@ defmodule ViralEngine.Presence do
         |> Map.put(:name, user.name || "Anonymous")
         |> Map.put(:user_id, user_id)
       )
+
+      # Create/update presence session
+      session_id = "subject_#{subject_id}_#{user_id}_#{:erlang.system_time(:second)}"
+
+      ViralEngine.PresenceTracking.create_session(%{
+        user_id: user_id,
+        subject_id: subject_id,
+        session_id: session_id,
+        status: meta[:status] || "online",
+        current_activity: meta[:current_activity],
+        metadata: meta,
+        last_seen_at: DateTime.utc_now(),
+        connected_at: DateTime.utc_now()
+      })
 
       ViralEngine.PresenceTracker.track_user(user_id, subject_id, topic, meta)
     end

@@ -1,0 +1,101 @@
+{
+	"meta": {
+		"generatedAt": "2025-11-05T05:32:59.091Z",
+		"tasksAnalyzed": 11,
+		"totalTasks": 11,
+		"analysisCount": 11,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Set Up Real-Time Infrastructure with Phoenix Channels and PubSub",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break this task into subtasks covering Phoenix Channels integration, PubSub configuration with Redis/PostgreSQL, channel creation for presence and feeds, and comprehensive load testing for scalability.",
+			"reasoning": "High complexity due to real-time requirements, horizontal scalability needs, and rigorous load testing simulating high concurrency, involving multiple backend integrations and performance optimizations."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Global and Subject-Specific Presence Indicators",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into subtasks for extending PresenceChannel, implementing anonymized tracking and opt-out logic, and ensuring compliance with privacy regulations.",
+			"reasoning": "Moderate to high complexity from extending real-time features, handling anonymization and opt-out functionality, plus compliance with COPPA/FERPA, requiring careful data handling and testing."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Build Real-Time Activity Feed",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into subtasks for setting up the ActivityFeed module with event listening and broadcasting, and implementing anonymization with opt-out checks.",
+			"reasoning": "Medium complexity involving real-time broadcasting and database storage with anonymization, but straightforward given the dependency on Task 1, with focus on performance and privacy."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Develop Mini-Leaderboards for Subject Pages",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Break into subtasks for creating the LeaderboardService with database queries and caching, and integrating real-time updates via Channels.",
+			"reasoning": "Medium complexity due to query optimization, caching for performance, and real-time integration, with dependencies on Task 1 making it manageable but requiring UI and backend coordination."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Add Study Buddy Nudge Feature",
+			"complexityScore": 5,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divide into subtasks for UI integration of nudges in practice sessions and backend tracking of invites and conversions.",
+			"reasoning": "Lower medium complexity as it involves UI changes and link generation, dependent on presence features, with testing focused on user experience rather than heavy technical challenges."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement Buddy Challenge Viral Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Split into subtasks for micro-deck generation, deep link creation and sharing, and reward tracking upon completion.",
+			"reasoning": "High complexity from viral loop mechanics, deep link handling, and attribution tracking, building on dependencies with integration of analytics and rewards."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Develop Results Rally Viral Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break into subtasks for percentile rank calculation, leaderboard creation with deep links, and ensuring real-time updates.",
+			"reasoning": "High complexity involving leaderboard logic, deep links, and real-time features, with dependencies on Task 1 and 4, requiring careful testing for shareability and participation."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Create Proud Parent Referral System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divide into subtasks for weekly reel generation and visualization, email automation, and attribution tracking with privacy compliance.",
+			"reasoning": "High complexity due to visual content creation, email integration, and strict privacy requirements, with no dependencies but needing robust testing for compliance and delivery."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Build Streak Rescue Mechanism",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into subtasks for streak monitoring and prompt triggering, and co-practice link generation with reward issuance.",
+			"reasoning": "Medium complexity from monitoring logic and prompt timing, dependent on Tasks 1 and 6, with focus on user retention metrics and automated testing."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Integrate Session Intelligence and Agentic Actions",
+			"complexityScore": 9,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into subtasks for AI transcription and summarization setup, action triggering based on summaries, and implementing explainability and fallbacks.",
+			"reasoning": "Very high complexity due to AI integration, real-time analysis, and agentic actions, with multiple dependencies and extensive testing for accuracy, latency, and reliability."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Implement Analytics and Experimentation Framework",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into subtasks for event schema and tracking implementation, signed link attribution, ExperimentationAgent for A/B tests, and dashboard creation with cohort analysis.",
+			"reasoning": "High complexity from comprehensive analytics setup, experimentation, and real-time monitoring, heavily dependent on prior tasks, requiring data validation and simulation testing."
+		}
+	]
+}

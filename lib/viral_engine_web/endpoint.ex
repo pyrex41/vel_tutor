@@ -12,6 +12,16 @@ defmodule ViralEngineWeb.Endpoint do
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 
+  # Add WebSocket support for real-time features
+  socket("/socket", ViralEngineWeb.UserSocket,
+    websocket: [
+      connect_info: [:peer_data, :x_headers],
+      timeout: 45_000,
+      max_frame_size: 8_000_000
+    ],
+    longpoll: false
+  )
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest
@@ -20,7 +30,7 @@ defmodule ViralEngineWeb.Endpoint do
     at: "/",
     from: :viral_engine,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: ~w(assets css js fonts images favicon.ico robots.txt)
   )
 
   # Code reloading can be explicitly enabled under the

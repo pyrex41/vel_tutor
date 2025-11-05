@@ -112,6 +112,12 @@ defmodule ViralEngineWeb.Router do
     # Admin - Audit Logs
     get("/admin/audit_logs", AdminController, :audit_logs)
     get("/admin/audit_logs/stats", AdminController, :audit_logs_stats)
+
+    # Presence tracking
+    get("/presence", PresenceController, :index)
+    get("/presence/subject/:subject_id", PresenceController, :index)
+    put("/presence/status", PresenceController, :update_status)
+    put("/presence/activity", PresenceController, :update_activity)
   end
 
   scope "/mcp", ViralEngineWeb do
@@ -148,6 +154,13 @@ defmodule ViralEngineWeb.Router do
 
     # Results Rally routes
     live("/rally/:token", RallyLive)
+
+    # Presence routes
+    live("/presence", PresenceLive)
+    live("/presence/subject/:subject_id", PresenceLive)
+
+    # Activity Feed routes
+    live("/activity", ActivityFeedLive)
 
     # Parent Progress routes (COPPA-compliant)
     live("/parent/progress/:token", ParentProgressLive)

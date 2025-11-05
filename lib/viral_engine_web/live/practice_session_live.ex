@@ -1,9 +1,19 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext, StreakContext, BadgeContext, XPContext}
+
+  alias ViralEngine.{
+    PracticeContext,
+    ViralPrompts,
+    ChallengeContext,
+    StreakContext,
+    BadgeContext,
+    XPContext,
+    AttributionContext
+  }
+
   require Logger
 
-  on_mount ViralEngineWeb.Live.ViralPromptsHook
+  on_mount(ViralEngineWeb.Live.ViralPromptsHook)
 
   @impl true
   def mount(%{"session_id" => session_id}, %{"user_token" => user_token}, socket) do
@@ -36,11 +46,42 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
     # Create sample steps
     sample_steps = [
-      {1, %{title: "Warm-up", content: "Review basics", question_type: "open_ended", correct_answer: "correct"}},
-      {2, %{title: "Exercise 1", content: "Solve problem A", question_type: "multiple_choice", correct_answer: "B", options: ["A", "B", "C", "D"]}},
-      {3, %{title: "Exercise 2", content: "Solve problem B", question_type: "true_false", correct_answer: "true"}},
-      {4, %{title: "Review", content: "Check answers", question_type: "open_ended", correct_answer: "correct"}},
-      {5, %{title: "Wrap-up", content: "Summary", question_type: "open_ended", correct_answer: "correct"}}
+      {1,
+       %{
+         title: "Warm-up",
+         content: "Review basics",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }},
+      {2,
+       %{
+         title: "Exercise 1",
+         content: "Solve problem A",
+         question_type: "multiple_choice",
+         correct_answer: "B",
+         options: ["A", "B", "C", "D"]
+       }},
+      {3,
+       %{
+         title: "Exercise 2",
+         content: "Solve problem B",
+         question_type: "true_false",
+         correct_answer: "true"
+       }},
+      {4,
+       %{
+         title: "Review",
+         content: "Check answers",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }},
+      {5,
+       %{
+         title: "Wrap-up",
+         content: "Summary",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }}
     ]
 
     {:ok, _steps} = PracticeContext.create_steps(session.id, sample_steps)
@@ -74,6 +115,10 @@ defmodule ViralEngineWeb.PracticeSessionLive do
       |> assign(:loading, false)
       |> assign(:viral_prompt, nil)
       |> assign(:show_viral_modal, false)
+      |> assign(:show_buddy_nudge, false)
+      |> assign(:buddy_invite_link, nil)
+      |> assign(:buddy_nudge_shown, false)
+      |> assign(:nudge_trigger_time, 180)
 
     {:ok, socket}
   end
@@ -98,6 +143,14 @@ defmodule ViralEngineWeb.PracticeSessionLive do
           timer_seconds: new_timer
         })
       end
+
+      # Check if we should show the buddy nudge
+      socket =
+        if should_show_buddy_nudge?(socket, new_timer) do
+          trigger_buddy_nudge(socket)
+        else
+          socket
+        end
 
       Process.send_after(self(), :tick, 1000)
       {:noreply, assign(socket, :timer, new_timer)}
@@ -147,8 +200,10 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
       # Grant XP for completing session (async)
       Task.start(fn ->
-        base_xp = 50  # Base XP for completing a session
-        score_bonus = round((completed_session.score || 0) / 2)  # Bonus XP based on score
+        # Base XP for completing a session
+        base_xp = 50
+        # Bonus XP based on score
+        score_bonus = round((completed_session.score || 0) / 2)
         XPContext.grant_xp(socket.assigns.user_id, base_xp + score_bonus, :practice_session)
       end)
 
@@ -157,17 +212,39 @@ defmodule ViralEngineWeb.PracticeSessionLive do
         BadgeContext.check_and_unlock_badges(socket.assigns.user_id, :practice_completed)
       end)
 
+      # Create activity event for practice completion
+      Task.start(fn ->
+        ViralEngine.Activities.create_event(%{
+          user_id: socket.assigns.user_id,
+          event_type: "practice_completed",
+          data: %{score: completed_session.score, subject: completed_session.subject},
+          visibility: "public"
+        })
+
+        # Check for high score achievement
+        if completed_session.score && completed_session.score >= 90 do
+          ViralEngine.Activities.create_event(%{
+            user_id: socket.assigns.user_id,
+            event_type: "high_score",
+            data: %{score: completed_session.score, subject: completed_session.subject},
+            visibility: "public"
+          })
+        end
+      end)
+
       # Check if this was a buddy challenge session
       if completed_session.metadata["challenge_id"] do
         handle_challenge_completion(completed_session)
       end
 
       # Trigger viral prompt (only if not a challenge session)
-      viral_prompt = if completed_session.metadata["challenge_id"] do
-        nil  # Don't show viral prompt for challenge sessions
-      else
-        trigger_completion_prompt(socket.assigns.user_id, completed_session)
-      end
+      viral_prompt =
+        if completed_session.metadata["challenge_id"] do
+          # Don't show viral prompt for challenge sessions
+          nil
+        else
+          trigger_completion_prompt(socket.assigns.user_id, completed_session)
+        end
 
       socket =
         socket
@@ -253,7 +330,73 @@ defmodule ViralEngineWeb.PracticeSessionLive do
      |> put_flash(:info, "Let's share your results!")}
   end
 
+  @impl true
+  def handle_event("close_buddy_nudge", _params, socket) do
+    {:noreply, assign(socket, :show_buddy_nudge, false)}
+  end
+
+  @impl true
+  def handle_event("copy_invite_link", _params, socket) do
+    {:noreply,
+     socket
+     |> put_flash(:info, "Invite link copied! Share it with a friend to practice together.")}
+  end
+
   # Private helper functions
+
+  defp should_show_buddy_nudge?(socket, new_timer) do
+    # Show nudge if:
+    # 1. Haven't shown it yet
+    # 2. Timer reached trigger time (3 minutes) OR completed 3 questions
+    # 3. Not currently in a challenge session
+    # 4. Have other practice users online (someone to potentially invite)
+    !socket.assigns.buddy_nudge_shown &&
+      (new_timer >= socket.assigns.nudge_trigger_time || socket.assigns.current_step >= 3) &&
+      !socket.assigns.session.metadata["challenge_id"] &&
+      length(socket.assigns.practice_users) > 1
+  end
+
+  defp trigger_buddy_nudge(socket) do
+    # Create attribution link for buddy invite
+    case create_buddy_invite_link(socket.assigns.user_id, socket.assigns.session) do
+      {:ok, link} ->
+        invite_url = build_invite_url(link.link_token)
+
+        Logger.info("Buddy nudge triggered for user #{socket.assigns.user_id}")
+
+        socket
+        |> assign(:show_buddy_nudge, true)
+        |> assign(:buddy_invite_link, invite_url)
+        |> assign(:buddy_nudge_shown, true)
+
+      {:error, reason} ->
+        Logger.error("Failed to create buddy invite link: #{inspect(reason)}")
+        assign(socket, :buddy_nudge_shown, true)
+    end
+  end
+
+  defp create_buddy_invite_link(user_id, session) do
+    target_url = "/practice/join/#{session.id}"
+
+    AttributionContext.create_attribution_link(
+      user_id,
+      "study_buddy_nudge",
+      target_url,
+      campaign: "buddy_practice",
+      metadata: %{
+        session_id: session.id,
+        subject: session.subject,
+        session_type: session.session_type
+      },
+      expires_in_days: 7
+    )
+  end
+
+  defp build_invite_url(link_token) do
+    # In production, use actual domain
+    base_url = ViralEngineWeb.Endpoint.url()
+    "#{base_url}/invite/#{link_token}"
+  end
 
   defp trigger_completion_prompt(user_id, session) do
     event_data = %{
@@ -293,5 +436,13 @@ defmodule ViralEngineWeb.PracticeSessionLive do
           Logger.error("Failed to complete challenge #{challenge_id}: #{reason}")
       end
     end)
+  end
+
+  # Helper function for template
+  defp format_time(seconds) do
+    minutes = div(seconds, 60)
+    secs = rem(seconds, 60)
+
+    "#{String.pad_leading(Integer.to_string(minutes), 2, "0")}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
   end
 end

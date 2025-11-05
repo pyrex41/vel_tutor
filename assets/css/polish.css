@@ -1,0 +1,453 @@
+/* Vel Tutor UI Polish - Smooth Transitions & Micro-interactions */
+
+/* ==========================================================================
+   Smooth Transitions - Base
+   ========================================================================== */
+
+/* Apply smooth transitions to all interactive elements */
+a, button, input, textarea, select,
+[role="button"], [role="link"] {
+  transition-property: color, background-color, border-color, transform, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Longer transitions for layout changes */
+.transition-layout {
+  transition-property: all;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Button Polish
+   ========================================================================== */
+
+/* Enhanced button states */
+button, [role="button"], input[type="submit"], input[type="button"] {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+button:hover, [role="button"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+button:active, [role="button"]:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+button:disabled, [role="button"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primary button glow effect on hover */
+.bg-primary:hover {
+  box-shadow: 0 0 20px rgb(59 130 246 / 0.5);
+}
+
+/* ==========================================================================
+   Card Polish
+   ========================================================================== */
+
+/* Enhanced card hover effects */
+.card-hover {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.card-hover:active {
+  transform: translateY(-2px) scale(1.005);
+}
+
+/* Subtle card pulse for attention */
+@keyframes card-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.card-pulse {
+  animation: card-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==========================================================================
+   Form Input Polish
+   ========================================================================== */
+
+/* Enhanced focus states for inputs */
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:hover, textarea:hover, select:hover {
+  border-color: rgb(209 213 219);
+}
+
+/* Input with icon animation */
+.input-group:focus-within .input-icon {
+  transform: scale(1.1);
+  color: rgb(59 130 246);
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  border: 2px solid rgb(229 231 235);
+  border-top-color: rgb(59 130 246);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.6s linear infinite;
+}
+
+.loading-spinner-lg {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skeleton {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: rgb(229 231 235);
+  border-radius: 0.25rem;
+}
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(243 244 246) 0%,
+    rgb(229 231 235) 20%,
+    rgb(243 244 246) 40%,
+    rgb(243 244 246) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ==========================================================================
+   Icon & SVG Polish
+   ========================================================================== */
+
+/* SVG icon hover animations */
+svg {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover svg, button:hover svg, [role="button"]:hover svg {
+  transform: scale(1.1);
+}
+
+/* Icon bounce on click */
+@keyframes icon-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.icon-bounce:active svg {
+  animation: icon-bounce 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Badge & Notification Polish
+   ========================================================================== */
+
+/* Badge pulse animation */
+@keyframes badge-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Notification slide in */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-enter {
+  animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Progress & Stats Polish
+   ========================================================================== */
+
+/* Progress bar animation */
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+.progress-bar-animated {
+  animation: progress-fill 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Number counter animation */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-number {
+  animation: count-up 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Modal & Overlay Polish
+   ========================================================================== */
+
+/* Modal fade in */
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-enter {
+  animation: modal-fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Backdrop blur effect */
+.backdrop-blur {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: backdrop-filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Toggle Switch Polish
+   ========================================================================== */
+
+/* Smooth toggle transitions */
+input[type="checkbox"] + .toggle-slider {
+  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="checkbox"] + .toggle-slider::after {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="checkbox"]:checked + .toggle-slider::after {
+  transform: translateX(100%);
+}
+
+/* ==========================================================================
+   List & Table Polish
+   ========================================================================== */
+
+/* Hover effect for list items */
+li:hover, tr:hover {
+  background-color: rgb(249 250 251);
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Striped table rows with hover */
+tbody tr:nth-child(even) {
+  background-color: rgb(249 250 251);
+}
+
+tbody tr:hover {
+  background-color: rgb(243 244 246);
+}
+
+/* ==========================================================================
+   Page Transitions
+   ========================================================================== */
+
+/* Fade in page content */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger animation for lists */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  animation: stagger-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* ==========================================================================
+   Tooltip & Popover Polish
+   ========================================================================== */
+
+/* Tooltip fade in */
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-enter {
+  animation: tooltip-fade-in 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Success & Error States
+   ========================================================================== */
+
+/* Success checkmark animation */
+@keyframes success-scale {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.success-icon {
+  animation: success-scale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Error shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.error-shake {
+  animation: shake 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Accessibility - Reduced Motion
+   ========================================================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* Quick transition utilities */
+.transition-fast { transition-duration: 150ms; }
+.transition-normal { transition-duration: 200ms; }
+.transition-slow { transition-duration: 300ms; }
+
+/* Hover lift effect */
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Hover glow effect */
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgb(59 130 246 / 0.4);
+}
+
+/* Active press effect */
+.active-press:active {
+  transform: scale(0.98);
+}
+
+/* Focus ring */
+.focus-ring:focus {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

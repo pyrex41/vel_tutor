@@ -7,9 +7,15 @@
     <.live_title suffix=" · Vel Tutor">
       <%= assigns[:page_title] || "Vel Tutor" %>
     </.live_title>
-    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
-    </script>
+    <%= if function_exported?(Mix, :env, 0) and Mix.env() == :dev do %>
+      <link phx-track-static rel="stylesheet" href="http://localhost:4001/assets/css/app.css" />
+      <script defer phx-track-static type="text/javascript" src="http://localhost:4001/assets/js/app.js">
+      </script>
+    <% else %>
+      <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+      <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+      </script>
+    <% end %>
   </head>
   <body class="bg-white antialiased">
     <%= @inner_content %>

@@ -1,53 +1,68 @@
 defmodule ViralEngineWeb.PresenceLive do
   use ViralEngineWeb, :live_view
+  alias ViralEngine.{Presence, PresenceTracking}
 
-  @subjects ~w(math science english history)
+  @impl true
+  def mount(%{"subject_id" => subject_id}, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:subject:#{subject_id}")
+    end
+
+    {:ok,
+     socket
+     |> assign(:subject_id, subject_id)
+     |> assign(:online_users, [])
+     |> load_presence()}
+  end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:global")
-
-      for subject <- @subjects do
-        Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:subject:#{subject}")
-      end
+      Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:lobby")
     end
 
-    socket =
-      socket
-      |> assign(:global_count, 0)
-      |> assign(:subject_counts, %{})
-
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign(:subject_id, nil)
+     |> assign(:online_users, [])
+     |> load_presence()}
   end
 
-  def handle_info({:presence_diff, {topic, _diff}}, socket) do
-    count = ViralEngine.Presence.list(topic)
+  @impl true
+  def handle_info(%{event: "presence_diff"}, socket) do
+    {:noreply, load_presence(socket)}
+  end
 
-    key =
-      if String.contains?(topic, "subject:"),
-        do: String.replace(topic, "subject:", ""),
-        else: :global_count
+  @impl true
+  def handle_event("update_activity", %{"activity" => activity}, socket) do
+    user_id = socket.assigns.current_user.id
+    subject_id = socket.assigns.subject_id
 
-    socket =
-      if key == :global_count do
-        assign(socket, :global_count, map_size(count))
-      else
-        update(socket, :subject_counts, &Map.put(&1, key, map_size(count)))
-      end
+    # Update presence session
+    sessions = PresenceTracking.get_user_sessions(user_id)
+
+    current_session =
+      Enum.find(sessions, fn s ->
+        (subject_id && s.subject_id == subject_id) || (!subject_id && is_nil(s.subject_id))
+      end)
+
+    if current_session do
+      PresenceTracking.update_session(current_session.session_id, %{
+        current_activity: activity,
+        last_seen_at: DateTime.utc_now()
+      })
+    end
 
     {:noreply, socket}
   end
 
-  def render(assigns) do
-    ~H"""
-    <div class="presence-dashboard">
-      <div class="global">Online Users: <%= @global_count %></div>
-      <div class="subjects">
-        <%= for {subject, count} <- @subject_counts do %>
-          <span><%= String.capitalize(subject) %>: <%= count %> online</span>
-        <% end %>
-      </div>
-    </div>
-    """
+  defp load_presence(socket) do
+    subject_id = socket.assigns.subject_id
+    online_users = PresenceTracking.get_online_users(subject_id)
+
+    assign(socket, :online_users, online_users)
+  end
+
+  defp format_datetime(datetime) do
+    Calendar.strftime(datetime, "%H:%M:%S")
   end
 end
