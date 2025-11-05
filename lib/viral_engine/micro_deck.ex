@@ -42,9 +42,6 @@ defmodule ViralEngine.MicroDeck do
     end
   end
 
-  @doc """
-  Gets all steps for a session ordered by step number.
-  """
   defp get_session_steps(session_id) do
     steps =
       from(s in PracticeStep,
@@ -60,9 +57,6 @@ defmodule ViralEngine.MicroDeck do
     end
   end
 
-  @doc """
-  Gets all answers for a session.
-  """
   defp get_session_answers(session_id) do
     answers =
       from(a in PracticeAnswer,
@@ -74,9 +68,6 @@ defmodule ViralEngine.MicroDeck do
     {:ok, answers}
   end
 
-  @doc """
-  Selects 5 questions based on the strategy.
-  """
   defp select_questions(steps, answers, strategy) do
     scored_steps = score_steps(steps, answers, strategy)
 
@@ -90,9 +81,6 @@ defmodule ViralEngine.MicroDeck do
     {:ok, selected}
   end
 
-  @doc """
-  Scores steps based on selection strategy.
-  """
   defp score_steps(steps, answers, strategy) do
     Enum.map(steps, fn step ->
       score = calculate_step_score(step, answers[step.step_number], strategy)
@@ -100,9 +88,6 @@ defmodule ViralEngine.MicroDeck do
     end)
   end
 
-  @doc """
-  Calculates individual step score for selection.
-  """
   defp calculate_step_score(step, step_answers, strategy) do
     base_score = 0.0
 
@@ -158,9 +143,6 @@ defmodule ViralEngine.MicroDeck do
     end
   end
 
-  @doc """
-  Builds the final micro-deck structure.
-  """
   defp build_micro_deck(selected_steps, session_id, strategy) do
     # Shuffle for variety but maintain some challenge progression
     questions =

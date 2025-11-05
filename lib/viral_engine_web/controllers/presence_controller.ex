@@ -13,7 +13,7 @@ defmodule ViralEngineWeb.PresenceController do
   end
 
   def update_status(conn, %{"status" => status}) do
-    user_id = conn.assigns.current_user.id
+    _user_id = conn.assigns.current_user.id
     session_id = get_session_id(conn)
 
     case PresenceTracking.update_session(session_id, %{
@@ -31,7 +31,7 @@ defmodule ViralEngineWeb.PresenceController do
   end
 
   def update_activity(conn, %{"activity" => activity}) do
-    user_id = conn.assigns.current_user.id
+    _user_id = conn.assigns.current_user.id
     session_id = get_session_id(conn)
 
     case PresenceTracking.update_session(session_id, %{

@@ -17,8 +17,7 @@ defmodule ViralEngine.Workers.WeeklyParentProgressWorker do
   alias ViralEngine.{
     Repo,
     ParentShareContext,
-    AttributionContext,
-    Accounts
+    AttributionContext
   }
 
   require Logger
@@ -33,24 +32,34 @@ defmodule ViralEngine.Workers.WeeklyParentProgressWorker do
     Logger.info("Found #{length(students_with_activity)} active students for weekly reels")
 
     # Generate and send progress reels
-    results = Enum.map(students_with_activity, fn student_data ->
-      case generate_and_send_weekly_reel(student_data) do
-        {:ok, share} ->
-          Logger.info("Weekly reel sent for student #{student_data.student_id}, parent: #{student_data.parent_email}")
-          {:ok, share}
+    results =
+      Enum.map(students_with_activity, fn student_data ->
+        case generate_and_send_weekly_reel(student_data) do
+          {:ok, share} ->
+            Logger.info(
+              "Weekly reel sent for student #{student_data.student_id}, parent: #{student_data.parent_email}"
+            )
 
-        {:skip, reason} ->
-          Logger.debug("Skipped weekly reel for student #{student_data.student_id}: #{reason}")
-          {:skip, reason}
+            {:ok, share}
 
-        {:error, reason} ->
-          Logger.error("Failed to send weekly reel for student #{student_data.student_id}: #{inspect(reason)}")
-          {:error, reason}
-      end
-    end)
+          {:skip, reason} ->
+            Logger.debug("Skipped weekly reel for student #{student_data.student_id}: #{reason}")
+            {:skip, reason}
+
+          {:error, reason} ->
+            Logger.error(
+              "Failed to send weekly reel for student #{student_data.student_id}: #{inspect(reason)}"
+            )
+
+            {:error, reason}
+        end
+      end)
 
     success_count = Enum.count(results, fn {status, _} -> status == :ok end)
-    Logger.info("Weekly parent progress reels sent: #{success_count}/#{length(students_with_activity)}")
+
+    Logger.info(
+      "Weekly parent progress reels sent: #{success_count}/#{length(students_with_activity)}"
+    )
 
     :ok
   end
@@ -97,8 +106,8 @@ defmodule ViralEngine.Workers.WeeklyParentProgressWorker do
     else
       # Create parent share with weekly_progress type
       case ParentShareContext.create_share(student_id, "weekly_progress",
-        parent_email: parent_email
-      ) do
+             parent_email: parent_email
+           ) do
         {:ok, share} ->
           # Create attribution link for parent referrals
           {:ok, attribution_link} = create_referral_attribution_link(share)
@@ -145,12 +154,13 @@ defmodule ViralEngine.Workers.WeeklyParentProgressWorker do
     progress = share.progress_data
 
     # Build email
-    email = build_progress_email(
-      to: parent_email,
-      share_link: share_link,
-      referral_link: referral_link,
-      progress: progress
-    )
+    email =
+      build_progress_email(
+        to: parent_email,
+        share_link: share_link,
+        referral_link: referral_link,
+        progress: progress
+      )
 
     # Send via Swoosh
     case ViralEngine.Mailer.deliver(email) do
@@ -173,9 +183,10 @@ defmodule ViralEngine.Workers.WeeklyParentProgressWorker do
     import Ecto.Query
 
     from(s in ViralEngine.ParentShare,
-      where: s.student_id == ^student_id and
-             s.share_type == "weekly_progress" and
-             s.shared_at >= ^cutoff
+      where:
+        s.student_id == ^student_id and
+          s.share_type == "weekly_progress" and
+          s.shared_at >= ^cutoff
     )
     |> Repo.exists?()
   end

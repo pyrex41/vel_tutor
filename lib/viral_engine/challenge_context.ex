@@ -34,16 +34,20 @@ defmodule ViralEngine.ChallengeContext do
         {:ok, micro_deck} ->
           # Generate signed token
           token = generate_challenge_token(challenger_id, session_id)
-          expires_at = DateTime.utc_now() |> DateTime.add(@challenge_expiry_days * 24 * 3600, :second)
+
+          expires_at =
+            DateTime.utc_now() |> DateTime.add(@challenge_expiry_days * 24 * 3600, :second)
 
           # Create attribution link for tracking
-          {:ok, attribution_link} = create_challenge_attribution_link(challenger_id, session_id, token)
+          {:ok, attribution_link} =
+            create_challenge_attribution_link(challenger_id, session_id, token)
 
-          metadata = Map.merge(opts[:metadata] || %{}, %{
-            "micro_deck" => micro_deck,
-            "attribution_link_id" => attribution_link.id,
-            "attribution_token" => attribution_link.link_token
-          })
+          metadata =
+            Map.merge(opts[:metadata] || %{}, %{
+              "micro_deck" => micro_deck,
+              "attribution_link_id" => attribution_link.id,
+              "attribution_token" => attribution_link.link_token
+            })
 
           attrs = %{
             challenger_id: challenger_id,
@@ -64,7 +68,10 @@ defmodule ViralEngine.ChallengeContext do
           |> Repo.insert()
 
         {:error, reason} ->
-          Logger.error("Failed to generate micro-deck for session #{session_id}: #{inspect(reason)}")
+          Logger.error(
+            "Failed to generate micro-deck for session #{session_id}: #{inspect(reason)}"
+          )
+
           {:error, :micro_deck_generation_failed}
       end
     else
@@ -77,14 +84,12 @@ defmodule ViralEngine.ChallengeContext do
   """
   def generate_challenge_token(challenger_id, session_id) do
     data = "#{challenger_id}:#{session_id}:#{System.system_time(:second)}"
+
     :crypto.hash(:sha256, data <> @token_salt)
     |> Base.url_encode64(padding: false)
     |> String.slice(0, 32)
   end
 
-  @doc """
-  Creates an attribution link for tracking buddy challenge conversions.
-  """
   defp create_challenge_attribution_link(challenger_id, session_id, challenge_token) do
     target_url = "/challenge/#{challenge_token}"
 
@@ -183,18 +188,20 @@ defmodule ViralEngine.ChallengeContext do
     session = PracticeContext.get_session(challenged_session_id)
 
     if challenge && session && session.completed do
-      winner_id = if session.score > challenge.challenger_score do
-        challenge.challenged_user_id
-      else
-        challenge.challenger_id
-      end
+      winner_id =
+        if session.score > challenge.challenger_score do
+          challenge.challenged_user_id
+        else
+          challenge.challenger_id
+        end
 
-      {:ok, updated_challenge} = update_challenge(challenge, %{
-        challenged_score: session.score,
-        status: "completed",
-        completed_at: DateTime.utc_now(),
-        winner_id: winner_id
-      })
+      {:ok, updated_challenge} =
+        update_challenge(challenge, %{
+          challenged_score: session.score,
+          status: "completed",
+          completed_at: DateTime.utc_now(),
+          winner_id: winner_id
+        })
 
       # Grant rewards
       grant_challenge_rewards(updated_challenge)
@@ -228,17 +235,19 @@ defmodule ViralEngine.ChallengeContext do
     limit = opts[:limit] || 20
     status = opts[:status]
 
-    base_query = from(c in BuddyChallenge,
-      where: c.challenger_id == ^user_id or c.challenged_user_id == ^user_id,
-      order_by: [desc: c.inserted_at],
-      limit: ^limit
-    )
+    base_query =
+      from(c in BuddyChallenge,
+        where: c.challenger_id == ^user_id or c.challenged_user_id == ^user_id,
+        order_by: [desc: c.inserted_at],
+        limit: ^limit
+      )
 
-    query = if status do
-      from(c in base_query, where: c.status == ^status)
-    else
-      base_query
-    end
+    query =
+      if status do
+        from(c in base_query, where: c.status == ^status)
+      else
+        base_query
+      end
 
     Repo.all(query)
   end
@@ -247,17 +256,26 @@ defmodule ViralEngine.ChallengeContext do
   Gets challenge statistics for a user.
   """
   def get_user_challenge_stats(user_id) do
-    stats = from(c in BuddyChallenge,
-      where: c.challenger_id == ^user_id or c.challenged_user_id == ^user_id,
-      select: %{
-        total: count(c.id),
-        completed: sum(fragment("CASE WHEN ? = 'completed' THEN 1 ELSE 0 END", c.status)),
-        won: sum(fragment("CASE WHEN ? = ? THEN 1 ELSE 0 END", c.winner_id, ^user_id)),
-        created: sum(fragment("CASE WHEN ? = ? THEN 1 ELSE 0 END", c.challenger_id, ^user_id)),
-        accepted: sum(fragment("CASE WHEN ? = ? AND ? = 'completed' THEN 1 ELSE 0 END", c.challenged_user_id, ^user_id, c.status))
-      }
-    )
-    |> Repo.one()
+    stats =
+      from(c in BuddyChallenge,
+        where: c.challenger_id == ^user_id or c.challenged_user_id == ^user_id,
+        select: %{
+          total: count(c.id),
+          completed: sum(fragment("CASE WHEN ? = 'completed' THEN 1 ELSE 0 END", c.status)),
+          won: sum(fragment("CASE WHEN ? = ? THEN 1 ELSE 0 END", c.winner_id, ^user_id)),
+          created: sum(fragment("CASE WHEN ? = ? THEN 1 ELSE 0 END", c.challenger_id, ^user_id)),
+          accepted:
+            sum(
+              fragment(
+                "CASE WHEN ? = ? AND ? = 'completed' THEN 1 ELSE 0 END",
+                c.challenged_user_id,
+                ^user_id,
+                c.status
+              )
+            )
+        }
+      )
+      |> Repo.one()
 
     if stats do
       win_rate = if stats.completed > 0, do: (stats.won || 0) / stats.completed * 100, else: 0.0
@@ -306,6 +324,7 @@ defmodule ViralEngine.ChallengeContext do
   # Private functions
 
   defp grant_challenge_rewards(%BuddyChallenge{reward_granted: true}), do: :ok
+
   defp grant_challenge_rewards(challenge) do
     # Grant Streak Shields and XP to both users
     Task.start(fn ->

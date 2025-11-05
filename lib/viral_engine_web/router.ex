@@ -8,6 +8,11 @@ defmodule ViralEngineWeb.Router do
     plug(:put_root_layout, html: {ViralEngineWeb.Layouts, :root})
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
+
+    # Test-only authentication bypass for E2E tests
+    if Mix.env() == :test do
+      plug(ViralEngineWeb.Plugs.TestAuthPlug)
+    end
   end
 
   pipeline :api do

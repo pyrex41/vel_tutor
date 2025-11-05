@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.StreakRescueLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{StreakContext, PracticeContext, AttributionContext, RewardContext}
+  alias ViralEngine.{StreakContext, PracticeContext, AttributionContext}
   require Logger
 
   @impl true

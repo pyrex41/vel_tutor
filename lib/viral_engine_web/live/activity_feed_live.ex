@@ -26,7 +26,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   end
 
   @impl true
-  def handle_info({:activity, event_type, event}, socket) do
+  def handle_info({:activity, _event_type, event}, socket) do
     # Only show public activities that haven't been opted out
     if event.visibility == "public" and not opted_out?(event.user_id) do
       anonymized = anonymize_activity(event)
@@ -143,7 +143,7 @@ defmodule ViralEngineWeb.ActivityFeedLive do
   end
 
   # Check if user has opted out of activity sharing
-  defp opted_out?(user_id) do
+  defp opted_out?(_user_id) do
     # Check user's privacy settings
     # For now, return false (everyone participates)
     # In production, this would check user preferences

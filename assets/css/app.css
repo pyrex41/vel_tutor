@@ -48,6 +48,23 @@
   pointer-events: none;
 }
 
+/**
+ * Custom CSS Variables
+ *
+ * This file uses CSS custom properties that are defined in tailwind.config.js
+ * and injected by the Tailwind CSS v4 plugin. If these styles break, check:
+ *
+ * 1. tailwind.config.js theme.extend.colors
+ * 2. Ensure @tailwindcss/postcss is processing correctly
+ * 3. Verify Tailwind v4 syntax is properly configured
+ *
+ * Variables used:
+ * - --color-ring: Focus ring color for accessibility
+ * - --color-muted: Muted background color
+ * - --color-muted-foreground: Muted text color
+ * - --color-foreground: Primary text color
+ */
+
 /* Focus styles for accessibility */
 .focus-visible:focus-visible {
   outline: 2px solid var(--color-ring);

@@ -27,14 +27,15 @@ config :viral_engine, ViralEngineWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "b1jnEqxSbRMF+xSc5UQSJSiAfaFjwMDpjBO9pnVaGu3IcFBSBe7mxxuKHIn7ZaMp",
-  watchers: [
-    pnpm: [
-      "run",
-      "dev",
-      cd: Path.expand("../assets", __DIR__)
-    ]
-  ],
-  static_url: [path: "/assets", host: "localhost", port: 4001],
+  # Disabled Vite dev server - using built assets instead
+  # watchers: [
+  #   pnpm: [
+  #     "run",
+  #     "dev",
+  #     cd: Path.expand("../assets", __DIR__)
+  #   ]
+  # ],
+  # static_url: [path: "/assets", host: "localhost", port: 4001],
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",

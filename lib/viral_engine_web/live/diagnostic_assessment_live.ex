@@ -1,57 +1,71 @@
 defmodule ViralEngineWeb.DiagnosticAssessmentLive do
   use ViralEngineWeb, :live_view
   alias ViralEngine.DiagnosticContext
-  # alias ViralEngine.DiagnosticAssessment  # Unused - commented for future use
   require Logger
+
+  # Assessment Configuration
+  @total_questions 20
+  @initial_difficulty 5
+  @time_warning_threshold_seconds 300  # 5 minutes
+  @feedback_delay_ms 1500
+  @time_update_interval_seconds 10
 
   @impl true
   def mount(%{"id" => assessment_id}, %{"user_token" => user_token}, socket) do
-    user = ViralEngine.Accounts.get_user_by_session_token(user_token)
-
-    case DiagnosticContext.get_user_assessment(assessment_id, user.id) do
+    case ViralEngine.Accounts.get_user_by_session_token(user_token) do
       nil ->
         {:ok,
          socket
-         |> put_flash(:error, "Assessment not found")
-         |> redirect(to: "/dashboard")}
+         |> put_flash(:error, "Invalid or expired session. Please log in again.")
+         |> redirect(to: "/")}
 
-      assessment ->
-        initialize_assessment(socket, user, assessment)
+      user ->
+        case DiagnosticContext.get_user_assessment(assessment_id, user.id) do
+          nil ->
+            {:ok,
+             socket
+             |> put_flash(:error, "Assessment not found")
+             |> redirect(to: "/dashboard")}
+
+          assessment ->
+            initialize_assessment(socket, user, assessment)
+        end
     end
   end
 
   def mount(_params, %{"user_token" => user_token}, socket) do
-    user = ViralEngine.Accounts.get_user_by_session_token(user_token)
+    case ViralEngine.Accounts.get_user_by_session_token(user_token) do
+      nil ->
+        {:ok,
+         socket
+         |> put_flash(:error, "Invalid or expired session. Please log in again.")
+         |> redirect(to: "/")}
 
-    socket =
-      socket
-      |> assign(:user, user)
-      |> assign(:stage, :subject_selection)
-      |> assign(:selected_subject, nil)
-      |> assign(:selected_grade, nil)
-      |> assign(:assessment, nil)
-      |> assign(:current_question, nil)
-      |> assign(:feedback, "")
-      |> assign(:time_warning, false)
-      |> assign(:loading, false)
-
-    {:ok, socket}
+      user ->
+        {:ok, assign_initial_state(socket, user)}
+    end
   end
 
+  # Unauthenticated users must log in
   def mount(_params, _session, socket) do
-    socket =
-      socket
-      |> assign(:user, nil)
-      |> assign(:stage, :subject_selection)
-      |> assign(:selected_subject, nil)
-      |> assign(:selected_grade, nil)
-      |> assign(:assessment, nil)
-      |> assign(:current_question, nil)
-      |> assign(:feedback, "")
-      |> assign(:time_warning, false)
-      |> assign(:loading, false)
+    {:ok,
+     socket
+     |> put_flash(:info, "Please log in to take a diagnostic assessment.")
+     |> redirect(to: "/")}
+  end
 
-    {:ok, socket}
+  defp assign_initial_state(socket, user) do
+    socket
+    |> assign(:user, user)
+    |> assign(:stage, :subject_selection)
+    |> assign(:selected_subject, nil)
+    |> assign(:selected_grade, nil)
+    |> assign(:assessment, nil)
+    |> assign(:current_question, nil)
+    |> assign(:feedback, nil)
+    |> assign(:time_warning, false)
+    |> assign(:loading, false)
+    |> assign(:timer_ref, nil)
   end
 
   defp initialize_assessment(socket, user, assessment) do
@@ -62,14 +76,19 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
        |> put_flash(:info, "Assessment already completed")
        |> redirect(to: "/diagnostic/results/#{assessment.id}")}
     else
-      # Load current question
+      # Get current question from preloaded questions (avoiding N+1 query)
       current_question =
-        DiagnosticContext.get_question(assessment.id, assessment.current_question)
+        Enum.find(assessment.questions, fn q ->
+          q.question_number == assessment.current_question
+        end)
 
-      # Start timer
-      if connected?(socket) do
-        Process.send_after(self(), :tick, 1000)
-      end
+      # Start timer and store reference
+      timer_ref =
+        if connected?(socket) do
+          Process.send_after(self(), :tick, 1000)
+        else
+          nil
+        end
 
       socket =
         socket
@@ -77,9 +96,10 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
         |> assign(:stage, :assessment)
         |> assign(:assessment, assessment)
         |> assign(:current_question, current_question)
-        |> assign(:feedback, "")
-        |> assign(:time_warning, assessment.time_remaining_seconds < 300)
+        |> assign(:feedback, nil)
+        |> assign(:time_warning, assessment.time_remaining_seconds < @time_warning_threshold_seconds)
         |> assign(:loading, false)
+        |> assign(:timer_ref, timer_ref)
 
       {:ok, socket}
     end
@@ -92,13 +112,13 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
       assessment = socket.assigns.assessment
       new_time = max(0, assessment.time_remaining_seconds - 1)
 
-      # Update time in database every 10 seconds
-      if rem(new_time, 10) == 0 do
+      # Update time in database at configured intervals
+      if rem(new_time, @time_update_interval_seconds) == 0 do
         DiagnosticContext.update_time_remaining(assessment.id, new_time)
       end
 
-      # Check for time warning (5 minutes left)
-      time_warning = new_time < 300 && new_time > 0
+      # Check for time warning
+      time_warning = new_time < @time_warning_threshold_seconds && new_time > 0
 
       # Auto-complete if time runs out
       if new_time == 0 do
@@ -106,15 +126,18 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
 
         {:noreply,
          socket
+         |> assign(:timer_ref, nil)
          |> put_flash(:warning, "Time's up! Assessment completed.")
          |> redirect(to: "/diagnostic/results/#{assessment.id}")}
       else
-        Process.send_after(self(), :tick, 1000)
+        # Reschedule timer and update reference
+        timer_ref = Process.send_after(self(), :tick, 1000)
 
         {:noreply,
          socket
          |> assign(:assessment, %{assessment | time_remaining_seconds: new_time})
-         |> assign(:time_warning, time_warning)}
+         |> assign(:time_warning, time_warning)
+         |> assign(:timer_ref, timer_ref)}
       end
     else
       {:noreply, socket}
@@ -136,15 +159,17 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
       # Advance question
       {:ok, updated_assessment} = DiagnosticContext.advance_question(assessment.id)
 
-      # Load next question
+      # Load next question from preloaded questions (avoiding N+1 query)
       next_question =
-        DiagnosticContext.get_question(updated_assessment.id, updated_assessment.current_question)
+        Enum.find(updated_assessment.questions, fn q ->
+          q.question_number == updated_assessment.current_question
+        end)
 
       {:noreply,
        socket
        |> assign(:assessment, updated_assessment)
        |> assign(:current_question, next_question)
-       |> assign(:feedback, "")
+       |> assign(:feedback, nil)
        |> assign(:loading, false)}
     end
   end
@@ -166,33 +191,53 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
 
     if subject && grade do
       if socket.assigns.user do
-        # Create assessment
-        {:ok, assessment} =
-          DiagnosticContext.create_assessment(%{
-            user_id: socket.assigns.user.id,
-            subject: subject,
-            grade_level: grade,
-            total_questions: 20
-          })
+        # Create assessment with error handling
+        case DiagnosticContext.create_assessment(%{
+          user_id: socket.assigns.user.id,
+          subject: subject,
+          grade_level: grade,
+          total_questions: @total_questions
+        }) do
+          {:ok, assessment} ->
+            # Generate initial questions at medium difficulty
+            case DiagnosticContext.generate_questions(assessment.id, subject, @initial_difficulty, 1) do
+              {:ok, _questions} ->
+                # Reload assessment with preloaded questions
+                assessment = DiagnosticContext.get_assessment(assessment.id)
 
-        # Generate initial questions at medium difficulty (5)
-        {:ok, _questions} =
-          DiagnosticContext.generate_questions(assessment.id, subject, 5, 1)
+                # Get first question from preloaded questions (avoiding N+1 query)
+                current_question =
+                  Enum.find(assessment.questions, fn q -> q.question_number == 1 end)
 
-        # Reload assessment with questions
-        assessment = DiagnosticContext.get_assessment(assessment.id)
-        current_question = DiagnosticContext.get_question(assessment.id, 1)
+                # Start timer and store reference
+                timer_ref = Process.send_after(self(), :tick, 1000)
 
-        # Start timer
-        Process.send_after(self(), :tick, 1000)
+                {:noreply,
+                 socket
+                 |> assign(:stage, :assessment)
+                 |> assign(:assessment, assessment)
+                 |> assign(:current_question, current_question)
+                 |> assign(:time_warning, false)
+                 |> assign(:timer_ref, timer_ref)
+                 |> put_flash(:info, "Assessment started! Good luck!")}
 
-        {:noreply,
-         socket
-         |> assign(:stage, :assessment)
-         |> assign(:assessment, assessment)
-         |> assign(:current_question, current_question)
-         |> assign(:time_warning, false)
-         |> put_flash(:info, "Assessment started! Good luck!")}
+              {:error, reason} ->
+                Logger.error("Failed to generate questions: #{inspect(reason)}")
+
+                {:noreply,
+                 socket
+                 |> put_flash(:error, "Could not generate questions. Please try again.")
+                 |> assign(:loading, false)}
+            end
+
+          {:error, changeset} ->
+            Logger.error("Failed to create assessment: #{inspect(changeset.errors)}")
+
+            {:noreply,
+             socket
+             |> put_flash(:error, "Could not start assessment. Please try again.")
+             |> assign(:loading, false)}
+        end
       else
         {:noreply,
          socket
@@ -220,11 +265,16 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
             current_question.time_allocated_seconds - assessment.time_remaining_seconds
         })
 
-      # Show feedback
-      feedback = if response.is_correct, do: "Correct!", else: "Incorrect"
+      # Show structured feedback (enabling future i18n and type safety)
+      feedback =
+        if response.is_correct do
+          {:correct, "Correct!"}
+        else
+          {:incorrect, "Incorrect"}
+        end
 
       # Advance to next question after brief delay
-      Process.send_after(self(), :advance_question, 1500)
+      Process.send_after(self(), :advance_question, @feedback_delay_ms)
 
       {:noreply,
        socket
@@ -249,7 +299,21 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
      |> redirect(to: "/dashboard")}
   end
 
+  # Cleanup callback - cancel timer when LiveView terminates
+  @impl true
+  def terminate(_reason, socket) do
+    # Cancel timer if it exists to prevent resource leaks
+    if timer_ref = socket.assigns[:timer_ref] do
+      Process.cancel_timer(timer_ref)
+    end
+
+    :ok
+  end
+
   # Helper functions
+
+  defp feedback_classes(:correct), do: "bg-green-50 border-green-300 text-green-900"
+  defp feedback_classes(:incorrect), do: "bg-red-50 border-red-300 text-red-900"
 
   @impl true
   def render(assigns) do
@@ -261,7 +325,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
           <div class="bg-card text-card-foreground rounded-lg border shadow-sm p-8">
             <div class="text-center mb-8">
               <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                <svg class="h-10 w-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Assessment icon">
+                <svg class="h-10 w-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
@@ -493,20 +557,20 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
               <% end %>
 
               <!-- Feedback -->
-              <%= if @feedback != "" do %>
-                <div class={"mt-6 p-4 rounded-lg border #{if String.contains?(@feedback, "Correct"), do: "bg-green-50 border-green-300 text-green-900", else: "bg-red-50 border-red-300 text-red-900"}"} role="alert" aria-live="polite">
+              <%= if @feedback do %>
+                <% {status, message} = @feedback %>
+                <div class={"mt-6 p-4 rounded-lg border #{feedback_classes(status)}"} role="alert" aria-live="polite">
                   <div class="flex items-center space-x-3">
-                    <%= if String.contains?(@feedback, "Correct") do %>
+                    <%= if status == :correct do %>
                       <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                       </svg>
-                      <p class="font-semibold"><%= @feedback %></p>
                     <% else %>
                       <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                       </svg>
-                      <p class="font-semibold"><%= @feedback %></p>
                     <% end %>
+                    <p class="font-semibold"><%= message %></p>
                   </div>
                 </div>
               <% end %>

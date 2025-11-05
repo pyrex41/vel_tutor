@@ -4,7 +4,7 @@ defmodule ViralEngine.PracticeContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer, LeaderboardContext, Reward, UserReward}
+  alias ViralEngine.{Repo, PracticeSession, PracticeStep, PracticeAnswer, LeaderboardContext}
   require Logger
 
   @doc """
@@ -123,7 +123,8 @@ defmodule ViralEngine.PracticeContext do
         ViralEngine.AttributionContext.track_conversion(
           session.metadata["attribution_link_id"],
           session.user_id,
-          50  # XP value of helping with rescue
+          # XP value of helping with rescue
+          50
         )
       end
     end
@@ -137,11 +138,13 @@ defmodule ViralEngine.PracticeContext do
 
     if streak_shield do
       # Check if user already has this reward
-      existing = Repo.get_by(ViralEngine.UserReward,
-        user_id: user_id,
-        reward_id: streak_shield.id,
-        uses_remaining: 1  # Only grant if they don't have an unused one
-      )
+      existing =
+        Repo.get_by(ViralEngine.UserReward,
+          user_id: user_id,
+          reward_id: streak_shield.id,
+          # Only grant if they don't have an unused one
+          uses_remaining: 1
+        )
 
       if !existing do
         # Grant new Streak Shield
@@ -150,7 +153,8 @@ defmodule ViralEngine.PracticeContext do
           user_id: user_id,
           reward_id: streak_shield.id,
           claimed_at: DateTime.utc_now(),
-          xp_spent: 0,  # Free reward
+          # Free reward
+          xp_spent: 0,
           uses_remaining: 1,
           is_active: true,
           metadata: %{
@@ -191,7 +195,8 @@ defmodule ViralEngine.PracticeContext do
   def create_steps(session_id, steps_data) when is_list(steps_data) do
     steps =
       Enum.map(steps_data, fn {step_number, step_attrs} ->
-        attrs = Map.merge(step_attrs, %{practice_session_id: session_id, step_number: step_number})
+        attrs =
+          Map.merge(step_attrs, %{practice_session_id: session_id, step_number: step_number})
 
         %PracticeStep{}
         |> PracticeStep.changeset(attrs)
@@ -422,12 +427,13 @@ defmodule ViralEngine.PracticeContext do
       cutoff_date = DateTime.add(DateTime.utc_now(), -time_period, :day)
 
       # Get all completed sessions for this subject in the time period
-      all_scores = from(s in PracticeSession,
-        where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
-        select: s.score,
-        order_by: [asc: s.score]
-      )
-      |> Repo.all()
+      all_scores =
+        from(s in PracticeSession,
+          where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
+          select: s.score,
+          order_by: [asc: s.score]
+        )
+        |> Repo.all()
 
       total_count = length(all_scores)
 
@@ -468,12 +474,13 @@ defmodule ViralEngine.PracticeContext do
       cutoff_date = DateTime.add(DateTime.utc_now(), -time_period, :day)
 
       # Get all completed sessions ranked by score
-      sessions = from(s in PracticeSession,
-        where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
-        select: %{id: s.id, score: s.score},
-        order_by: [desc: s.score]
-      )
-      |> Repo.all()
+      sessions =
+        from(s in PracticeSession,
+          where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
+          select: %{id: s.id, score: s.score},
+          order_by: [desc: s.score]
+        )
+        |> Repo.all()
 
       total = length(sessions)
 
@@ -481,7 +488,8 @@ defmodule ViralEngine.PracticeContext do
       rank = Enum.find_index(sessions, fn s -> s.id == session.id end)
 
       if rank do
-        rank = rank + 1  # Convert 0-indexed to 1-indexed
+        # Convert 0-indexed to 1-indexed
+        rank = rank + 1
         percentile = ((total - rank) / total * 100) |> Float.round(1)
 
         {:ok, %{rank: rank, total: total, percentile: percentile, score: session.score}}

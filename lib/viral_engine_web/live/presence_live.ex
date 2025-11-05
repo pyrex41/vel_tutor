@@ -1,6 +1,6 @@
 defmodule ViralEngineWeb.PresenceLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{Presence, PresenceTracking}
+  alias ViralEngine.PresenceTracking
 
   @impl true
   def mount(%{"subject_id" => subject_id}, _session, socket) do

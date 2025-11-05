@@ -7,7 +7,6 @@ defmodule ViralEngineWeb.Components.MiniLeaderboard do
   """
 
   use Phoenix.Component
-  import ViralEngineWeb.CoreComponents
 
   @doc """
   Renders a mini-leaderboard component.
@@ -20,13 +19,13 @@ defmodule ViralEngineWeb.Components.MiniLeaderboard do
   - `title` - Custom title (optional)
   - `show_period_toggle` - Show daily/weekly toggle (default: true)
   """
-  attr :subject, :string, required: true
-  attr :period, :atom, default: :daily
-  attr :entries, :list, required: true
-  attr :current_user_id, :integer, default: nil
-  attr :title, :string, default: nil
-  attr :show_period_toggle, :boolean, default: true
-  attr :class, :string, default: ""
+  attr(:subject, :string, required: true)
+  attr(:period, :atom, default: :daily)
+  attr(:entries, :list, required: true)
+  attr(:current_user_id, :integer, default: nil)
+  attr(:title, :string, default: nil)
+  attr(:show_period_toggle, :boolean, default: true)
+  attr(:class, :string, default: "")
 
   def mini_leaderboard(assigns) do
     ~H"""
