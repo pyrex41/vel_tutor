@@ -2,21 +2,22 @@ defmodule ViralEngineWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel("room:*", ViralEngineWeb.RoomChannel)
+  channel("presence:lobby", ViralEngineWeb.PresenceChannel)
+  channel("presence:subject:*", ViralEngineWeb.SubjectChannel)
+  channel("activity:*", ViralEngineWeb.ActivityChannel)
+  channel("notifications:*", ViralEngineWeb.NotificationChannel)
 
-  ## Transports are configured in config/config.exs via Phoenix.Endpoint
+  @impl true
+  def connect(%{"token" => token}, socket, _connect_info) do
+    case ViralEngine.Accounts.verify_socket_token(token) do
+      {:ok, user_id} ->
+        {:ok, assign(socket, :user_id, user_id)}
 
-  def connect(params, socket, _connect_info) do
-    user_id = get_user_id(params)
-    socket = assign(socket, :user_id, user_id)
-    {:ok, socket}
+      {:error, _reason} ->
+        :error
+    end
   end
 
-  defp get_user_id(params) do
-    params["user_id"] || "anonymous"
-  end
-
-  def id(socket) do
-    "users_socket:#{socket.assigns.user_id}"
-  end
+  @impl true
+  def id(socket), do: "user_socket:#{socket.assigns.user_id}"
 end

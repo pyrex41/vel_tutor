@@ -8,6 +8,13 @@ defmodule ViralEngine.Accounts do
     Repo.get_by(User, session_token: token)
   end
 
+  def verify_socket_token(token) do
+    case get_user_by_session_token(token) do
+      %User{id: user_id} -> {:ok, user_id}
+      nil -> {:error, :invalid_token}
+    end
+  end
+
   def update_user(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)

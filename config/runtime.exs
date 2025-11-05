@@ -15,11 +15,12 @@ endpoint_config = [
   ]
 ]
 
-endpoint_config = if secret_key_base = System.get_env("SECRET_KEY_BASE") do
-  Keyword.put(endpoint_config, :secret_key_base, secret_key_base)
-else
-  endpoint_config
-end
+endpoint_config =
+  if secret_key_base = System.get_env("SECRET_KEY_BASE") do
+    Keyword.put(endpoint_config, :secret_key_base, secret_key_base)
+  else
+    endpoint_config
+  end
 
 config :viral_engine, ViralEngineWeb.Endpoint, endpoint_config
 
@@ -57,6 +58,8 @@ config :viral_engine, Oban,
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     {Oban.Plugins.Cron,
      crontab: [
+       # Clean up stale presence sessions every 5 minutes
+       {"*/5 * * * *", ViralEngine.Workers.PresenceCleanupWorker}
        # Run anomaly detection every hour
        # {"0 * * * *", ViralEngine.Jobs.AnomalyDetectionWorker},  # TODO: Implement this worker
        # Check approval timeouts every 5 minutes

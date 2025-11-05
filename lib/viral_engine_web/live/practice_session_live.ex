@@ -1,9 +1,18 @@
 defmodule ViralEngineWeb.PracticeSessionLive do
   use ViralEngineWeb, :live_view
-  alias ViralEngine.{PracticeContext, ViralPrompts, ChallengeContext, StreakContext, BadgeContext, XPContext}
+
+  alias ViralEngine.{
+    PracticeContext,
+    ViralPrompts,
+    ChallengeContext,
+    StreakContext,
+    BadgeContext,
+    XPContext
+  }
+
   require Logger
 
-  on_mount ViralEngineWeb.Live.ViralPromptsHook
+  on_mount(ViralEngineWeb.Live.ViralPromptsHook)
 
   @impl true
   def mount(%{"session_id" => session_id}, %{"user_token" => user_token}, socket) do
@@ -36,11 +45,42 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
     # Create sample steps
     sample_steps = [
-      {1, %{title: "Warm-up", content: "Review basics", question_type: "open_ended", correct_answer: "correct"}},
-      {2, %{title: "Exercise 1", content: "Solve problem A", question_type: "multiple_choice", correct_answer: "B", options: ["A", "B", "C", "D"]}},
-      {3, %{title: "Exercise 2", content: "Solve problem B", question_type: "true_false", correct_answer: "true"}},
-      {4, %{title: "Review", content: "Check answers", question_type: "open_ended", correct_answer: "correct"}},
-      {5, %{title: "Wrap-up", content: "Summary", question_type: "open_ended", correct_answer: "correct"}}
+      {1,
+       %{
+         title: "Warm-up",
+         content: "Review basics",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }},
+      {2,
+       %{
+         title: "Exercise 1",
+         content: "Solve problem A",
+         question_type: "multiple_choice",
+         correct_answer: "B",
+         options: ["A", "B", "C", "D"]
+       }},
+      {3,
+       %{
+         title: "Exercise 2",
+         content: "Solve problem B",
+         question_type: "true_false",
+         correct_answer: "true"
+       }},
+      {4,
+       %{
+         title: "Review",
+         content: "Check answers",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }},
+      {5,
+       %{
+         title: "Wrap-up",
+         content: "Summary",
+         question_type: "open_ended",
+         correct_answer: "correct"
+       }}
     ]
 
     {:ok, _steps} = PracticeContext.create_steps(session.id, sample_steps)
@@ -147,8 +187,10 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
       # Grant XP for completing session (async)
       Task.start(fn ->
-        base_xp = 50  # Base XP for completing a session
-        score_bonus = round((completed_session.score || 0) / 2)  # Bonus XP based on score
+        # Base XP for completing a session
+        base_xp = 50
+        # Bonus XP based on score
+        score_bonus = round((completed_session.score || 0) / 2)
         XPContext.grant_xp(socket.assigns.user_id, base_xp + score_bonus, :practice_session)
       end)
 
@@ -157,17 +199,39 @@ defmodule ViralEngineWeb.PracticeSessionLive do
         BadgeContext.check_and_unlock_badges(socket.assigns.user_id, :practice_completed)
       end)
 
+      # Create activity event for practice completion
+      Task.start(fn ->
+        ViralEngine.Activities.create_event(%{
+          user_id: socket.assigns.user_id,
+          event_type: "practice_completed",
+          data: %{score: completed_session.score, subject: completed_session.subject},
+          visibility: "public"
+        })
+
+        # Check for high score achievement
+        if completed_session.score && completed_session.score >= 90 do
+          ViralEngine.Activities.create_event(%{
+            user_id: socket.assigns.user_id,
+            event_type: "high_score",
+            data: %{score: completed_session.score, subject: completed_session.subject},
+            visibility: "public"
+          })
+        end
+      end)
+
       # Check if this was a buddy challenge session
       if completed_session.metadata["challenge_id"] do
         handle_challenge_completion(completed_session)
       end
 
       # Trigger viral prompt (only if not a challenge session)
-      viral_prompt = if completed_session.metadata["challenge_id"] do
-        nil  # Don't show viral prompt for challenge sessions
-      else
-        trigger_completion_prompt(socket.assigns.user_id, completed_session)
-      end
+      viral_prompt =
+        if completed_session.metadata["challenge_id"] do
+          # Don't show viral prompt for challenge sessions
+          nil
+        else
+          trigger_completion_prompt(socket.assigns.user_id, completed_session)
+        end
 
       socket =
         socket
@@ -299,6 +363,7 @@ defmodule ViralEngineWeb.PracticeSessionLive do
   defp format_time(seconds) do
     minutes = div(seconds, 60)
     secs = rem(seconds, 60)
+
     "#{String.pad_leading(Integer.to_string(minutes), 2, "0")}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
   end
 end

@@ -3311,5 +3311,596 @@
       "description": "Tasks for style context",
       "updated": "2025-11-05T03:12:45.389Z"
     }
+  },
+  "next": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Set Up Real-Time Infrastructure with Phoenix Channels and PubSub",
+        "description": "Establish the foundational real-time communication layer using Phoenix Channels and PubSub to support live updates for presence, activity feeds, and leaderboards.",
+        "details": "Integrate Phoenix Channels into the existing Elixir/Phoenix backend. Create channels for global presence, subject-specific presence, and activity feeds. Use PubSub for broadcasting events like user achievements. Ensure horizontal scalability by configuring Redis or PostgreSQL for PubSub. Pseudo-code: defmodule PresenceChannel do use Phoenix.Channel; def join('presence:lobby', _payload, socket) do send(self(), :after_join); {:ok, socket}; end; def handle_info(:after_join, socket) do Presence.track(socket, socket.assigns.user_id, %{online_at: inspect(System.system_time(:second))}); push(socket, 'presence_state', Presence.list(socket)); {:noreply, socket}; end; end. Adhere to non-functional requirements for concurrency and latency.",
+        "testStrategy": "Unit tests for channel joins and broadcasts; integration tests simulating 5,000 concurrent users with latency checks under 150ms P95; load testing for 50 events/second.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Phoenix Channels into the Elixir/Phoenix Backend",
+            "description": "Integrate Phoenix Channels into the existing Elixir/Phoenix backend to enable real-time communication capabilities.",
+            "dependencies": [],
+            "details": "Modify the existing Phoenix application to include Phoenix.Channel modules. Ensure proper setup of channel routing and socket connections. Implement basic channel handlers as per the provided pseudo-code for PresenceChannel, including join and handle_info functions. Verify integration with the current backend architecture without breaking existing functionality.",
+            "status": "done",
+            "testStrategy": "Unit tests for channel join and message handling; integration tests to ensure channels connect without errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure PubSub with Redis or PostgreSQL for Scalability",
+            "description": "Set up PubSub using Redis or PostgreSQL to support broadcasting events across multiple nodes for horizontal scalability.",
+            "dependencies": [
+              1
+            ],
+            "details": "Choose between Redis or PostgreSQL based on project needs and configure the PubSub adapter in the Phoenix application. Set up the necessary database or Redis instance, including connection pooling and clustering if required. Implement broadcasting mechanisms for events like user achievements, ensuring low-latency distribution. Test the configuration for failover and performance under load.",
+            "status": "done",
+            "testStrategy": "Integration tests for PubSub broadcasting; performance benchmarks for message delivery latency.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create Channels for Presence and Activity Feeds",
+            "description": "Develop specific channels for global presence, subject-specific presence, and activity feeds to handle real-time updates.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Create separate Phoenix.Channel modules for global presence, subject-specific presence, and activity feeds. Implement tracking logic using Phoenix.Presence for user online status and counts. Add broadcasting for activity events via PubSub. Ensure anonymization and opt-out functionality as per compliance requirements. Include handlers for joining, leaving, and updating presence states.",
+            "status": "done",
+            "testStrategy": "Functional tests for presence tracking and updates; integration tests for activity feed broadcasting with anonymization checks.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Conduct Comprehensive Load Testing for Scalability",
+            "description": "Perform rigorous load testing to validate the real-time infrastructure's ability to handle high concurrency and maintain low latency.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Set up load testing tools to simulate 5,000 concurrent users and 50 events per second. Measure P95 latency to ensure it stays under 150ms. Test horizontal scalability by running multiple nodes and verifying PubSub distribution. Identify and optimize bottlenecks in channels and PubSub. Document results and any necessary adjustments for production deployment.",
+            "status": "done",
+            "testStrategy": "Load tests simulating high concurrency; latency and throughput measurements; scalability tests across multiple nodes.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break this task into subtasks covering Phoenix Channels integration, PubSub configuration with Redis/PostgreSQL, channel creation for presence and feeds, and comprehensive load testing for scalability."
+      },
+      {
+        "id": 2,
+        "title": "Implement Global and Subject-Specific Presence Indicators",
+        "description": "Develop real-time indicators showing total active users and subject-specific active counts, with opt-out functionality.",
+        "details": "Extend the PresenceChannel to track and broadcast global and subject-based counts. Use anonymized data, excluding PII. Add user settings for opt-out, which immediately removes them from presence lists. Pseudo-code: def update_presence(socket, subject) do count = Presence.list(socket) |> Enum.filter(fn {_, meta} -> meta.subject == subject end) |> length(); broadcast(socket, 'presence_update', %{subject: subject, count: count}); end. Ensure COPPA/FERPA compliance by default anonymization.",
+        "testStrategy": "Functional tests for real-time updates and opt-out; A/B testing for user satisfaction; monitor for PII leaks in logs.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extend PresenceChannel for Global and Subject-Specific Tracking",
+            "description": "Modify the PresenceChannel to handle tracking of total active users globally and per subject, including broadcasting updates.",
+            "dependencies": [],
+            "details": "Update the PresenceChannel module to incorporate logic for counting active users across all subjects and specifically by subject. Implement the pseudo-code provided: def update_presence(socket, subject) do count = Presence.list(socket) |> Enum.filter(fn {_, meta} -> meta.subject == subject end) |> length(); broadcast(socket, 'presence_update', %{subject: subject, count: count}); end. Ensure the channel can handle global counts as well by aggregating data.",
+            "status": "done",
+            "testStrategy": "Unit tests for channel broadcasting and count accuracy; integration tests for real-time updates.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Anonymized Tracking and Opt-Out Functionality",
+            "description": "Develop anonymized data handling for presence indicators and add user opt-out settings to remove them from lists immediately.",
+            "dependencies": [],
+            "details": "Ensure all presence data is anonymized by excluding personally identifiable information (PII). Add user settings in the application for opting out of presence tracking, which should immediately remove the user from presence lists and prevent their inclusion in counts. Integrate this with the PresenceChannel updates to respect opt-out preferences.",
+            "status": "done",
+            "testStrategy": "Functional tests for opt-out behavior and anonymization; A/B testing for user satisfaction with opt-out feature.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Ensure COPPA/FERPA Compliance in Presence Indicators",
+            "description": "Implement default anonymization and privacy measures to comply with COPPA and FERPA regulations for user data handling.",
+            "dependencies": [],
+            "details": "By default, anonymize all presence data to exclude any PII, ensuring compliance with COPPA (for children under 13) and FERPA (for educational records). Add safeguards in the code to prevent accidental PII exposure, such as logging checks and data validation. Review and audit the implementation for privacy leaks.",
+            "status": "done",
+            "testStrategy": "Compliance audits and penetration testing for PII leaks; monitor logs for any unauthorized data exposure.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into subtasks for extending PresenceChannel, implementing anonymized tracking and opt-out logic, and ensuring compliance with privacy regulations."
+      },
+      {
+        "id": 3,
+        "title": "Build Real-Time Activity Feed",
+        "description": "Create an anonymized feed of user achievements updating in real-time via PubSub.",
+        "details": "Set up an ActivityFeed module to listen for events (e.g., streak completions, high scores) and broadcast them. Store events in a database with anonymization. Pseudo-code: def broadcast_achievement(user_id, achievement) do anonymized = %{type: achievement.type, message: 'A student achieved ' <> achievement.description}; PubSub.broadcast('activity_feed', 'new_event', anonymized); end. Include opt-out checks.",
+        "testStrategy": "Integration tests for event broadcasting and feed updates; user acceptance testing for anonymity; performance tests for real-time delivery.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up ActivityFeed Module for Event Listening and Broadcasting",
+            "description": "Create the ActivityFeed module to listen for user achievement events such as streak completions and high scores, and broadcast them in real-time using PubSub.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement the ActivityFeed module in Elixir/Phoenix, defining functions to subscribe to events and broadcast anonymized messages via PubSub channels like 'activity_feed'. Ensure integration with the existing PubSub infrastructure set up in Task 1, including handling event payloads and broadcasting to connected clients for real-time updates.\n<info added on 2025-11-05T13:54:13.427Z>\nActivityFeed module fully implemented with: Event creation and broadcasting via PubSub, Reaction system with duplicate prevention, Database persistence with proper indexes (activity_events and activity_reactions tables), 17 comprehensive tests achieving 100% pass rate, Integration with streak and practice contexts for automatic event creation. Files: lib/viral_engine/activities.ex, lib/viral_engine/activities/event.ex, lib/viral_engine/activities/reaction.ex, priv/repo/migrations/20251105070001_create_activity_events.exs, test/viral_engine/activities_test.exs (17 tests, 311 lines).\n</info added on 2025-11-05T13:54:13.427Z>",
+            "status": "done",
+            "testStrategy": "Unit tests for module functions and event handling; integration tests to verify broadcasting and real-time feed updates with simulated events.",
+            "updatedAt": "2025-11-05T06:58:02.172Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Anonymization and Opt-Out Checks for Activity Feed",
+            "description": "Add anonymization logic to user achievement events and include checks for user opt-out preferences before broadcasting or storing events.",
+            "dependencies": [
+              1,
+              1
+            ],
+            "details": "Modify the broadcast_achievement function to anonymize data by removing user identifiers and using generic messages like 'A student achieved [description]'. Integrate opt-out checks by querying user settings to skip broadcasting for opted-out users. Store anonymized events in the database for persistence, ensuring compliance with privacy regulations like COPPA/FERPA.\n<info added on 2025-11-05T13:54:26.737Z>\nAnonymization and opt-out fully implemented: Activity messages anonymized in ActivityFeedLive using privacy-safe messaging patterns (e.g., 'A student achieved...' instead of showing names), Opt-out checking integrated in Activities.create_event/1 (lines 10-16), Visibility controls implemented (public/private/friends), User.presence_opt_out field utilized for privacy preferences, COPPA/FERPA compliant design with no PII exposed in public feed. File: lib/viral_engine_web/live/activity_feed_live.ex:89-160 (anonymize_activity and opted_out? functions).\n</info added on 2025-11-05T13:54:26.737Z>",
+            "status": "done",
+            "testStrategy": "Functional tests for anonymization accuracy and opt-out enforcement; integration tests for database storage and privacy compliance checks.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-05T06:58:07.778Z"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split into subtasks for setting up the ActivityFeed module with event listening and broadcasting, and implementing anonymization with opt-out checks.",
+        "updatedAt": "2025-11-05T06:58:07.778Z"
+      },
+      {
+        "id": 4,
+        "title": "Develop Mini-Leaderboards for Subject Pages",
+        "description": "Implement contextual leaderboards showing top performers for the day or week on subject pages.",
+        "details": "Create a LeaderboardService to query and cache top scores from the database. Display on subject pages with real-time updates via Channels. Pseudo-code: def get_top_performers(subject, period) do query = from u in User, join: s in Score, on: u.id == s.user_id, where: s.subject == ^subject and s.created_at >= ^period_start, order_by: [desc: s.score], limit: 10; Repo.all(query); end. Use caching for performance.",
+        "testStrategy": "Unit tests for queries; UI tests for display and updates; A/B tests for engagement lift.",
+        "priority": "medium",
+        "dependencies": [
+          "1"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create LeaderboardService with Database Queries and Caching",
+            "description": "Develop the LeaderboardService module to handle querying top performers from the database based on subject and time period, including caching for performance optimization.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement the get_top_performers function using Ecto queries to join User and Score tables, filter by subject and period, order by score descending, and limit to 10. Integrate caching mechanism (e.g., using Cachex or similar) to store query results for a short duration to reduce database load. Ensure queries are optimized for performance and handle edge cases like no scores available.",
+            "status": "pending",
+            "testStrategy": "Unit tests for query accuracy and caching behavior; performance tests to verify reduced database hits.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate Real-Time Updates via Channels for Mini-Leaderboards",
+            "description": "Set up real-time updates for the mini-leaderboards on subject pages using Phoenix Channels to broadcast changes in top performers.",
+            "dependencies": [
+              1,
+              1
+            ],
+            "details": "Extend the existing Channels infrastructure to broadcast leaderboard updates when scores change. Modify subject page templates to subscribe to relevant channels and update the leaderboard display dynamically. Ensure updates are triggered on score submissions and use the LeaderboardService for fresh data. Handle user subscriptions and unsubscriptions efficiently to avoid performance issues.",
+            "status": "pending",
+            "testStrategy": "Integration tests for channel broadcasting and UI updates; functional tests for real-time synchronization across users.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Break into subtasks for creating the LeaderboardService with database queries and caching, and integrating real-time updates via Channels."
+      },
+      {
+        "id": 5,
+        "title": "Add Study Buddy Nudge Feature",
+        "description": "Prompt users during practice sessions to invite friends, integrating with presence and viral loops.",
+        "details": "In the practice session UI, add a periodic nudge with a shareable link. Track invites and conversions. Pseudo-code: def nudge_user(socket) do if eligible_for_nudge?(socket.assigns.user_id) do push(socket, 'buddy_nudge', %{message: 'Invite a friend!', link: generate_invite_link()}); end; end. Link to Buddy Challenge for rewards.",
+        "testStrategy": "UI/UX tests for nudge timing; conversion tracking tests; user feedback surveys.",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Nudge UI in Practice Sessions",
+            "description": "Add a periodic nudge in the practice session UI to prompt users to invite friends, including a shareable link.",
+            "dependencies": [],
+            "details": "Implement the nudge using the provided pseudo-code, integrating with Phoenix sockets to push 'buddy_nudge' events. Ensure the nudge appears periodically during sessions, linking to Buddy Challenge rewards.",
+            "status": "pending",
+            "testStrategy": "UI/UX tests for nudge timing and visibility.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Backend Tracking for Invites and Conversions",
+            "description": "Track user invites sent via the nudge and monitor conversions when friends join.",
+            "dependencies": [],
+            "details": "Generate invite links, track when links are used, and record conversions. Integrate with presence and viral loops as per parent task.",
+            "status": "pending",
+            "testStrategy": "Conversion tracking tests and analytics verification.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Divide into subtasks for UI integration of nudges in practice sessions and backend tracking of invites and conversions."
+      },
+      {
+        "id": 6,
+        "title": "Implement Buddy Challenge Viral Loop",
+        "description": "Build the challenge mechanism where students can share micro-decks and earn rewards upon friend completion.",
+        "details": "After sessions, generate 5-question micro-decks and shareable deep links. Track conversions and issue 'Streak Shield' rewards. Pseudo-code: def create_challenge(user_id, session_id) do questions = select_questions(session_id, 5); link = generate_deep_link(questions); track_invite(user_id, link); end. Integrate with analytics for attribution.",
+        "testStrategy": "End-to-end tests for link generation and reward issuance; A/B tests for conversion rates; monitor K-factor metrics.",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "5"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Generate 5-Question Micro-Decks from Sessions",
+            "description": "After a tutoring session, select and compile 5 questions from the session to create a micro-deck for sharing in buddy challenges.",
+            "dependencies": [],
+            "details": "Implement a function to query the database for questions associated with the session_id, select 5 relevant and anonymized questions, and package them into a micro-deck structure suitable for challenges. Ensure the selection logic prioritizes key learning points from the session.",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create and Share Deep Links for Micro-Decks",
+            "description": "Generate shareable deep links that encapsulate the micro-deck data and enable tracking of invites and shares to friends.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use a deep linking service or library to create links containing the micro-deck questions and metadata. Implement sharing options via social media, messaging apps, or direct links. Integrate with analytics to log share events and link opens for attribution purposes.",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Track Challenge Completions and Issue Rewards",
+            "description": "Monitor when friends complete the shared micro-deck challenges and automatically issue 'Streak Shield' rewards to the original sharer.",
+            "dependencies": [
+              2
+            ],
+            "details": "Set up event tracking for challenge completions accessed via deep links. Verify successful completions, attribute them to the inviting user, and trigger reward issuance through the rewards system. Ensure integration with analytics for conversion tracking and prevent fraud.",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Split into subtasks for micro-deck generation, deep link creation and sharing, and reward tracking upon completion."
+      },
+      {
+        "id": 7,
+        "title": "Develop Results Rally Viral Loop",
+        "description": "Enable creation of cohort leaderboards from diagnostic results with shareable links.",
+        "details": "On results pages, show percentile ranks and 'Create Rally' CTA. Generate deep links to leaderboards updating in real-time. Pseudo-code: def create_rally(user_id, assessment_id) do rank = calculate_percentile(user_id, assessment_id); link = generate_leaderboard_link(assessment_id); end. Ensure real-time updates via Channels.",
+        "testStrategy": "Functional tests for rank calculation and leaderboard updates; user testing for shareability; analytics for participation rates.",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "4"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Calculate Percentile Ranks for Assessment Results",
+            "description": "Implement the logic to calculate the percentile rank of a user's score in a specific assessment by comparing it to all scores from users who completed the same assessment.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Develop a function like calculate_percentile(user_id, assessment_id) that queries the database for all scores on the assessment, sorts them, and computes the percentile. Ensure efficiency with indexing and possibly caching to handle large datasets without performance issues.",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify percentile calculation accuracy with various score distributions; edge case tests for minimum and maximum percentiles.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Shareable Leaderboard Links",
+            "description": "Generate deep links for cohort leaderboards that allow users to share and invite others to join, with the leaderboard displaying real-time ranks.",
+            "dependencies": [
+              1,
+              4,
+              1
+            ],
+            "details": "Implement generate_leaderboard_link(assessment_id) to create unique, shareable URLs. Add a 'Create Rally' CTA on results pages that triggers link generation and associates it with the user's rally. Ensure links are secure and trackable for analytics.",
+            "status": "pending",
+            "testStrategy": "Functional tests for link generation, validity, and shareability; user acceptance testing to confirm links lead to correct leaderboards and allow participation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Real-Time Updates for Leaderboards",
+            "description": "Ensure leaderboards update in real-time via Phoenix Channels whenever new assessment results are submitted or ranks change.",
+            "dependencies": [
+              1,
+              4,
+              1,
+              2
+            ],
+            "details": "Integrate with PresenceChannel or a dedicated LeaderboardChannel to broadcast updates when calculate_percentile is called or new scores are added. Use PubSub for efficient broadcasting to all connected users viewing the leaderboard, maintaining low latency.",
+            "status": "pending",
+            "testStrategy": "Integration tests for real-time broadcasting and UI updates; load tests simulating multiple users submitting results simultaneously to ensure updates propagate correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break into subtasks for percentile rank calculation, leaderboard creation with deep links, and ensuring real-time updates."
+      },
+      {
+        "id": 8,
+        "title": "Create Proud Parent Referral System",
+        "description": "Automate weekly progress reels for parents with shareable links offering free class passes.",
+        "details": "Generate visual summaries weekly, email to parents, and include referral CTAs. Track attributions. Pseudo-code: def generate_reel(student_id) do summary = compile_progress(student_id); reel = create_visual_summary(summary); email_parent(reel.link); end. Ensure privacy-safe content.",
+        "testStrategy": "Integration tests for reel generation and email delivery; conversion tracking; compliance audits for COPPA/FERPA.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Weekly Reel Generation and Visualization",
+            "description": "Develop functionality to compile student progress data and create visual summaries as reels, ensuring content is privacy-safe and includes referral CTAs.",
+            "dependencies": [],
+            "details": "Use the provided pseudo-code as a base: def generate_reel(student_id) do summary = compile_progress(student_id); reel = create_visual_summary(summary); end. Integrate with a video generation library to produce reels, anonymize any personal data, and add shareable links for free class passes. Ensure compliance with COPPA/FERPA by avoiding identifiable information.",
+            "status": "pending",
+            "testStrategy": "Unit tests for data compilation and reel creation; integration tests for visual output and privacy checks.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Set Up Email Automation for Reel Distribution",
+            "description": "Automate the process of emailing generated reels to parents with shareable links and referral calls-to-action.",
+            "dependencies": [
+              1
+            ],
+            "details": "Extend the pseudo-code to include email_parent(reel.link). Integrate with an email service (e.g., SendGrid) to send weekly emails. Personalize emails with parent details while maintaining privacy, and track email delivery status. Include opt-out functionality and ensure emails comply with privacy regulations.",
+            "status": "pending",
+            "testStrategy": "Integration tests for email sending and delivery; functional tests for opt-out and personalization.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Attribution Tracking with Privacy Compliance",
+            "description": "Track referrals from shared reel links to attribute sign-ups or class passes, ensuring all tracking is privacy-compliant.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add tracking mechanisms to shareable links using unique identifiers that do not expose PII. Store attribution data in a database with anonymization. Monitor for conversions and generate reports. Implement checks to ensure FERPA/COPPA compliance, such as not linking to identifiable student data.",
+            "status": "pending",
+            "testStrategy": "Integration tests for link tracking and attribution; compliance audits for data privacy; conversion rate analysis.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into subtasks for weekly reel generation and visualization, email automation, and attribution tracking with privacy compliance."
+      },
+      {
+        "id": 9,
+        "title": "Build Streak Rescue Mechanism",
+        "description": "Prompt users near streak expiration to invite friends for co-practice sessions.",
+        "details": "Monitor streaks and trigger prompts within 6 hours. Generate shareable co-practice links. Pseudo-code: def check_streak_expiry(user_id) do if hours_to_expiry(user_id) <= 6 do prompt_rescue(user_id); end; end. Reward completion with 'Streak Shield'.",
+        "testStrategy": "Automated tests for prompt timing; user flow tests for co-practice; retention metrics analysis.",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Streak Monitoring and Prompt Triggering",
+            "description": "Develop logic to monitor user streaks and trigger rescue prompts when expiration is within 6 hours, including pseudo-code implementation for checking expiry and prompting users.",
+            "dependencies": [
+              1,
+              6
+            ],
+            "details": "Extend the existing system to track streak expiry times for each user. Implement a function like check_streak_expiry(user_id) that calculates hours_to_expiry and triggers prompt_rescue if <=6. Integrate with user notifications to display prompts encouraging friend invites for co-practice. Ensure real-time monitoring without performance impact, using background jobs or scheduled checks.",
+            "status": "pending",
+            "testStrategy": "Automated unit tests for expiry calculation and prompt triggering timing; integration tests for notification delivery; monitor retention metrics post-prompt.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Generate Co-Practice Links and Issue Rewards",
+            "description": "Create shareable co-practice links for invited friends and handle reward issuance upon successful completion, including 'Streak Shield' rewards.",
+            "dependencies": [
+              1,
+              6
+            ],
+            "details": "Build functionality to generate unique, shareable deep links for co-practice sessions based on micro-decks or challenges. Track link usage and friend completions to issue rewards automatically. Integrate with Task 6's Buddy Challenge for link generation and reward logic, ensuring links are secure and trackable for analytics. Implement fallback mechanisms for reward failures.",
+            "status": "pending",
+            "testStrategy": "End-to-end tests for link generation, sharing, and reward issuance; user flow tests for co-practice sessions; A/B tests for conversion rates and retention impact.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split into subtasks for streak monitoring and prompt triggering, and co-practice link generation with reward issuance."
+      },
+      {
+        "id": 10,
+        "title": "Integrate Session Intelligence and Agentic Actions",
+        "description": "Implement transcription, summarization, and AI-driven actions for students and tutors.",
+        "details": "Use AI for session transcription and summarization. Trigger actions like auto-challenges or nudges based on summaries. Pseudo-code: def analyze_session(session_id) do transcript = get_transcript(session_id); summary = ai_summarize(transcript); trigger_actions(summary); end. Ensure explainability and fallbacks.",
+        "testStrategy": "AI accuracy tests for summarization; integration tests for action triggers; A/B tests for effectiveness; monitor latency and reliability.",
+        "priority": "high",
+        "dependencies": [
+          "6",
+          "7",
+          "8"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up AI Transcription for Sessions",
+            "description": "Integrate AI services to transcribe real-time session audio or text into structured transcripts.",
+            "dependencies": [],
+            "details": "Use an AI API like OpenAI Whisper or Google Speech-to-Text to process session data. Ensure transcripts are stored securely and linked to session IDs. Handle audio input formats and provide fallback for text-only sessions. Implement error handling for transcription failures.",
+            "status": "pending",
+            "testStrategy": "Unit tests for transcription accuracy; integration tests with sample audio; monitor latency under 5 seconds.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement AI Summarization of Transcripts",
+            "description": "Develop AI-powered summarization to condense session transcripts into key insights and actionable summaries.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate an AI model (e.g., GPT-based) to generate summaries from transcripts. Include parameters for summary length and focus areas like student progress or tutor feedback. Ensure summaries are explainable with confidence scores. Add caching for performance.",
+            "status": "pending",
+            "testStrategy": "AI accuracy tests for summarization quality; A/B tests comparing summary lengths; validate against human-generated summaries.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Trigger Agentic Actions Based on Summaries",
+            "description": "Create logic to analyze summaries and automatically trigger actions like challenges or nudges for students and tutors.",
+            "dependencies": [
+              2
+            ],
+            "details": "Define rules or use AI to interpret summaries and trigger actions (e.g., auto-challenges if summary indicates struggle). Integrate with existing systems for notifications. Pseudo-code: def trigger_actions(summary) do if summary.contains('struggle') then send_challenge(); end; end. Ensure actions are customizable and reversible.",
+            "status": "pending",
+            "testStrategy": "Integration tests for action triggers; A/B tests for effectiveness on user engagement; monitor false positives.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement Explainability and Fallback Mechanisms",
+            "description": "Add features to explain AI decisions and provide fallbacks when AI fails or is inaccurate.",
+            "dependencies": [
+              3
+            ],
+            "details": "For each AI output, provide explanations (e.g., 'Summary based on keywords: struggle, help'). Implement fallbacks like manual review queues or default actions. Ensure user opt-out options and compliance with explainability standards. Log all decisions for auditing.",
+            "status": "pending",
+            "testStrategy": "Functional tests for explanation display; reliability tests for fallbacks; user feedback surveys on trust.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into subtasks for AI transcription and summarization setup, action triggering based on summaries, and implementing explainability and fallbacks."
+      },
+      {
+        "id": 11,
+        "title": "Implement Analytics and Experimentation Framework",
+        "description": "Set up event tracking, attribution, experimentation agent, and dashboards for K-factor measurement.",
+        "details": "Implement event schema for invites, conversions, etc. Use signed links for tracking. Create an ExperimentationAgent for A/B tests. Build dashboards with cohort analysis. Pseudo-code: def track_event(event_type, data) do log_to_analytics(event_type, data); end. Monitor guardrail metrics.",
+        "testStrategy": "Data validation tests for event tracking; dashboard accuracy checks; experimentation simulations; real-time metric monitoring.",
+        "priority": "high",
+        "dependencies": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Event Schema and Tracking",
+            "description": "Define and implement the event schema for tracking invites, conversions, and other key events. Set up the tracking mechanism to log events to analytics using signed links where applicable.",
+            "dependencies": [],
+            "details": "Create a structured event schema including fields for event_type, user_id, timestamp, and data payload. Implement the track_event function as per pseudo-code to log events securely. Ensure events are validated and stored in a scalable analytics system.",
+            "status": "pending",
+            "testStrategy": "Unit tests for event validation and logging accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Signed Link Attribution",
+            "description": "Develop the signed link mechanism for tracking attributions, ensuring secure and verifiable links for invites and conversions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Generate signed deep links using cryptographic methods to prevent tampering. Integrate with the event tracking system to attribute conversions back to original invites. Handle link expiration and validation to maintain data integrity.",
+            "status": "pending",
+            "testStrategy": "Integration tests for link generation, signing, and attribution accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create ExperimentationAgent for A/B Tests",
+            "description": "Build the ExperimentationAgent to manage A/B testing for features like conversion rates and user engagement.",
+            "dependencies": [
+              1
+            ],
+            "details": "Develop an agent that assigns users to experiment variants, tracks outcomes, and analyzes results. Implement logic for random assignment, metric collection, and statistical significance testing. Ensure it integrates with the event tracking for real-time data.",
+            "status": "pending",
+            "testStrategy": "Simulation tests for variant assignment and result analysis.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Build Dashboards with Cohort Analysis",
+            "description": "Construct dashboards that display K-factor metrics, cohort analysis, and guardrail monitoring for the analytics framework.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Use data from event tracking and experimentation to build interactive dashboards. Include cohort analysis for user retention and conversion funnels. Implement real-time updates and visualizations for metrics like invites, conversions, and streaks.",
+            "status": "pending",
+            "testStrategy": "UI tests for dashboard accuracy and performance under load.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Divide into subtasks for event schema and tracking implementation, signed link attribution, ExperimentationAgent for A/B tests, and dashboard creation with cohort analysis."
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-11-05T06:58:07.779Z",
+      "taskCount": 11,
+      "completedCount": 3,
+      "tags": [
+        "next"
+      ],
+      "created": "2025-11-05T13:54:10.077Z",
+      "description": "Tasks for next context"
+    }
   }
 }

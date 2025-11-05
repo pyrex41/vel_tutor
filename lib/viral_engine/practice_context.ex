@@ -75,7 +75,24 @@ defmodule ViralEngine.PracticeContext do
       total_steps = length(session.steps)
       score = if total_steps > 0, do: round(correct_answers / total_steps * 100), else: 0
 
-      update_session(session, %{completed: true, score: score})
+      result = update_session(session, %{completed: true, score: score})
+
+      # Create activity event for practice completion
+      with {:ok, updated_session} <- result do
+        ViralEngine.Activities.create_event(%{
+          user_id: updated_session.user_id,
+          event_type: "practice_completed",
+          data: %{
+            score: score,
+            correct_answers: correct_answers,
+            total_steps: total_steps,
+            session_id: session_id
+          },
+          visibility: "public"
+        })
+
+        {:ok, updated_session}
+      end
     else
       {:error, :not_found}
     end

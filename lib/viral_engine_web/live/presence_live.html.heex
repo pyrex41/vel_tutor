@@ -1,0 +1,72 @@
+<div class="presence-container">
+  <div class="presence-header">
+    <h2 class="text-xl font-bold text-slate-900">
+      <%= if @subject_id do %>
+        Online Students in <%= @subject_id %>
+      <% else %>
+        Global Online Students
+      <% end %>
+    </h2>
+    <div class="online-count text-sm text-slate-600">
+      <%= length(@online_users) %> students online
+    </div>
+  </div>
+
+  <div class="presence-list mt-4">
+    <%= if Enum.empty?(@online_users) do %>
+      <div class="empty-state text-center py-8">
+        <div class="text-slate-400 text-lg">No students online right now</div>
+        <div class="text-slate-300 text-sm mt-2">Check back later!</div>
+      </div>
+    <% else %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <%= for session <- @online_users do %>
+          <div class="presence-card bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+            <div class="flex items-center space-x-3">
+              <div class="avatar">
+                <img
+                  src={session.user.avatar_url || "/images/default-avatar.png"}
+                  alt={session.user.username}
+                  class="w-10 h-10 rounded-full"
+                />
+              </div>
+              <div class="user-info flex-1">
+                <div class="username font-medium text-slate-900">
+                  <%= session.user.display_name || session.user.username %>
+                </div>
+                <div class="status text-sm text-slate-600">
+                  <span class={"status-indicator status-#{session.status}"}>
+                    <%= String.capitalize(session.status) %>
+                  </span>
+                  <%= if session.current_activity do %>
+                    <span class="activity"> • <%= session.current_activity %></span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="last-seen text-xs text-slate-400 mt-2">
+              Last seen: <%= format_datetime(session.last_seen_at) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= if assigns[:current_user] do %>
+    <div class="activity-update mt-6">
+      <h3 class="text-lg font-semibold text-slate-900 mb-3">Update Your Activity</h3>
+      <div class="flex flex-wrap gap-2">
+        <%= for activity <- ["studying", "browsing", "taking_quiz", "chatting"] do %>
+          <button
+            phx-click="update_activity"
+            phx-value-activity={activity}
+            class="activity-btn px-4 py-2 rounded-full text-sm font-medium border border-slate-300 hover:border-slate-400 transition-colors"
+          >
+            <%= String.capitalize(String.replace(activity, "_", " ")) %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
