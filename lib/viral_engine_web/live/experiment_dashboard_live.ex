@@ -14,9 +14,12 @@ defmodule ViralEngineWeb.ExperimentDashboardLive do
        |> put_flash(:error, "Unauthorized access")
        |> redirect(to: "/dashboard")}
     else
-      if connected?(socket) do
+      socket = if connected?(socket) do
         # Refresh every 30 seconds
-        :timer.send_interval(30_000, self(), :refresh_experiments)
+        {:ok, timer_ref} = :timer.send_interval(30_000, self(), :refresh_experiments)
+        assign(socket, :timer_ref, timer_ref)
+      else
+        socket
       end
 
       experiments = list_experiments()
@@ -28,6 +31,15 @@ defmodule ViralEngineWeb.ExperimentDashboardLive do
        |> assign(:show_form, false)
        |> assign(:form_experiment, nil)}
     end
+  end
+
+  @impl true
+  def terminate(_reason, socket) do
+    # Clean up timer to prevent memory leaks
+    if timer_ref = socket.assigns[:timer_ref] do
+      :timer.cancel(timer_ref)
+    end
+    :ok
   end
 
   @impl true

@@ -365,11 +365,14 @@ defmodule ViralEngine.ViralMetricsContext do
 
     Enum.map(k_by_source, fn source_data ->
       # Efficiency score: K-factor * conversion_rate (higher is better)
-      efficiency_score = source_data.k_factor * (source_data.conversion_rate / 100)
+      # Add nil checks to prevent errors with missing data
+      k_factor = source_data.k_factor || 0.0
+      conv_rate = source_data.conversion_rate || 0.0
+      efficiency_score = k_factor * (conv_rate / 100)
 
       # ROI estimate: conversions per active user
       roi = if source_data.active_users > 0 do
-        source_data.total_conversions / source_data.active_users
+        (source_data.total_conversions || 0) / source_data.active_users
       else
         0.0
       end
@@ -377,7 +380,7 @@ defmodule ViralEngine.ViralMetricsContext do
       source_data
       |> Map.put(:efficiency_score, Float.round(efficiency_score, 3))
       |> Map.put(:roi, Float.round(roi, 2))
-      |> Map.put(:recommendation, get_recommendation(source_data.k_factor, efficiency_score))
+      |> Map.put(:recommendation, get_recommendation(k_factor, efficiency_score))
     end)
     |> Enum.sort_by(& &1.efficiency_score, :desc)
   end

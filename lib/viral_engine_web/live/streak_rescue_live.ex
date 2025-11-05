@@ -1,7 +1,11 @@
 defmodule ViralEngineWeb.StreakRescueLive do
   use ViralEngineWeb, :live_view
   alias ViralEngine.{StreakContext, PracticeContext, AttributionContext}
+  alias ViralEngineWeb.Live.ViralPromptsHook
   require Logger
+
+  # Use the viral prompts hook for experiment tracking
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(params, %{"user_token" => user_token}, socket) do
@@ -54,6 +58,9 @@ defmodule ViralEngineWeb.StreakRescueLive do
       |> assign(:activity_type, "practice")
       |> assign(:urgency_level, calculate_urgency_level(stats.hours_remaining))
       |> assign(:inviter_id, inviter_id)
+
+    # Log exposure for streak_rescue experiment when rescue UI/invite link is shown
+    ViralPromptsHook.log_variant_exposure(socket, "streak_rescue")
 
     {:ok, socket}
   end

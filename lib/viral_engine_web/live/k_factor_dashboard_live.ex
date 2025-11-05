@@ -14,9 +14,12 @@ defmodule ViralEngineWeb.KFactorDashboardLive do
        |> put_flash(:error, "Unauthorized access")
        |> redirect(to: "/dashboard")}
     else
-      if connected?(socket) do
+      socket = if connected?(socket) do
         # Refresh metrics every 60 seconds
-        :timer.send_interval(60_000, self(), :refresh_metrics)
+        {:ok, timer_ref} = :timer.send_interval(60_000, self(), :refresh_metrics)
+        assign(socket, :timer_ref, timer_ref)
+      else
+        socket
       end
 
       # Initial load
@@ -24,6 +27,15 @@ defmodule ViralEngineWeb.KFactorDashboardLive do
 
       {:ok, assign(socket, :user, user)}
     end
+  end
+
+  @impl true
+  def terminate(_reason, socket) do
+    # Clean up timer to prevent memory leaks
+    if timer_ref = socket.assigns[:timer_ref] do
+      :timer.cancel(timer_ref)
+    end
+    :ok
   end
 
   @impl true

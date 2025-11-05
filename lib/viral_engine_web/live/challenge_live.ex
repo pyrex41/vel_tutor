@@ -1,7 +1,11 @@
 defmodule ViralEngineWeb.ChallengeLive do
   use ViralEngineWeb, :live_view
   alias ViralEngine.{ChallengeContext, PracticeContext}
+  alias ViralEngineWeb.Live.ViralPromptsHook
   require Logger
+
+  # Use the viral prompts hook for experiment tracking
+  on_mount ViralEngineWeb.Live.ViralPromptsHook
 
   @impl true
   def mount(%{"token" => token}, session, socket) do
@@ -34,6 +38,9 @@ defmodule ViralEngineWeb.ChallengeLive do
           |> assign(:challenge, challenge)
           |> assign(:user, user)
           |> assign(:share_link, ChallengeContext.generate_challenge_link(challenge))
+
+        # Log exposure for buddy_challenge experiment when share UI is shown
+        ViralPromptsHook.log_variant_exposure(socket, "buddy_challenge")
 
         {:ok, socket}
 
