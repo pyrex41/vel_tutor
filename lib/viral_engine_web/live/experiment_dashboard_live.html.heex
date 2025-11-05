@@ -1,0 +1,489 @@
+<div class="experiment-dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">🧪 A/B Testing Experiments</h1>
+    <button phx-click="show_create_form" class="btn-primary">
+      ➕ New Experiment
+    </button>
+  </div>
+
+  <%= if @show_form do %>
+    <div class="modal-overlay" phx-click="hide_form">
+      <div class="modal-content" phx-click={JS.stop_propagation()}>
+        <h2>Create New Experiment</h2>
+        <form phx-submit="create_experiment">
+          <div class="form-group">
+            <label>Experiment Name:</label>
+            <input type="text" name="name" required placeholder="e.g., Buddy Challenge CTA Test" />
+          </div>
+
+          <div class="form-group">
+            <label>Experiment Key:</label>
+            <input type="text" name="experiment_key" required placeholder="e.g., buddy_challenge_cta_v1" />
+            <small>Unique identifier (lowercase, underscores only)</small>
+          </div>
+
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea name="description" rows="3" placeholder="What are you testing?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Variants:</label>
+            <input type="text" name="variants" required placeholder="control:50,variant_a:50" />
+            <small>Format: variant_name:weight,variant_name:weight</small>
+          </div>
+
+          <div class="form-group">
+            <label>Target Metric:</label>
+            <select name="target_metric">
+              <option value="conversion_rate">Conversion Rate</option>
+              <option value="k_factor">K-Factor</option>
+              <option value="retention_d7">D7 Retention</option>
+              <option value="ltv">LTV</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Traffic Allocation (%):</label>
+            <input type="number" name="traffic_allocation" min="1" max="100" value="100" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Create Experiment</button>
+            <button type="button" phx-click="hide_form" class="btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Experiments List -->
+  <div class="experiments-grid">
+    <%= for experiment <- @experiments do %>
+      <div class="experiment-card">
+        <div class="experiment-header">
+          <h3><%= experiment.name %></h3>
+          <span class={"status-badge " <> status_badge_class(experiment.status)}>
+            <%= String.capitalize(experiment.status) %>
+          </span>
+        </div>
+
+        <div class="experiment-details">
+          <div class="detail-row">
+            <strong>Key:</strong> <%= experiment.experiment_key %>
+          </div>
+          <div class="detail-row">
+            <strong>Target Metric:</strong> <%= experiment.target_metric || "N/A" %>
+          </div>
+          <div class="detail-row">
+            <strong>Variants:</strong> <%= variant_summary(experiment.variants) %>
+          </div>
+          <div class="detail-row">
+            <strong>Traffic:</strong> <%= experiment.traffic_allocation %>%
+          </div>
+          <%= if experiment.start_date do %>
+            <div class="detail-row">
+              <strong>Started:</strong> <%= format_datetime(experiment.start_date) %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="experiment-actions">
+          <%= if experiment.status == "draft" do %>
+            <button phx-click="start_experiment" phx-value-id={experiment.id} class="btn-success">
+              ▶️ Start
+            </button>
+          <% end %>
+
+          <%= if experiment.status == "running" do %>
+            <button phx-click="view_results" phx-value-id={experiment.id} class="btn-info">
+              📊 View Results
+            </button>
+            <button phx-click="stop_experiment" phx-value-id={experiment.id} class="btn-warning">
+              ⏸️ Stop
+            </button>
+          <% end %>
+
+          <%= if experiment.status == "completed" do %>
+            <button phx-click="view_results" phx-value-id={experiment.id} class="btn-info">
+              📊 View Results
+            </button>
+            <%= if get_in(experiment.metadata, ["winner"]) do %>
+              <div class="winner-badge">
+                🏆 Winner: <%= get_in(experiment.metadata, ["winner"]) %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Results Modal -->
+  <%= if assigns[:viewing_results] do %>
+    <div class="modal-overlay" phx-click={JS.push("hide_results")}>
+      <div class="modal-content results-modal" phx-click={JS.stop_propagation()}>
+        <h2>Experiment Results</h2>
+
+        <div class="results-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Variant</th>
+                <th>Users</th>
+                <th>Conversions</th>
+                <th>Conv. Rate</th>
+                <th>Lift</th>
+                <th>P-Value</th>
+                <th>Significant?</th>
+                <th>95% CI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for result <- @results do %>
+                <tr class={if result.is_significant, do: "significant-row", else: ""}>
+                  <td><strong><%= result.variant %></strong></td>
+                  <td><%= result.total_users %></td>
+                  <td><%= result.conversions || 0 %></td>
+                  <td><%= result.conversion_rate %>%</td>
+                  <td>
+                    <%= if result.lift do %>
+                      <span class={if result.lift > 0, do: "positive-lift", else: "negative-lift"}>
+                        <%= if result.lift > 0, do: "+", else: "" %><%= result.lift %>%
+                      </span>
+                    <% else %>
+                      -
+                    <% end %>
+                  </td>
+                  <td><%= result.p_value || "N/A" %></td>
+                  <td>
+                    <%= if result.is_significant do %>
+                      <span class="badge-yes">Yes ✅</span>
+                    <% else %>
+                      <span class="badge-no">No</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if result.confidence_interval do %>
+                      [<%= result.confidence_interval.lower %>%, <%= result.confidence_interval.upper %>%]
+                    <% else %>
+                      N/A
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="results-actions">
+          <%= for result <- @results do %>
+            <%= if result.is_significant && result.variant != "control" do %>
+              <button
+                phx-click="declare_winner"
+                phx-value-id={@viewing_results}
+                phx-value-variant={result.variant}
+                class="btn-success"
+              >
+                🏆 Declare <%= result.variant %> as Winner
+              </button>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.experiment-dashboard {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-info {
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.experiments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.experiment-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.experiment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.experiment-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.draft {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.status-badge.running {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.paused {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.experiment-details {
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.detail-row strong {
+  color: #1f2937;
+}
+
+.experiment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.winner-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.results-modal {
+  max-width: 900px;
+}
+
+.results-table {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.results-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th {
+  background: #f9fafb;
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.results-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.significant-row {
+  background: #f0fdf4;
+}
+
+.positive-lift {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.negative-lift {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.badge-yes {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.badge-no {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.results-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+</style>

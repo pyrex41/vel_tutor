@@ -12,6 +12,7 @@ defmodule ViralEngine.ExperimentAssignment do
     field(:variant, :string)
 
     field(:assigned_at, :utc_datetime)
+    field(:exposed_at, :utc_datetime)
     field(:converted, :boolean, default: false)
     field(:conversion_value, :decimal)
     field(:conversion_at, :utc_datetime)
@@ -28,6 +29,7 @@ defmodule ViralEngine.ExperimentAssignment do
       :user_id,
       :variant,
       :assigned_at,
+      :exposed_at,
       :converted,
       :conversion_value,
       :conversion_at,
