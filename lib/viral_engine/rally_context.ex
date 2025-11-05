@@ -6,29 +6,39 @@ defmodule ViralEngine.RallyContext do
   """
 
   import Ecto.Query
-  alias ViralEngine.{Repo, ResultsRally, RallyParticipant, DiagnosticContext}
+  alias ViralEngine.{Repo, ResultsRally, RallyParticipant, DiagnosticContext, PracticeContext, AttributionContext}
   require Logger
 
   @rally_duration_days 7
   @token_salt "results_rally_salt"
 
   @doc """
-  Creates a new results rally from a diagnostic assessment.
+  Creates a new results rally from a diagnostic assessment or practice session.
 
   ## Parameters
   - user_id: Creator user ID
-  - assessment_id: Diagnostic assessment to base rally on
-  - opts: Optional parameters (rally_name, end_date)
+  - source_id: Diagnostic assessment ID or practice session ID
+  - opts: Optional parameters (rally_name, end_date, source_type, share_method)
 
   ## Returns
-  - {:ok, rally} with generated token
-  - {:error, changeset}
+  - {:ok, rally} with generated token and attribution link
+  - {:error, reason}
   """
-  def create_rally(user_id, assessment_id, opts \\ []) do
+  def create_rally(user_id, source_id, opts \\ []) do
+    source_type = opts[:source_type] || :diagnostic
+
+    case source_type do
+      :diagnostic -> create_rally_from_diagnostic(user_id, source_id, opts)
+      :practice -> create_rally_from_practice(user_id, source_id, opts)
+      _ -> {:error, :invalid_source_type}
+    end
+  end
+
+  defp create_rally_from_diagnostic(user_id, assessment_id, opts) do
     assessment = DiagnosticContext.get_assessment(assessment_id)
 
     if assessment && assessment.user_id == user_id && assessment.completed do
-      token = generate_rally_token(user_id, assessment_id)
+      token = generate_rally_token(user_id, assessment_id, "diagnostic")
       start_date = DateTime.utc_now()
       end_date = opts[:end_date] || DateTime.add(start_date, @rally_duration_days * 24 * 3600, :second)
 
@@ -44,48 +54,119 @@ defmodule ViralEngine.RallyContext do
         end_date: end_date,
         status: "active",
         participant_count: 1,
-        metadata: opts[:metadata] || %{}
+        metadata: Map.merge(opts[:metadata] || %{}, %{"source_type" => "diagnostic", "source_id" => assessment_id})
       }
 
-      case Repo.transaction(fn ->
-        # Create rally
-        rally = %ResultsRally{}
-        |> ResultsRally.changeset(attrs)
-        |> Repo.insert!()
-
-        # Add creator as first participant
-        %RallyParticipant{}
-        |> RallyParticipant.changeset(%{
-          rally_id: rally.id,
-          user_id: user_id,
-          assessment_id: assessment_id,
-          score: assessment.results["overall_score"] || 0,
-          rank: 1,
-          joined_via: "creator",
-          is_creator: true
-        })
-        |> Repo.insert!()
-
-        rally
-      end) do
-        {:ok, rally} ->
-          # Broadcast rally creation
-          broadcast_rally_event(rally, :rally_created)
-          {:ok, rally}
-
-        {:error, _changeset} = error ->
-          error
-      end
+      create_rally_transaction(attrs, user_id, assessment_id, assessment.results["overall_score"] || 0, opts)
     else
       {:error, :invalid_assessment}
     end
   end
 
+  defp create_rally_from_practice(user_id, session_id, opts) do
+    session = PracticeContext.get_session(session_id)
+
+    if session && session.user_id == user_id && session.completed do
+      token = generate_rally_token(user_id, session_id, "practice")
+      start_date = DateTime.utc_now()
+      end_date = opts[:end_date] || DateTime.add(start_date, @rally_duration_days * 24 * 3600, :second)
+
+      rally_name = opts[:rally_name] || "#{String.capitalize(session.subject)} Practice Rally"
+
+      # Get percentile rank for display
+      {:ok, rank_info} = PracticeContext.get_session_rank(session_id)
+
+      attrs = %{
+        creator_id: user_id,
+        rally_name: rally_name,
+        subject: session.subject,
+        grade_level: session.grade_level,
+        rally_token: token,
+        start_date: start_date,
+        end_date: end_date,
+        status: "active",
+        participant_count: 1,
+        metadata: Map.merge(opts[:metadata] || %{}, %{
+          "source_type" => "practice",
+          "source_id" => session_id,
+          "creator_percentile" => rank_info.percentile,
+          "creator_rank" => rank_info.rank
+        })
+      }
+
+      create_rally_transaction(attrs, user_id, session_id, round(session.score || 0), opts)
+    else
+      {:error, :invalid_session}
+    end
+  end
+
+  defp create_rally_transaction(attrs, user_id, source_id, score, opts) do
+    case Repo.transaction(fn ->
+      # Create rally
+      rally = %ResultsRally{}
+      |> ResultsRally.changeset(attrs)
+      |> Repo.insert!()
+
+      # Add creator as first participant
+      %RallyParticipant{}
+      |> RallyParticipant.changeset(%{
+        rally_id: rally.id,
+        user_id: user_id,
+        assessment_id: source_id,
+        score: score,
+        rank: 1,
+        joined_via: "creator",
+        is_creator: true
+      })
+      |> Repo.insert!()
+
+      # Create attribution link for viral tracking
+      {:ok, attribution_link} = create_rally_attribution_link(user_id, rally, opts[:share_method] || "copy_link")
+
+      # Store attribution link in rally metadata
+      updated_metadata = Map.put(rally.metadata, "attribution_link_id", attribution_link.id)
+      rally = rally
+      |> ResultsRally.changeset(%{metadata: updated_metadata})
+      |> Repo.update!()
+
+      {rally, attribution_link}
+    end) do
+      {:ok, {rally, attribution_link}} ->
+        # Broadcast rally creation
+        broadcast_rally_event(rally, :rally_created)
+        {:ok, rally, attribution_link}
+
+      {:error, _changeset} = error ->
+        error
+    end
+  end
+
+  @doc """
+  Creates an attribution link for rally sharing.
+  Tracks conversions when friends join the rally.
+  """
+  defp create_rally_attribution_link(user_id, rally, share_method) do
+    expires_at = DateTime.add(DateTime.utc_now(), 7, :day)  # 7 days expiry
+
+    AttributionContext.create_link(%{
+      user_id: user_id,
+      link_type: "rally_invite",
+      share_method: share_method,
+      metadata: %{
+        "rally_id" => rally.id,
+        "rally_token" => rally.rally_token,
+        "subject" => rally.subject,
+        "rally_name" => rally.rally_name
+      },
+      expires_at: expires_at
+    })
+  end
+
   @doc """
   Generates a signed rally token.
   """
-  def generate_rally_token(user_id, assessment_id) do
-    data = "#{user_id}:#{assessment_id}:#{System.system_time(:second)}"
+  def generate_rally_token(user_id, source_id, source_type \\ "diagnostic") do
+    data = "#{user_id}:#{source_id}:#{source_type}:#{System.system_time(:second)}"
     :crypto.hash(:sha256, data <> @token_salt)
     |> Base.url_encode64(padding: false)
     |> String.slice(0, 32)

@@ -328,4 +328,96 @@ defmodule ViralEngine.PracticeContext do
     )
     |> Repo.all()
   end
+
+  @doc """
+  Calculates the percentile rank for a user's session in a subject.
+
+  ## Parameters
+  - session_id: Practice session ID
+  - subject: Subject to compare within (optional, defaults to session's subject)
+  - time_period: Days to consider for ranking (default 7)
+
+  ## Returns
+  - Percentile rank (0-100) where 100 is top performer
+  """
+  def calculate_percentile_rank(session_id, opts \\ []) do
+    session = get_session(session_id)
+
+    if session && session.completed do
+      subject = opts[:subject] || session.subject
+      time_period = opts[:time_period] || 7
+
+      cutoff_date = DateTime.add(DateTime.utc_now(), -time_period, :day)
+
+      # Get all completed sessions for this subject in the time period
+      all_scores = from(s in PracticeSession,
+        where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
+        select: s.score,
+        order_by: [asc: s.score]
+      )
+      |> Repo.all()
+
+      total_count = length(all_scores)
+
+      if total_count > 0 do
+        # Count sessions with lower scores
+        lower_count = Enum.count(all_scores, fn score -> score < session.score end)
+
+        # Calculate percentile (percentage of users this user beat)
+        percentile = (lower_count / total_count * 100) |> Float.round(1)
+
+        {:ok, percentile}
+      else
+        {:ok, 0.0}
+      end
+    else
+      {:error, :session_not_found}
+    end
+  end
+
+  @doc """
+  Gets user's rank in a subject leaderboard.
+
+  ## Parameters
+  - session_id: Practice session ID
+  - subject: Subject to rank in (optional, defaults to session's subject)
+  - time_period: Days to consider (default 7)
+
+  ## Returns
+  - {:ok, %{rank: integer, total: integer, percentile: float}}
+  """
+  def get_session_rank(session_id, opts \\ []) do
+    session = get_session(session_id)
+
+    if session && session.completed do
+      subject = opts[:subject] || session.subject
+      time_period = opts[:time_period] || 7
+
+      cutoff_date = DateTime.add(DateTime.utc_now(), -time_period, :day)
+
+      # Get all completed sessions ranked by score
+      sessions = from(s in PracticeSession,
+        where: s.subject == ^subject and s.completed == true and s.updated_at > ^cutoff_date,
+        select: %{id: s.id, score: s.score},
+        order_by: [desc: s.score]
+      )
+      |> Repo.all()
+
+      total = length(sessions)
+
+      # Find this session's rank
+      rank = Enum.find_index(sessions, fn s -> s.id == session.id end)
+
+      if rank do
+        rank = rank + 1  # Convert 0-indexed to 1-indexed
+        percentile = ((total - rank) / total * 100) |> Float.round(1)
+
+        {:ok, %{rank: rank, total: total, percentile: percentile, score: session.score}}
+      else
+        {:ok, %{rank: nil, total: total, percentile: 0.0, score: session.score}}
+      end
+    else
+      {:error, :session_not_found}
+    end
+  end
 end
