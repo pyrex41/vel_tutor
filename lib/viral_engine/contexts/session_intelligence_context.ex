@@ -7,8 +7,8 @@ defmodule ViralEngine.SessionIntelligenceContext do
   """
 
   import Ecto.Query
-  alias VelTutor.Repo
-  alias ViralEngine.{PracticeSession, StudySession, SessionTranscript}
+  alias ViralEngine.Repo
+  alias ViralEngine.PracticeSession
   alias ViralEngine.DiagnosticContext
 
   @doc """
@@ -561,7 +561,7 @@ defmodule ViralEngine.SessionIntelligenceContext do
     |> calculate_average_score_from_list()
   end
 
-  defp get_peer_cohort_scores(grade_level, opts) do
+  defp get_peer_cohort_scores(_grade_level, opts) do
     days = Keyword.get(opts, :days, 30)
     cutoff_date = DateTime.utc_now() |> DateTime.add(-days * 24 * 3600, :second)
 

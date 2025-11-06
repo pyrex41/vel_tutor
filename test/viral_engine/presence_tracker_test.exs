@@ -7,7 +7,7 @@ defmodule ViralEngine.PresenceTrackerTest do
   setup :verify_on_exit!
 
   test "tracks global and subject presence" do
-    user = %ViralEngine.User{id: "user1", role: "user"} |> Repo.insert!()
+    user = %ViralEngine.Accounts.User{id: "user1", role: "user"} |> Repo.insert!()
     socket = %Phoenix.Socket{private: %{phoenix_socket_connected?: true}}
 
     {:ok, _} = Presence.start_link()

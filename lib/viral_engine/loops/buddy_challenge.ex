@@ -204,7 +204,7 @@ defmodule ViralEngine.Loops.BuddyChallenge do
     }
   end
 
-  defp generate_card_image(user, deck, event) do
+  defp generate_card_image(_user, deck, event) do
     # Generate dynamic image (use Cloudinary, imgix, or similar)
     # For now, return placeholder
     "/images/challenge_cards/#{deck.skill}_#{event.context.score}.png"

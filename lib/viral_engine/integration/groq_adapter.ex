@@ -15,6 +15,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
   defstruct [
     :api_key,
     :base_url,
+    :model,
     :timeout,
     :temperature,
     :max_tokens,
@@ -36,6 +37,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
     %__MODULE__{
       api_key: api_key,
       base_url: opts[:base_url] || "https://api.groq.com/openai/v1",
+      model: opts[:model] || get_default_model(),
       # Groq is faster
       timeout: opts[:timeout] || 10_000,
       temperature: opts[:temperature] || 0.1,
@@ -44,6 +46,13 @@ defmodule ViralEngine.Integration.GroqAdapter do
       failure_count: 0,
       last_failure_time: nil
     }
+  end
+
+  # Get default model from config or fallback to llama-3.3-70b-versatile
+  defp get_default_model do
+    Application.get_env(:viral_engine, :ai, %{})
+    |> get_in([:providers, :groq, :default_model])
+    || "llama-3.3-70b-versatile"
   end
 
   @doc """
@@ -85,7 +94,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
     body =
       Jason.encode!(%{
-        model: "llama-3.3-70b-versatile",
+        model: adapter.model,
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens,
@@ -123,7 +132,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
                        :ok
                    end
                  else
-                   callback_fn.({:done, %{provider: "groq", model: "llama-3.3-70b-versatile"}})
+                   callback_fn.({:done, %{provider: "groq", model: adapter.model}})
                  end
                end
              end)
@@ -160,7 +169,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
           AuditLogContext.log_ai_call(
             nil,  # task_id not available here, will be nil
             "groq",
-            "llama-3.3-70b-versatile",
+            adapter.model,
             response.tokens_used,
             Decimal.from_float(response.cost),
             latency_ms
@@ -187,7 +196,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
 
     body =
       Jason.encode!(%{
-        model: "llama-3.3-70b-versatile",
+        model: adapter.model,
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens
@@ -204,7 +213,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
         case Jason.decode(response_body) do
           {:ok, %{"choices" => [%{"message" => %{"content" => content}} | _], "usage" => usage}} ->
             tokens_used = Map.get(usage, "total_tokens", 0)
-            cost = calculate_cost(tokens_used, "llama-3.3-70b-versatile")
+            cost = calculate_cost(tokens_used, adapter.model)
 
             # Log performance metrics
             Logger.info("Groq API call completed in #{latency}ms, tokens: #{tokens_used}")
@@ -216,7 +225,7 @@ defmodule ViralEngine.Integration.GroqAdapter do
                cost: cost,
                latency_ms: latency,
                provider: "groq",
-               model: "llama-3.3-70b-versatile",
+               model: adapter.model,
                raw_response: response_body
              }}
 

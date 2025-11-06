@@ -121,8 +121,8 @@
 
   <!-- Results Modal -->
   <%= if assigns[:viewing_results] do %>
-    <div class="modal-overlay" phx-click={JS.push("hide_results")}>
-      <div class="modal-content results-modal" phx-click={JS.stop_propagation()}>
+    <div class="modal-overlay" phx-click={Phoenix.LiveView.JS.push("hide_results")}>
+      <div class="modal-content results-modal" phx-click={Phoenix.LiveView.JS.stop_propagation()}>
         <h2>Experiment Results</h2>
 
         <div class="results-table">

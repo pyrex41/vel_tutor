@@ -144,7 +144,7 @@ defmodule ViralEngine.Loops.ResultsRally do
 
   # Private functions
 
-  defp fetch_cohort_leaderboard(cohort_id, subject, opts \\ []) do
+  defp fetch_cohort_leaderboard(_cohort_id, _subject, opts \\ []) do
     limit = Keyword.get(opts, :limit, 50)
 
     # Get active presence (simplified - would check actual presence in production)
@@ -196,7 +196,7 @@ defmodule ViralEngine.Loops.ResultsRally do
     }
   end
 
-  defp generate_leaderboard_image(leaderboard, rank) do
+  defp generate_leaderboard_image(_leaderboard, rank) do
     # Generate dynamic image showing top 5 + current user
     "/images/leaderboard_cards/rank_#{rank}.png"
   end

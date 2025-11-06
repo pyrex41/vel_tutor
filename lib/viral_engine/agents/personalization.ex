@@ -1,16 +1,18 @@
 defmodule ViralEngine.Agents.Personalization do
   @moduledoc """
-  Personalization Agent - Generates dynamic, personalized content using Claude API.
+  Personalization Agent - Generates dynamic, personalized content using AI.
 
   This GenServer handles content personalization for viral loops, creating tailored
   headlines, bodies, CTAs, and share copy based on user profiles and context.
+  Uses the unified AIClient for intelligent multi-provider routing (OpenAI/Groq).
   Includes fallback logic for API failures.
   """
 
   use GenServer
   require Logger
 
-  alias HTTPoison
+  alias ViralEngine.AIClient
+  alias ViralEngine.Repo
 
   # Client API
 
@@ -40,7 +42,6 @@ defmodule ViralEngine.Agents.Personalization do
   @impl true
   def init(_opts) do
     state = %{
-      claude_client: configure_claude_client(),
       copy_templates: load_copy_templates(),
       persona_profiles: %{}
     }
@@ -110,15 +111,16 @@ defmodule ViralEngine.Agents.Personalization do
     end
   end
 
-  defp generate_with_claude(loop_type, profile, context, state) do
+  defp generate_with_claude(loop_type, profile, context, _state) do
     prompt = build_claude_prompt(loop_type, profile, context)
 
-    case call_claude(state.claude_client, prompt) do
+    # Use AIClient with intelligent routing - general task type
+    case AIClient.chat(prompt, task_type: :general, max_tokens: 150, temperature: 0.7) do
       {:ok, response} ->
-        {:ok, String.trim(response)}
+        {:ok, String.trim(response.content)}
 
       {:error, reason} ->
-        Logger.warning("Claude generation failed: #{inspect(reason)}")
+        Logger.warning("AI generation failed: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -189,7 +191,7 @@ defmodule ViralEngine.Agents.Personalization do
     }
   end
 
-  defp determine_persona(user) do
+  defp _determine_persona(user) do
     # Simple heuristic; expand as needed
     cond do
       user.email =~ "tutor" -> :tutor
@@ -253,56 +255,6 @@ defmodule ViralEngine.Agents.Personalization do
     end
   end
 
-  defp configure_claude_client do
-    # Configure Anthropic client
-    api_key =
-      Application.get_env(:viral_engine, :claude_api_key) || System.get_env("ANTHROPIC_API_KEY")
-
-    %{api_key: api_key, model: "claude-3-haiku-20240307"}
-  end
-
-  defp call_claude(client, prompt) do
-    if client.api_key do
-      headers = [
-        {"x-api-key", client.api_key},
-        {"anthropic-version", "2023-06-01"},
-        {"content-type", "application/json"},
-        {"accept", "application/json"}
-      ]
-
-      body = Jason.encode!(%{
-        model: client.model,
-        max_tokens: 150,
-        messages: [%{role: "user", content: prompt}],
-        temperature: 0.7
-      })
-
-      case HTTPoison.post("https://api.anthropic.com/v1/messages", body, headers, timeout: 10000, recv_timeout: 15000) do
-        {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
-          case Jason.decode(response_body) do
-            {:ok, %{"content" => [%{"type" => "text", "text" => text}]}} ->
-              {:ok, String.trim(text)}
-            {:ok, response} ->
-              Logger.warning("Unexpected Claude response format: #{inspect(response)}")
-              {:error, :invalid_response_format}
-            {:error, decode_error} ->
-              Logger.error("Failed to decode Claude response: #{inspect(decode_error)}")
-              {:error, :json_decode_error}
-          end
-
-        {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} ->
-          Logger.warning("Claude API error #{status_code}: #{error_body}")
-          {:error, {:api_error, status_code}}
-
-        {:error, %HTTPoison.Error{reason: reason}} ->
-          Logger.error("HTTPoison error calling Claude: #{inspect(reason)}")
-          {:error, {:http_error, reason}}
-      end
-    else
-      Logger.warning("No Claude API key configured, using fallback")
-      {:error, :no_api_key}
-    end
-  end
 
   defp log_personalization(user_id, loop_type, result) do
     # Log to analytics (placeholder for now)

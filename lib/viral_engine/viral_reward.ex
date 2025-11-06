@@ -9,7 +9,7 @@ defmodule ViralEngine.ViralReward do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "user_rewards" do
+  schema "viral_rewards" do
     field(:user_id, :integer)
     field(:reward_type, :string)
     field(:amount, :integer)

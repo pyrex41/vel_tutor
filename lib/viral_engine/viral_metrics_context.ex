@@ -275,7 +275,7 @@ defmodule ViralEngine.ViralMetricsContext do
   Computes retention cohort - tracks how many referred users remain active over time.
   """
   def retention_cohort(weeks_back \\ 12) do
-    cutoff = DateTime.add(DateTime.utc_now(), -weeks_back * 7 * 24 * 60 * 60, :second)
+    _cutoff = DateTime.add(DateTime.utc_now(), -weeks_back * 7 * 24 * 60 * 60, :second)
 
     # This would require a users table with last_activity tracking
     # For now, return structure showing what the data would look like

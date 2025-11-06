@@ -110,7 +110,7 @@ defmodule ViralEngine.ExperimentContext do
   @doc """
   Logs exposure event when user sees an experiment variant.
   """
-  def log_exposure(experiment_key, user_id, variant) do
+  def log_exposure(experiment_key, user_id, _variant) do
     # Record that user was exposed to this variant
     # This is important for accurate conversion rate calculation
     case from(a in ExperimentAssignment,
@@ -180,10 +180,6 @@ defmodule ViralEngine.ExperimentContext do
     |> Repo.update()
   end
 
-  @doc """
-  Adds statistical significance calculation to experiment results.
-  Uses Z-test for proportions to compare variants against control.
-  """
   defp add_statistical_significance(results) do
     # Find control variant
     control = Enum.find(results, fn r -> r.variant == "control" end)
@@ -223,10 +219,6 @@ defmodule ViralEngine.ExperimentContext do
     end
   end
 
-  @doc """
-  Calculates Z-test for two proportions.
-  Returns p-value and statistical significance at 95% confidence level.
-  """
   defp calculate_z_test(control_conversions, control_total, variant_conversions, variant_total) do
     p1 = control_conversions / control_total
     p2 = variant_conversions / variant_total
@@ -264,9 +256,6 @@ defmodule ViralEngine.ExperimentContext do
     }
   end
 
-  @doc """
-  Approximates the cumulative distribution function of the standard normal distribution.
-  """
   defp normal_cdf(x) do
     # Using erf approximation
     # CDF(x) = 0.5 * (1 + erf(x / sqrt(2)))

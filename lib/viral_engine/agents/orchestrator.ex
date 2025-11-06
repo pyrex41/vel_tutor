@@ -422,7 +422,7 @@ defmodule ViralEngine.Agents.Orchestrator do
     nil
   end
 
-  defp count_cohort_participants(user_id) do
+  defp count_cohort_participants(_user_id) do
     # For now, return a default count - in production this would check actual cohort size
     10
   end

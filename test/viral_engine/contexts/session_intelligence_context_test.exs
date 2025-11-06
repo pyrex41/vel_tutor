@@ -1,9 +1,9 @@
 defmodule ViralEngine.SessionIntelligenceContextTest do
-  use VelTutor.DataCase, async: true
+  use ViralEngine.DataCase, async: true
 
   alias ViralEngine.SessionIntelligenceContext
   alias ViralEngine.PracticeSession
-  alias VelTutor.Repo
+  alias ViralEngine.Repo
 
   describe "analyze_learning_patterns/1" do
     test "returns empty patterns when user has no sessions" do

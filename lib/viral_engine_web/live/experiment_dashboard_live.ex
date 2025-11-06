@@ -1,6 +1,7 @@
 defmodule ViralEngineWeb.ExperimentDashboardLive do
   use ViralEngineWeb, :live_view
   alias ViralEngine.{ExperimentContext, Repo, Experiment}
+  alias Phoenix.LiveView.JS
   require Logger
 
   @impl true

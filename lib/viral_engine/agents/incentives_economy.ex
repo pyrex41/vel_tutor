@@ -10,6 +10,7 @@ defmodule ViralEngine.Agents.IncentivesEconomy do
   require Logger
   import Ecto.Query
 
+  alias ViralEngine.Repo
   alias ViralEngine.Support.DateTimeHelpers
 
   # Client API

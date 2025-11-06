@@ -8,8 +8,7 @@
 import Config
 
 config :viral_engine,
-  ecto_repos: [ViralEngine.Repo],
-  claude_api_key: System.get_env("ANTHROPIC_API_KEY")
+  ecto_repos: [ViralEngine.Repo]
 
 # Configures the endpoint
 config :viral_engine, ViralEngineWeb.Endpoint,
@@ -59,6 +58,9 @@ config :viral_engine, Oban,
   engine: Oban.Engines.Basic,
   queues: [default: 10, fine_tuning: 5],
   repo: ViralEngine.Repo
+
+# Import AI provider configuration
+import_config "ai.exs"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

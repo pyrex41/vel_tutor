@@ -16,6 +16,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
   defstruct [
     :api_key,
     :base_url,
+    :model,
     :timeout,
     :temperature,
     :max_tokens,
@@ -37,6 +38,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
     %__MODULE__{
       api_key: api_key,
       base_url: opts[:base_url] || "https://api.openai.com/v1",
+      model: opts[:model] || get_default_model(),
       timeout: opts[:timeout] || 30_000,
       temperature: opts[:temperature] || 0.1,
       max_tokens: opts[:max_tokens] || 4096,
@@ -44,6 +46,13 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
       failure_count: 0,
       last_failure_time: nil
     }
+  end
+
+  # Get default model from config or fallback to gpt-4o
+  defp get_default_model do
+    Application.get_env(:viral_engine, :ai, %{})
+    |> get_in([:providers, :openai, :default_model])
+    || "gpt-4o"
   end
 
   @doc """
@@ -85,7 +94,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
 
     body =
       Jason.encode!(%{
-        model: "gpt-4o",
+        model: adapter.model,
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens,
@@ -124,7 +133,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
                        :ok
                    end
                  else
-                   callback_fn.({:done, %{provider: "openai", model: "gpt-4o"}})
+                   callback_fn.({:done, %{provider: "openai", model: adapter.model}})
                  end
                end
              end)
@@ -161,7 +170,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
           AuditLogContext.log_ai_call(
             nil,  # task_id not available here, will be nil
             "openai",
-            "gpt-4o",
+            adapter.model,
             response.tokens_used,
             Decimal.from_float(response.cost),
             latency_ms
@@ -189,7 +198,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
 
     body =
       Jason.encode!(%{
-        model: "gpt-4o",
+        model: adapter.model,
         messages: [%{role: "user", content: prompt}],
         temperature: adapter.temperature,
         max_tokens: adapter.max_tokens
