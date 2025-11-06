@@ -48,11 +48,11 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
     }
   end
 
-  # Get default model from config or fallback to gpt-4o
+  # Get default model from config or fallback to gpt-5
   defp get_default_model do
     Application.get_env(:viral_engine, :ai, %{})
     |> get_in([:providers, :openai, :default_model])
-    || "gpt-4o"
+    || "gpt-5"
   end
 
   @doc """
@@ -211,7 +211,7 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
         case Jason.decode(response_body) do
           {:ok, %{"choices" => [%{"message" => %{"content" => content}} | _], "usage" => usage}} ->
             tokens_used = Map.get(usage, "total_tokens", 0)
-            cost = calculate_cost(tokens_used, "gpt-4o")
+            cost = calculate_cost(tokens_used, adapter.model)
 
             {:ok,
              %{
@@ -238,11 +238,11 @@ defmodule ViralEngine.Integration.OpenAIAdapter do
 
   defp calculate_cost(tokens, model) do
     # OpenAI pricing (as of 2025)
-    # GPT-4o: $0.0025 input / $0.01 output per 1K tokens (avg $0.00625)
+    # GPT-5: $0.0025 input / $0.01 output per 1K tokens (avg $0.00625)
     # GPT-4o-mini: $0.00015 input / $0.0006 output per 1K tokens (avg $0.000375)
     rate =
       case model do
-        "gpt-4o" -> 0.00625
+        "gpt-5" -> 0.00625
         "gpt-4o-mini" -> 0.000375
         _ -> 0.00625
       end

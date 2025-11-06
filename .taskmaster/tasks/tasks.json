@@ -3917,7 +3917,7 @@
   "phase2": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Create Phase 2 Database Migrations",
         "description": "Add new tables for rewards, challenge decks, and challenge sessions to support the viral loops and reward system.",
         "details": "Implement the migration file as specified in section 2.6, creating tables for rewards, challenge_decks, and challenge_sessions with appropriate indexes. Use Ecto.Migration to define the schema changes, ensuring foreign key constraints and data types match the PRD. Run the migration in the development environment to verify schema integrity.",
@@ -3995,7 +3995,7 @@
         "updatedAt": "2025-11-06T00:34:40.733Z"
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Implement Personalization Agent",
         "description": "Develop the Personalization Agent as a GenServer to personalize content using Claude API with fallbacks.",
         "details": "Code the ViralEngine.Agents.Personalization module with state struct, client API functions (start_link, personalize), and server callbacks (init, handle_call). Include logic for fetching user profiles, personalizing headlines, bodies, CTAs, and share copy. Integrate Claude API call with HTTPoison, handle fallbacks, and log decisions. Use up-to-date Anthropic API endpoints and authentication.",
@@ -4119,7 +4119,7 @@
         "updatedAt": "2025-11-06T00:46:25.545Z"
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Implement Incentives & Economy Agent",
         "description": "Build the Incentives & Economy Agent as a GenServer to manage reward distribution, balances, and redemptions.",
         "details": "Implement ViralEngine.Agents.IncentivesEconomy with state for daily caps, balances, and tracking. Define client API for grant_reward, check_balance, redeem_reward. Handle core logic for cap checks, reward creation, balance updates, and redemptions. Include helpers for expiry calculations and logging. Ensure thread-safety with GenServer.",
@@ -4172,7 +4172,7 @@
         "updatedAt": "2025-11-06T00:34:41.629Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Enhance Orchestrator with Loop Routing",
         "description": "Update the Orchestrator to route events to Buddy Challenge and Results Rally loops with throttling and scoring.",
         "details": "Modify ViralEngine.Agents.Orchestrator to include loop configs, user throttles, and experiments. Implement find_eligible_loops, select_best_loop, execute_loop functions. Add scoring logic with boosts and penalties. Integrate with MCP for agent calls. Ensure logging of decisions.",
@@ -4217,7 +4217,7 @@
         "updatedAt": "2025-11-06T00:34:42.080Z"
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Implement Buddy Challenge Loop",
         "description": "Develop the Buddy Challenge Loop for student-to-student challenges after practice.",
         "details": "Code ViralEngine.Loops.BuddyChallenge with generate, handle_join, complete_challenge functions. Create challenge decks, generate share packs with personalization, handle attributions, and grant rewards. Integrate with Attribution, MCP, and Analytics modules.",
@@ -4282,7 +4282,7 @@
         "updatedAt": "2025-11-06T00:34:42.574Z"
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Implement Results Rally Loop",
         "description": "Build the Results Rally Loop for async-to-social sharing of diagnostic results with leaderboards.",
         "details": "Implement ViralEngine.Loops.ResultsRally with generate, handle_join functions. Fetch cohort leaderboards, calculate ranks, generate share packs, and render widgets. Integrate with Presence for real-time updates and Attribution for links.",
@@ -4351,7 +4351,7 @@
         "updatedAt": "2025-11-06T00:34:43.068Z"
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Create MCP Deployment Script",
         "description": "Write and configure the deployment script for launching agents on Fly.io.",
         "details": "Develop the deploy_phase2.sh script as per section 2.7, using fly mcp launch commands for personalization-agent and incentives-agent. Set environment variables, regions, VM sizes, and auto-stop configurations. Ensure the script redeploys the orchestrator.",
@@ -4435,7 +4435,7 @@
         "updatedAt": "2025-11-06T00:41:12.763Z"
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Write Phase 2 Integration Tests",
         "description": "Create comprehensive integration tests for Buddy Challenge and Results Rally loops.",
         "details": "Implement ViralEngine.Phase2IntegrationTest with test cases for complete flows as described in section 2.8. Use DataCase for database interactions, insert test data, and assert on rewards, sessions, and analytics events.",
@@ -4478,7 +4478,7 @@
         "updatedAt": "2025-11-06T00:34:43.561Z"
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Build Phase 2 Metrics Dashboard",
         "description": "Develop a LiveView dashboard to monitor Phase 2 metrics and K-factors.",
         "details": "Code ViralEngineWeb.Phase2DashboardLive as specified, fetching metrics for exposures, invites, joins, K-factors, and rewards. Implement render function with HTML templates. Add real-time updates every 10 seconds.",
@@ -4508,7 +4508,7 @@
         "updatedAt": "2025-11-06T00:34:44.056Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Execute Deployment Checklist and Verify Success Criteria",
         "description": "Follow the Phase 2 Deployment Checklist and confirm all success criteria are met.",
         "details": "Deploy agents, run migrations, set environment variables, execute integration tests, perform load testing, and verify metrics. Ensure K-factor tracking, share modals, deep links, and analytics are functional. Document any issues and iterate.",
@@ -4575,7 +4575,484 @@
       "completedCount": 10,
       "tags": [
         "phase2"
-      ]
+      ],
+      "created": "2025-11-06T02:49:29.375Z",
+      "description": "Tasks for phase2 context"
+    }
+  },
+  "phase3": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create Phase 3 Database Schema",
+        "description": "Add new tables for parental consents, device flags, tutoring sessions, weekly recaps, and achievements to support Trust & Safety, Session Intelligence, and viral loops.",
+        "details": "Run the migration file `priv/repo/migrations/20250105_phase3_schema.exs` which creates tables: parental_consents, device_flags, tutoring_sessions, weekly_recaps, achievements. Ensure indexes are added for performance. Use Ecto.Migration with create_if_not_exists to avoid errors if tables exist. Update existing User and TutoringSession schemas if needed to include new fields like age, parent_id, etc.",
+        "testStrategy": "Verify table creation by running migrations in test environment and checking schema with Ecto queries. Ensure foreign keys and constraints are properly set.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Write Migration File for New Tables",
+            "description": "Create the migration file `priv/repo/migrations/20250105_phase3_schema.exs` to define and create the new tables: parental_consents, device_flags, tutoring_sessions, weekly_recaps, and achievements using Ecto.Migration with create_if_not_exists to prevent errors if tables already exist.",
+            "dependencies": [],
+            "details": "Use Ecto.Migration to define table structures including columns, data types, foreign keys, and constraints for each table. Ensure the migration handles creation safely and includes any initial data seeding if required. Reference existing schemas for consistency in naming and types.",
+            "status": "pending",
+            "testStrategy": "Run the migration in a test environment and verify table creation using Ecto queries to check schema definitions and foreign key constraints."
+          },
+          {
+            "id": 2,
+            "title": "Add Indexes for Performance Optimization",
+            "description": "Add necessary indexes to the new tables (parental_consents, device_flags, tutoring_sessions, weekly_recaps, achievements) to improve query performance, focusing on frequently queried columns like foreign keys and timestamps.",
+            "dependencies": [
+              1
+            ],
+            "details": "Within the migration file or a separate migration, use Ecto.Migration to create indexes on key columns such as user_id, parent_id, session_id, and created_at fields. Ensure indexes are added after table creation to avoid performance issues during migration execution.",
+            "status": "pending",
+            "testStrategy": "Execute the migration and perform benchmark queries in the test environment to confirm index effectiveness and verify no errors in index creation."
+          },
+          {
+            "id": 3,
+            "title": "Update Existing Schemas for New Fields",
+            "description": "Modify the existing User and TutoringSession schemas to include new fields such as age, parent_id, and any other required additions to support the new tables and features.",
+            "dependencies": [
+              1
+            ],
+            "details": "Edit the User and TutoringSession Ecto schemas in the codebase to add new fields with appropriate data types and validations. Ensure changes are backward compatible and update any related modules or queries that interact with these schemas.",
+            "status": "pending",
+            "testStrategy": "Run schema validations and integration tests to ensure the updated schemas work correctly with existing data and new table relationships, checking for constraint violations."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Trust & Safety Agent",
+        "description": "Develop the TrustSafety GenServer module for fraud detection, COPPA/FERPA compliance, and abuse prevention.",
+        "details": "Implement the full ViralEngine.Agents.TrustSafety module as provided, including state management, client API functions (check_action, report_abuse, redact_data, update_user_signal), server callbacks, and helper functions for checks like blocklist, rate limits, duplicates, fraud scoring, compliance, and redaction. Integrate with existing Repo for database queries. Use up-to-date Elixir best practices, such as proper error handling and logging.",
+        "testStrategy": "Unit tests for each check function (e.g., blocklist, rate limit). Integration tests to simulate actions and verify blocking/redaction. Mock database calls for fraud scoring.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up TrustSafety GenServer structure",
+            "description": "Initialize the ViralEngine.Agents.TrustSafety GenServer module with proper state management, init/1 callback, and basic structure following Elixir best practices.",
+            "dependencies": [],
+            "details": "Define the module with use GenServer, implement init/1 to set up initial state (e.g., maps for blocklists, rate limits), and include proper error handling and logging. Ensure the state includes necessary data structures for fraud detection and compliance checks.",
+            "status": "pending",
+            "testStrategy": "Unit tests for GenServer initialization and state retrieval."
+          },
+          {
+            "id": 2,
+            "title": "Implement client API functions",
+            "description": "Develop the client-facing API functions: check_action, report_abuse, redact_data, and update_user_signal for interacting with the TrustSafety agent.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement these functions to call GenServer.cast or GenServer.call appropriately, passing parameters and handling responses. Ensure they integrate with the server's state and callbacks for actions like checking permissions, reporting issues, redacting sensitive data, and updating user signals.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each API function, mocking GenServer calls to verify correct message passing and response handling."
+          },
+          {
+            "id": 3,
+            "title": "Implement server callbacks",
+            "description": "Add server-side callbacks such as handle_call/3, handle_cast/2, and handle_info/2 to process requests from client API functions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Handle messages for checking actions, reporting abuse, redacting data, and updating signals. Implement logic to update state accordingly, perform checks, and return results. Include error handling for invalid requests and logging for audit purposes.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each callback, simulating calls and verifying state changes and responses."
+          },
+          {
+            "id": 4,
+            "title": "Implement helper functions for checks",
+            "description": "Create helper functions for various checks including blocklist, rate limits, duplicates, fraud scoring, compliance (COPPA/FERPA), and redaction.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define private functions like check_blocklist/1, check_rate_limit/1, detect_duplicates/1, calculate_fraud_score/1, ensure_compliance/1, and perform_redaction/1. Each should handle specific logic, such as querying lists, calculating scores, and applying redaction rules, with proper error handling.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each helper function with various inputs, including edge cases for fraud detection and compliance."
+          },
+          {
+            "id": 5,
+            "title": "Integrate with Repo for database queries",
+            "description": "Integrate the TrustSafety module with the existing Repo for database operations related to user signals, blocklists, and compliance data.",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Add Repo queries within relevant functions (e.g., fetching user data for fraud scoring, updating blocklists). Ensure queries are efficient, handle database errors gracefully, and use Ecto's best practices. Log database interactions for security auditing.",
+            "status": "pending",
+            "testStrategy": "Integration tests mocking Repo calls to verify correct query execution and data handling."
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Implement Session Intelligence Pipeline",
+        "description": "Build the Oban worker for processing tutoring sessions: transcription, summarization with AIClient (multi-provider), and generating agentic actions.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "high",
+        "details": "Implement ViralEngine.SessionPipeline as an Oban.Worker. Handle transcription (stub for now, integrate with AssemblyAI later), call AIClient for summarization using AIClient.chat/2 with appropriate task_type (:general or :planning for complex sessions), generate actions for students, tutors, and parents. Update session summary in DB. Integrate with TrustSafety for action checks. AIClient provides automatic fallback, cost optimization, and streaming support. Leverage intelligent routing to Groq for cost efficiency or OpenAI GPT-5 for complex reasoning that requires advanced understanding of educational context, student psychology, and pedagogical recommendations. Update the task_type guidance to use :planning which routes to GPT-5 for complex sessions requiring deep educational insights.",
+        "testStrategy": "Mock transcription and AIClient calls. Test action generation with sample session data. Verify DB updates and event triggering.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Oban Worker for Session Pipeline",
+            "description": "Implement the basic structure of ViralEngine.SessionPipeline as an Oban.Worker, including the perform/1 function and initial error handling.",
+            "dependencies": [],
+            "details": "Create the module ViralEngine.SessionPipeline inheriting from Oban.Worker. Define the perform/1 function to accept job arguments like session_id. Set up basic logging and error handling for the worker lifecycle.",
+            "status": "pending",
+            "testStrategy": "Unit test the worker setup with mock job arguments to ensure proper initialization and error handling."
+          },
+          {
+            "id": 2,
+            "title": "Implement Transcription Stubbing",
+            "description": "Add a stub for transcription functionality in the worker, preparing for future AssemblyAI integration.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the perform/1 function, add a placeholder for transcription that returns a mock transcript string. Ensure it handles session audio data (stubbed for now). Log the transcription step for debugging.",
+            "status": "pending",
+            "testStrategy": "Mock the transcription call and verify that a stubbed transcript is returned without errors."
+          },
+          {
+            "id": 3,
+            "title": "Integrate AIClient for Summarization",
+            "description": "Integrate AIClient to call for session summarization, handling responses and leveraging multi-provider routing.",
+            "dependencies": [
+              2
+            ],
+            "details": "After transcription, use AIClient.chat/2 to make a call for summarization with task_type :general (or :planning for complex sessions, which routes to GPT-5 for deep educational insights). Parse the response for summarization. Handle API errors and retries. Update the session summary in the database using the Repo.",
+            "status": "pending",
+            "testStrategy": "Mock AIClient calls to simulate responses. Test parsing and database updates with sample data."
+          },
+          {
+            "id": 4,
+            "title": "Generate Agentic Actions and Integrate TrustSafety",
+            "description": "Generate actions for students, tutors, and parents, and check them via TrustSafety integration.",
+            "dependencies": [
+              3
+            ],
+            "details": "Based on the summary, generate agentic actions (e.g., recommendations). Call TrustSafety.check_action for each action to ensure compliance. Update the database with actions and trigger events. Handle redaction if needed.",
+            "status": "pending",
+            "testStrategy": "Test action generation with mock summaries. Mock TrustSafety calls to verify actions are checked and filtered appropriately."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Implement Proud Parent Loop",
+        "description": "Create the ProudParent loop module for weekly progress sharing between parents.",
+        "details": "Implement ViralEngine.Loops.ProudParent with generate/2, handle_join/2, complete_signup/3 functions. Include progress reel generation, email template creation, and reward granting via MCP. Ensure privacy-safe data handling. Integrate with Attribution for links and Analytics for logging.",
+        "testStrategy": "Simulate weekly recap generation and loop triggering. Test share pack creation and reward granting. Mock MCP calls.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core ProudParent Loop Functions",
+            "description": "Develop the main functions for the ProudParent loop module: generate/2, handle_join/2, and complete_signup/3, ensuring they handle loop creation, user joining, and signup completion.",
+            "dependencies": [],
+            "details": "Implement ViralEngine.Loops.ProudParent with the specified functions. Generate/2 should create the loop instance, handle_join/2 manages parent joining the loop, and complete_signup/3 finalizes the signup process. Include basic error handling and logging.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each function with mock data to verify loop creation, joining, and completion."
+          },
+          {
+            "id": 2,
+            "title": "Create Progress Reel and Email Templates",
+            "description": "Build the functionality for generating progress reels and creating email templates for weekly sharing.",
+            "dependencies": [
+              1
+            ],
+            "details": "Within the ProudParent module, add logic to generate progress reels based on session data and create email templates for sharing. Ensure reels include session counts, skills, and improvements. Handle template rendering and personalization for parents.",
+            "status": "pending",
+            "testStrategy": "Test reel generation with sample session data and verify email template rendering and content accuracy."
+          },
+          {
+            "id": 3,
+            "title": "Integrate MCP, Attribution, Analytics, and Privacy Handling",
+            "description": "Integrate reward granting via MCP, link attribution, analytics logging, and ensure privacy-safe data handling.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add integrations to grant rewards through MCP calls, use Attribution for tracking links, log events with Analytics, and implement privacy-safe data handling to comply with regulations. Ensure all data processing respects user privacy and avoids exposing sensitive information.",
+            "status": "pending",
+            "testStrategy": "Mock MCP calls for rewards, test link attribution tracking, and verify analytics logging. Simulate privacy checks with test data."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement Tutor Spotlight Loop",
+        "description": "Develop the TutorSpotlight loop module for tutors sharing post-session referral packs.",
+        "details": "Implement ViralEngine.Loops.TutorSpotlight with generate/2, handle_join/2, complete_booking/3. Generate tutor cards, share packs, and handle WhatsApp/SMS/Email links. Grant rewards and log analytics. Ensure tutor profile fetching and feedback retrieval.",
+        "testStrategy": "Test loop generation after 5-star session. Verify share pack contents and link handling. Mock booking completion.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core TutorSpotlight Module Functions",
+            "description": "Develop the main functions for the TutorSpotlight loop module including generate/2, handle_join/2, and complete_booking/3 to manage the loop lifecycle.",
+            "dependencies": [],
+            "details": "Implement ViralEngine.Loops.TutorSpotlight with the specified functions. Generate/2 should create tutor cards based on session data. Handle_join/2 manages user participation. Complete_booking/3 processes booking completions and triggers rewards.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each function with mocked inputs, verifying correct outputs and state changes."
+          },
+          {
+            "id": 2,
+            "title": "Generate Share Packs and Fetch Tutor Data",
+            "description": "Create functionality to generate share packs including tutor profiles and feedback retrieval for post-session referrals.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement share pack generation that fetches tutor profiles and feedback from the database. Ensure packs include relevant details like session highlights and referral links. Integrate with existing Repo for data queries.",
+            "status": "pending",
+            "testStrategy": "Mock database calls and test pack generation with sample tutor data, verifying contents and accuracy."
+          },
+          {
+            "id": 3,
+            "title": "Handle Sharing Links and Integrate Rewards/Analytics",
+            "description": "Manage WhatsApp, SMS, and Email link handling, grant rewards, and log analytics for the TutorSpotlight loop.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement link handling for different channels (WhatsApp/SMS/Email) to track shares. Integrate reward granting via MCP and analytics logging. Ensure proper event triggering and data privacy compliance.",
+            "status": "pending",
+            "testStrategy": "Test link handling with mocked external services, verify reward granting and analytics logging with integration tests."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement Weekly Recap Generator Job",
+        "description": "Create the Oban worker for generating weekly recaps and triggering Proud Parent loops.",
+        "details": "Implement ViralEngine.Jobs.WeeklyRecapGenerator as Oban.Worker. Query active parents, generate recaps with session counts, skills, improvements, etc. Trigger events to Orchestrator. Schedule via cron or Oban cron.",
+        "testStrategy": "Run job with test data and verify recap accuracy. Check event triggering and loop activation.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Oban Worker Structure and Scheduling",
+            "description": "Set up the basic Oban.Worker module for WeeklyRecapGenerator, including the perform/1 function and scheduling via Oban cron.",
+            "dependencies": [],
+            "details": "Create the ViralEngine.Jobs.WeeklyRecapGenerator module inheriting from Oban.Worker. Implement the perform/1 function to handle job execution. Configure Oban cron for weekly scheduling, ensuring it runs at the appropriate time. Include error handling and logging for job failures.",
+            "status": "pending",
+            "testStrategy": "Test job scheduling by verifying it runs on schedule with mock data, and check for proper error logging."
+          },
+          {
+            "id": 2,
+            "title": "Implement Recap Generation Logic and Event Triggering",
+            "description": "Develop the logic to query active parents, generate weekly recaps with session data, and trigger Proud Parent loops via events to Orchestrator.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the perform/1 function, query the database for active parents and their session data (counts, skills, improvements). Generate recap content using templates or logic. Trigger events to the Orchestrator to start Proud Parent loops. Ensure data privacy and accuracy in recaps.",
+            "status": "pending",
+            "testStrategy": "Use test data to run the job, verify recap content accuracy, and confirm events are triggered correctly to activate loops."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Add Compliance Middleware",
+        "description": "Implement Phoenix plug for enforcing COPPA/FERPA compliance on sensitive endpoints.",
+        "details": "Create ViralEngineWeb.ComplianceMiddleware plug. Check paths requiring compliance, call TrustSafety agent, handle errors with JSON responses. Extract context from conn headers/IP. Add to router pipeline for relevant routes.",
+        "testStrategy": "Integration tests with Phoenix conn mocks. Test blocking for minors without consent and allowing with consent.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ComplianceMiddleware Plug",
+            "description": "Develop the ViralEngineWeb.ComplianceMiddleware plug module to enforce COPPA/FERPA compliance by checking sensitive endpoints, calling the TrustSafety agent, handling errors with JSON responses, and extracting context from connection headers and IP addresses.",
+            "dependencies": [],
+            "details": "Implement the plug as a Phoenix module with an init/1 and call/2 function. In call/2, check if the request path requires compliance, extract user context from conn headers and IP, call the TrustSafety agent to verify compliance, and return appropriate JSON error responses for non-compliant requests. Ensure proper error handling for agent failures or invalid contexts.",
+            "status": "pending",
+            "testStrategy": "Unit tests for plug functions using Phoenix conn mocks, verifying compliance checks, context extraction, and error responses."
+          },
+          {
+            "id": 2,
+            "title": "Integrate ComplianceMiddleware into Router Pipeline",
+            "description": "Add the ComplianceMiddleware plug to the router pipeline for relevant routes to ensure compliance enforcement on sensitive endpoints.",
+            "dependencies": [
+              1
+            ],
+            "details": "Modify the router configuration to include the ComplianceMiddleware plug in the pipeline for routes that handle sensitive data, such as those involving user profiles or session data. Ensure the plug is positioned correctly in the pipeline to intercept requests before they reach the controllers, and test that it blocks or allows requests based on compliance status.",
+            "status": "pending",
+            "testStrategy": "Integration tests with router pipelines, mocking connections to verify middleware application on specified routes and proper blocking/allowing of requests."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Deploy Phase 3 Agents and Jobs",
+        "description": "Set up MCP deployment for TrustSafety agent and update Orchestrator for new loops.",
+        "details": "Use fly mcp launch for TrustSafety agent with secrets. Update fly.orchestrator.toml. Schedule WeeklyRecapGenerator via cron. Ensure auto-stop disabled for always-on agents.",
+        "testStrategy": "Deploy to staging, verify agent startup and communication. Test job scheduling.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Deploy TrustSafety Agent via MCP",
+            "description": "Launch the TrustSafety agent using fly mcp launch with necessary secrets and ensure auto-stop is disabled for always-on operation.",
+            "dependencies": [],
+            "details": "Execute the fly mcp launch command for the TrustSafety agent, incorporating all required secrets. Verify that the deployment configuration disables auto-stop to maintain continuous availability. Monitor the launch process for any errors and confirm successful startup in the staging environment.",
+            "status": "pending",
+            "testStrategy": "Deploy to staging and verify agent startup, communication with other components, and that it remains active without auto-stopping."
+          },
+          {
+            "id": 2,
+            "title": "Update Orchestrator and Schedule WeeklyRecapGenerator",
+            "description": "Modify fly.orchestrator.toml for new loops and set up cron scheduling for WeeklyRecapGenerator job.",
+            "dependencies": [],
+            "details": "Update the fly.orchestrator.toml file to integrate new loop configurations, ensuring compatibility with Phase 3 agents. Configure cron scheduling for the WeeklyRecapGenerator to run periodically. Validate the changes to prevent any disruptions in the orchestration process.",
+            "status": "pending",
+            "testStrategy": "Deploy updates to staging, test job scheduling by triggering the WeeklyRecapGenerator manually, and verify loop activations and event handling."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement Phase 3 Integration Tests",
+        "description": "Write comprehensive tests for TrustSafety, Session Pipeline, Proud Parent, and Tutor Spotlight.",
+        "details": "Create ViralEngine.Phase3IntegrationTest with tests for fraud blocking, compliance, session processing, loop generation, etc. Use ExUnit and mocks for external calls.",
+        "testStrategy": "Run tests in CI/CD. Ensure coverage for all modules and edge cases.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Integration Tests for TrustSafety Module",
+            "description": "Create comprehensive integration tests for the TrustSafety agent, covering fraud detection, compliance checks, abuse prevention, and redaction functionalities.",
+            "dependencies": [
+              2
+            ],
+            "details": "Write tests in ViralEngine.Phase3IntegrationTest using ExUnit, mocking database calls and external services. Include scenarios for blocklist checks, rate limiting, fraud scoring, COPPA/FERPA compliance, and data redaction. Ensure tests verify state management and error handling.",
+            "status": "pending",
+            "testStrategy": "Run tests in CI/CD pipeline with mocked dependencies to ensure coverage of edge cases like high-risk actions and compliance violations."
+          },
+          {
+            "id": 2,
+            "title": "Implement Integration Tests for Session Pipeline",
+            "description": "Develop integration tests for the Session Intelligence Pipeline, focusing on session processing, transcription, summarization, and action generation.",
+            "dependencies": [
+              3
+            ],
+            "details": "Add tests to ViralEngine.Phase3IntegrationTest for the Oban worker, mocking transcription services (e.g., AssemblyAI), Claude AI API calls, and database updates. Test action generation for students, tutors, and parents, including integration with TrustSafety checks.",
+            "status": "pending",
+            "testStrategy": "Execute tests in CI/CD with mocks for external APIs, verifying correct summarization, action triggering, and event handling with sample session data."
+          },
+          {
+            "id": 3,
+            "title": "Implement Integration Tests for Proud Parent Loop",
+            "description": "Write integration tests for the ProudParent loop module, including loop generation, progress sharing, and reward granting.",
+            "dependencies": [
+              4
+            ],
+            "details": "Incorporate tests into ViralEngine.Phase3IntegrationTest for generating weekly recaps, handling joins, and completing signups. Mock MCP calls, email templates, and analytics logging. Ensure privacy-safe data handling and integration with Attribution for links.",
+            "status": "pending",
+            "testStrategy": "Test in CI/CD by simulating weekly recap generation and loop triggering, verifying share pack contents, reward granting, and mock interactions."
+          },
+          {
+            "id": 4,
+            "title": "Implement Integration Tests for Tutor Spotlight Loop",
+            "description": "Create integration tests for the TutorSpotlight loop, covering loop generation, referral pack sharing, and booking completion.",
+            "dependencies": [
+              5
+            ],
+            "details": "Extend ViralEngine.Phase3IntegrationTest with tests for generating tutor cards after 5-star sessions, handling WhatsApp/SMS/Email links, and granting rewards. Mock booking completions, profile fetching, and feedback retrieval. Include analytics logging.",
+            "status": "pending",
+            "testStrategy": "Run tests in CI/CD pipeline, mocking external services to validate share pack contents, link handling, and reward mechanisms with test data."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Phase 3 Metrics Dashboard",
+        "description": "Build LiveView dashboard for monitoring loops, TrustSafety, Session Intelligence, and compliance metrics.",
+        "details": "Create ViralEngineWeb.Phase3DashboardLive with real-time metrics fetching. Display K-factors, checks, fraud rates, etc. Use Phoenix LiveView for updates.",
+        "testStrategy": "Manual testing in browser. Verify data accuracy and real-time updates.",
+        "priority": "low",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Phase3DashboardLive module structure",
+            "description": "Create the basic Phoenix LiveView module ViralEngineWeb.Phase3DashboardLive with initial mount, render, and handle_info functions for the dashboard layout.",
+            "dependencies": [],
+            "details": "Initialize the LiveView module with necessary imports, define the mount/3 function to set up initial assigns, implement render/1 to display the dashboard template with placeholders for metrics, and add handle_info/2 for future real-time updates. Ensure proper routing is configured in the router.ex file.",
+            "status": "pending",
+            "testStrategy": "Manual testing to verify the LiveView renders without errors and displays the basic layout."
+          },
+          {
+            "id": 2,
+            "title": "Implement real-time metrics fetching and display",
+            "description": "Integrate data fetching for K-factors, checks, fraud rates, and other metrics, with LiveView subscriptions for real-time updates.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add functions to fetch metrics from relevant modules (e.g., TrustSafety, Session Intelligence) using database queries or API calls. Implement LiveView subscriptions or periodic updates via handle_info to refresh data. Update the render function to display metrics in charts or tables, ensuring data accuracy and real-time behavior.",
+            "status": "pending",
+            "testStrategy": "Manual testing in browser to check data accuracy, real-time updates, and performance under load."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-06T02:46:00.866Z",
+      "updated": "2025-11-06T02:46:00.866Z",
+      "description": "Tasks for phase3 context"
     }
   }
 }

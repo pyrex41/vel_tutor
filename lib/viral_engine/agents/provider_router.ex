@@ -2,7 +2,7 @@ defmodule ViralEngine.Agents.ProviderRouter do
   alias ViralEngine.{Provider, MetricsContext}
 
   @providers %{
-    gpt4o: %{name: "gpt-4o", cost: 0.005, latency: 2000, reliability: 0.98},
+    gpt5: %{name: "gpt-5", cost: 0.005, latency: 2000, reliability: 0.98},
     llama31: %{name: "llama-3.1", cost: 0.001, latency: 1500, reliability: 0.92}
   }
 

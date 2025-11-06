@@ -13,7 +13,7 @@ defmodule ViralEngineWeb.AdminControllerTest do
     {:ok, _} = AuditLogContext.log_user_action(1, "task_created", %{task_id: 100}, conn_fixture)
     {:ok, _} = AuditLogContext.log_user_action(1, "task_updated", %{task_id: 100}, conn_fixture)
     {:ok, _} = AuditLogContext.log_user_action(2, "task_created", %{task_id: 200}, conn_fixture)
-    {:ok, _} = AuditLogContext.log_ai_call(100, "openai", "gpt-4o", 1500, Decimal.new("0.015"), 250)
+    {:ok, _} = AuditLogContext.log_ai_call(100, "openai", "gpt-5", 1500, Decimal.new("0.015"), 250)
     {:ok, _} = AuditLogContext.log_ai_call(100, "groq", "llama-3.3-70b-versatile", 2000, Decimal.new("0.002"), 80)
     {:ok, _} = AuditLogContext.log_system_event("circuit_breaker_trip", %{provider: "openai"})
 

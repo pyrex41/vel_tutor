@@ -30,9 +30,9 @@ defmodule ViralEngine.Repo.Migrations.CreateAiProviders do
     repo().insert_all("ai_providers", [
       # OpenAI Providers
       %{
-        name: "OpenAI GPT-4o",
+        name: "OpenAI GPT-5",
         provider_type: "openai",
-        model: "gpt-4o",
+        model: "gpt-5",
         enabled: true,
         priority: 100,
         cost_per_1m_tokens: Decimal.new("6.25"),

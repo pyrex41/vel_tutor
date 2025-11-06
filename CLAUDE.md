@@ -56,8 +56,8 @@ task-master generate                                        # Update task markdo
 task-master models --setup
 
 # Direct configuration for optimal performance
-task-master models --set-main gpt-4o                          # Primary: Complex reasoning
-task-master models --set-research gpt-4o-mini                 # Research: Lightweight operations  
+task-master models --set-main gpt-5                          # Primary: Complex reasoning
+task-master models --set-research gpt-4o-mini                 # Research: Lightweight operations
 task-master models --set-fallback groq-llama-3.1-70b-versatile # Fallback: Fast inference
 
 # Verify configuration
@@ -67,7 +67,7 @@ task-master models
 # ┌─────────────────────┬────────────────────────┬──────────┬──────────┐
 # │ Role                │ Model                  │ Provider │ Status   │
 # ├─────────────────────┼────────────────────────┼──────────┼──────────┤
-# │ Primary             │ gpt-4o                 │ OpenAI   │ ✅ Active│
+# │ Primary             │ gpt-5                 │ OpenAI   │ ✅ Active│
 # │ Research            │ gpt-4o-mini            │ OpenAI   │ ✅ Active│
 # │ Fallback            │ llama-3.1-70b-versatile│ Groq     │ ✅ Active│
 # └─────────────────────┴────────────────────────┴──────────┴──────────┘
@@ -377,7 +377,7 @@ Update `.claude/settings.json` for OpenAI/Groq MCP integration:
 task-master models --setup
 
 # Production configuration (optimized for Vel Tutor)
-task-master models --set-main gpt-4o                          # Architecture & planning
+task-master models --set-main gpt-5                          # Architecture & planning
 task-master models --set-research gpt-4o-mini                 # Task operations  
 task-master models --set-fallback groq-llama-3.1-70b-versatile # Code generation
 task-master models --set-code groq-mixtral-8x7b-32768          # Validation & review
@@ -471,7 +471,7 @@ AI_DAILY_BUDGET=50.0
   "details": "Use bcrypt for password hashing, JWT for access tokens, refresh token rotation",
   "testStrategy": "Unit tests for auth functions, integration tests for login/register flows, security tests for token validation",
   "ai_metadata": {
-    "generated_by": "gpt-4o",
+    "generated_by": "gpt-5",
     "generated_at": "2025-11-03T18:30:00Z",
     "complexity_score": 7.2,
     "estimated_cost": 0.023,

@@ -162,8 +162,8 @@ defmodule ViralEngine.AIClient do
     %{
       openai: %{
         name: "OpenAI",
-        models: ["gpt-4o", "gpt-4o-mini"],
-        default_model: "gpt-4o",
+        models: ["gpt-5", "gpt-4o-mini"],
+        default_model: "gpt-5",
         cost_per_1m_tokens: 6.25,
         avg_latency_ms: 2100,
         streaming: true,
@@ -232,7 +232,7 @@ defmodule ViralEngine.AIClient do
           Map.get(routing_config, :code_generation, {:groq, "llama-3.3-70b-versatile"})
 
         :planning ->
-          Map.get(routing_config, :planning, {:openai, "gpt-4o"})
+          Map.get(routing_config, :planning, {:openai, "gpt-5"})
 
         :research ->
           Map.get(routing_config, :research, {:perplexity, "sonar-large-online"})
@@ -262,7 +262,7 @@ defmodule ViralEngine.AIClient do
     provider_scores = [
       {
         :openai,
-        "gpt-4o",
+        "gpt-5",
         calculate_score(%{
           reliability: 0.98,
           cost_per_token: 0.00000625,
@@ -378,10 +378,10 @@ defmodule ViralEngine.AIClient do
   end
 
   # Fallback default models if not configured
-  defp fallback_default_model(:openai), do: "gpt-4o"
+  defp fallback_default_model(:openai), do: "gpt-5"
   defp fallback_default_model(:groq), do: "llama-3.3-70b-versatile"
   defp fallback_default_model(:perplexity), do: "sonar-large-online"
-  defp fallback_default_model(_), do: "gpt-4o"
+  defp fallback_default_model(_), do: "gpt-5"
 
   # Get default provider from config
   defp get_default_provider do

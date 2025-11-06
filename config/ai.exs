@@ -17,10 +17,10 @@ config :viral_engine, :ai,
       api_key_env: "OPENAI_API_KEY",
 
       # Available models for this provider
-      models: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
+      models: ["gpt-5", "gpt-4o-mini", "gpt-4-turbo"],
 
       # Default model if not specified
-      default_model: "gpt-4o",
+      default_model: "gpt-5",
 
       # Request timeout in milliseconds
       timeout: 30_000,
@@ -30,7 +30,7 @@ config :viral_engine, :ai,
 
       # Cost per 1M tokens (approximate, for tracking)
       cost_per_1m_tokens: %{
-        "gpt-4o" => 6.25,
+        "gpt-5" => 6.25,
         "gpt-4o-mini" => 0.37,
         "gpt-4-turbo" => 5.00
       },
@@ -86,7 +86,7 @@ config :viral_engine, :ai,
     code_generation: %{provider: :groq, model: "llama-3.3-70b-versatile"},
 
     # Planning & architecture: Best reasoning capabilities
-    planning: %{provider: :openai, model: "gpt-4o"},
+    planning: %{provider: :openai, model: "gpt-5"},
 
     # Research: Web-connected, real-time data access
     research: %{provider: :perplexity, model: "sonar-large-online"},

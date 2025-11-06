@@ -1,5 +1,5 @@
 defmodule ViralEngine.Workers.StudyBuddyNudgeWorkerTest do
-  use VelTutor.DataCase, async: true
+  use ViralEngine.DataCase, async: true
 
   alias ViralEngine.Workers.StudyBuddyNudgeWorker
   alias ViralEngine.{Repo, PracticeSession, StudySession, DiagnosticAssessment}

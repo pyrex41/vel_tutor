@@ -53,7 +53,7 @@ defmodule ViralEngine.AuditLogContextTest do
       {:ok, log} = AuditLogContext.log_ai_call(
         789,
         "openai",
-        "gpt-4o",
+        "gpt-5",
         1500,
         Decimal.new("0.015"),
         250
@@ -61,7 +61,7 @@ defmodule ViralEngine.AuditLogContextTest do
 
       assert log.task_id == 789
       assert log.provider == "openai"
-      assert log.model == "gpt-4o"
+      assert log.model == "gpt-5"
       assert log.tokens_used == 1500
       assert log.cost == Decimal.new("0.015")
       assert log.latency_ms == 250
@@ -117,7 +117,7 @@ defmodule ViralEngine.AuditLogContextTest do
       {:ok, _} = AuditLogContext.log_user_action(1, "task_created", %{task_id: 100}, conn)
       {:ok, _} = AuditLogContext.log_user_action(1, "task_updated", %{task_id: 100}, conn)
       {:ok, _} = AuditLogContext.log_user_action(2, "task_created", %{task_id: 200}, conn)
-      {:ok, _} = AuditLogContext.log_ai_call(100, "openai", "gpt-4o", 1000, Decimal.new("0.01"), 200)
+      {:ok, _} = AuditLogContext.log_ai_call(100, "openai", "gpt-5", 1000, Decimal.new("0.01"), 200)
       {:ok, _} = AuditLogContext.log_system_event("test_event", %{data: "test"})
 
       :ok

@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-11-06T02:47:42.233Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Create Phase 3 Database Schema",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down the schema creation into subtasks for each table (parental_consents, device_flags, tutoring_sessions, weekly_recaps, achievements), including migration writing, index addition, and schema updates.",
+			"reasoning": "Involves multiple new tables, indexes, and schema updates with dependencies on existing structures; moderate effort due to Ecto migration specifics and testing for constraints."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Trust & Safety Agent",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into subtasks for GenServer setup, each check function (blocklist, rate limits, etc.), client API, server callbacks, and integration with Repo.",
+			"reasoning": "High complexity due to multiple fraud detection and compliance checks, state management, error handling, and integration with database; requires thorough testing for security."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement Session Intelligence Pipeline",
+			"complexityScore": 9,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subtasks for Oban worker setup, transcription stubbing, Claude API integration, action generation, and TrustSafety integration.",
+			"reasoning": "Complex due to external API calls (Claude), JSON parsing, database updates, and event triggering; high testing needs for mocks and edge cases."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Implement Proud Parent Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break into subtasks for module functions (generate, handle_join, complete_signup), progress reel/email generation, and integrations (MCP, Attribution, Analytics).",
+			"reasoning": "Involves multiple integrations and privacy handling; moderate to high effort with dependencies on other modules."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Implement Tutor Spotlight Loop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Subtasks for module functions, share pack generation, link handling (WhatsApp/SMS/Email), and reward/analytics integration.",
+			"reasoning": "Similar to Proud Parent, with focus on tutor profiles and feedback; requires careful handling of sharing mechanisms."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement Weekly Recap Generator Job",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Subtasks for Oban worker implementation and recap generation logic, including scheduling and event triggering.",
+			"reasoning": "Depends on database queries and triggering loops; moderate complexity with testing for data accuracy."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Add Compliance Middleware",
+			"complexityScore": 5,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Subtasks for plug creation and router integration, including error handling and context extraction.",
+			"reasoning": "Straightforward Phoenix plug with TrustSafety calls; lower complexity but critical for compliance."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Deploy Phase 3 Agents and Jobs",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Subtasks for MCP deployment setup and Orchestrator updates, including scheduling and testing in staging.",
+			"reasoning": "Deployment-focused with configuration; lower technical complexity but requires careful staging."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement Phase 3 Integration Tests",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Subtasks for tests on each module (TrustSafety, Session Pipeline, loops), including mocks and CI/CD integration.",
+			"reasoning": "Comprehensive testing across multiple components; high effort for coverage and edge cases."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Implement Phase 3 Metrics Dashboard",
+			"complexityScore": 5,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Subtasks for LiveView setup and metrics fetching/display, including real-time updates.",
+			"reasoning": "UI-focused with data fetching; moderate effort, low priority as per task."
+		}
+	]
+}
