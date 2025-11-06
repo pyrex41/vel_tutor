@@ -26,6 +26,14 @@ defmodule ViralEngineWeb.Router do
     plug(ViralEngineWeb.Plugs.RateLimitPlug)
   end
 
+  # Pipeline for COPPA/FERPA compliance on sensitive endpoints
+  pipeline :compliance_protected do
+    plug(:accepts, ["json"])
+    plug(ViralEngineWeb.Plugs.TenantContextPlug)
+    plug(ViralEngineWeb.Plugs.RateLimitPlug)
+    plug(ViralEngineWeb.ComplianceMiddleware)
+  end
+
   scope "/api", ViralEngineWeb do
     pipe_through(:api)
 
@@ -219,6 +227,31 @@ defmodule ViralEngineWeb.Router do
 
     # Phase 2 Viral Loops Dashboard
     live("/dashboard/phase2", Phase2DashboardLive)
+
+    # Phase 3 Dashboard
+    live("/dashboard/phase3", Phase3DashboardLive)
+  end
+
+  # Phase 3 Compliance-Protected API Routes
+  scope "/api/phase3", ViralEngineWeb do
+    pipe_through(:compliance_protected)
+
+    # User profile and social features (require COPPA compliance)
+    get("/users/:id/profile", UserController, :show_profile)
+    put("/users/:id/profile", UserController, :update_profile)
+    post("/users/:id/share", UserController, :share_profile)
+
+    # Session transcripts and data export (require FERPA compliance)
+    get("/sessions/:id/transcript", SessionController, :get_transcript)
+    post("/sessions/:id/export", SessionController, :export_session_data)
+
+    # Social and sharing features
+    post("/social/share", SocialController, :share)
+    get("/social/public-profile/:id", SocialController, :public_profile)
+
+    # Weekly recaps and parent features
+    get("/recaps/:id", RecapController, :show)
+    post("/recaps/:id/share", RecapController, :share)
   end
 
   # Enable LiveDashboard in development
