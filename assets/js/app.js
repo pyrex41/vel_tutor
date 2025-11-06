@@ -44,7 +44,7 @@ document.addEventListener('click', (e) => {
 })
 
 // Show progress bar on live navigation and form submits using Phoenix.LiveView.JS
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+topbar.configure({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => {
   if (typeof JS !== 'undefined') {
     // Use LiveView.JS dispatch for consistency, but still call topbar.show()
