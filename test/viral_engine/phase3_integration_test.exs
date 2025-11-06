@@ -521,6 +521,7 @@ defmodule ViralEngine.Phase3IntegrationTest do
 
   describe "Compliance Middleware" do
     import Plug.Test
+    import Plug.Conn
 
     test "blocks request requiring parental consent for minor without consent" do
       minor = insert(:user, age: 11, persona: "student")

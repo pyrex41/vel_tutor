@@ -28,6 +28,8 @@ defmodule ViralEngine.Application do
       ViralEngine.Agents.Personalization,
       # Start the Incentives & Economy Agent
       ViralEngine.Agents.IncentivesEconomy,
+      # Start the Trust & Safety Agent (Phase 3)
+      ViralEngine.Agents.TrustSafety,
       # Start the Loop Orchestrator (viral prompts)
       ViralEngine.LoopOrchestrator,
       # Start the rate limit reset scheduler
