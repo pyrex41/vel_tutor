@@ -1,18 +1,26 @@
+"use client"
+
+import { useEffect } from 'react';
+
 export default function ChallengePage() {
+  useEffect(() => {
+    // Force Alpine to initialize after component mounts
+    if (typeof window !== "undefined") {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+      script.defer = true;
+      document.head.appendChild(script);
+      
+      script.onload = () => {
+        if (window.Alpine) {
+          window.Alpine.start();
+        }
+      };
+    }
+  }, []);
+
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Challenge - Varsity Tutors</title>
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <link rel="stylesheet" href="/styles.css" />
-      </head>
-      <body className="bg-white text-black min-h-screen">
-        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-        <script dangerouslySetInnerHTML={{ __html: jsContent }} />
-      </body>
-    </html>
+    <div className="min-h-screen bg-white" dangerouslySetInnerHTML={{ __html: htmlContent }} />
   )
 }
 

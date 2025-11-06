@@ -158,3 +158,6 @@
   }
 
 }).call(this, window, document);
+
+// ES module export for modern bundlers
+export default topbar;

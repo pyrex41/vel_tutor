@@ -8,7 +8,7 @@
 
   <%= if @show_form do %>
     <div class="modal-overlay" phx-click="hide_form">
-      <div class="modal-content" phx-click={JS.stop_propagation()}>
+      <div class="modal-content">
         <h2>Create New Experiment</h2>
         <form phx-submit="create_experiment">
           <div class="form-group">
@@ -122,7 +122,7 @@
   <!-- Results Modal -->
   <%= if assigns[:viewing_results] do %>
     <div class="modal-overlay" phx-click={Phoenix.LiveView.JS.push("hide_results")}>
-      <div class="modal-content results-modal" phx-click={Phoenix.LiveView.JS.stop_propagation()}>
+      <div class="modal-content results-modal">
         <h2>Experiment Results</h2>
 
         <div class="results-table">

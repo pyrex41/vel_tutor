@@ -341,7 +341,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
                   <button
                     phx-click="select_subject"
                     phx-value-subject={subject}
-                    class={"p-6 rounded-lg border transition-all duration-200 hover:shadow-sm #{if @selected_subject == subject, do: "border-primary bg-accent shadow-sm ring-2 ring-ring", else: "border-border hover:border-primary"}"}
+                    class={"p-6 rounded-lg border-2 transition-all duration-200 hover:shadow-sm #{if @selected_subject == subject, do: "border-primary bg-accent shadow-sm ring-2 ring-ring", else: "border-border hover:border-primary"}"}
                     aria-pressed={@selected_subject == subject}
                   >
                     <div class="text-2xl mb-2 text-primary">
@@ -366,7 +366,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
                     <button
                       phx-click="select_grade"
                       phx-value-grade={grade}
-                      class={"px-4 py-3 rounded-lg border font-semibold transition-all duration-200 #{if @selected_grade == Integer.to_string(grade), do: "border-primary bg-primary text-primary-foreground shadow-sm", else: "border-border text-foreground hover:border-primary hover:bg-accent"}"}
+                      class={"px-4 py-3 rounded-lg border-2 font-semibold transition-all duration-200 #{if @selected_grade == Integer.to_string(grade), do: "border-primary bg-primary text-primary-foreground shadow-sm", else: "border-border text-foreground hover:border-primary hover:bg-accent"}"}
                       aria-pressed={@selected_grade == Integer.to_string(grade)}
                     >
                       <%= grade %>
@@ -380,7 +380,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
             <%= if @selected_subject && @selected_grade do %>
               <button
                 phx-click="start_assessment"
-                class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-all duration-200"
                 aria-label="Start diagnostic assessment"
               >
                 <div class="flex items-center justify-center space-x-2">
@@ -548,7 +548,7 @@ defmodule ViralEngineWeb.DiagnosticAssessmentLive do
 
                   <button
                     type="submit"
-                    class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-6 py-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-all duration-200"
                     aria-label="Submit your answer"
                   >
                     Submit Answer
