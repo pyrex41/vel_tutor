@@ -43,7 +43,7 @@ defmodule ViralEngine.ExperimentAssignment do
     changeset(assignment, %{
       converted: true,
       conversion_value: value,
-      conversion_at: DateTime.utc_now()
+      conversion_at: DateTime.utc_now() |> DateTime.truncate(:second)
     })
   end
 end

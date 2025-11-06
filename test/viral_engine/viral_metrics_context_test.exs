@@ -6,17 +6,19 @@ defmodule ViralEngine.ViralMetricsContextTest do
     setup do
       # Create 10 users who sent invites
       for i <- 1..10 do
-        {:ok, _link} =
+        link_attrs = AttributionLink.generate_signed_link(i, "buddy_challenge", "/invite", [])
+        {:ok, link} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "buddy_challenge",
-            token: "token_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 5,
-            conversion_count: 2,
-            inserted_at: DateTime.add(DateTime.utc_now(), -3 * 24 * 60 * 60, :second)
-          })
+            conversion_count: 2
+          }))
           |> Repo.insert()
+
+        # Update timestamp to 3 days ago
+        link
+        |> Ecto.Changeset.change(inserted_at: DateTime.add(DateTime.utc_now(), -3 * 24 * 60 * 60, :second) |> DateTime.to_naive() |> NaiveDateTime.truncate(:second))
+        |> Repo.update()
       end
 
       :ok
@@ -53,17 +55,23 @@ defmodule ViralEngine.ViralMetricsContextTest do
 
     test "filters by time period correctly" do
       # Create old data (outside 7 day window)
+      link_attrs = AttributionLink.generate_signed_link(999, "old_data", "/invite", [])
+      old_timestamp = DateTime.add(DateTime.utc_now(), -30 * 24 * 60 * 60, :second) |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
       {:ok, _} =
         %AttributionLink{}
-        |> AttributionLink.changeset(%{
-          referrer_id: 999,
-          source: "old_data",
-          token: "old_token",
+        |> AttributionLink.changeset(Map.merge(link_attrs, %{
           click_count: 100,
-          conversion_count: 50,
-          inserted_at: DateTime.add(DateTime.utc_now(), -30 * 24 * 60 * 60, :second)
-        })
+          conversion_count: 50
+        }))
         |> Repo.insert()
+        |> case do
+          {:ok, link} ->
+            # Force update inserted_at timestamp
+            link
+            |> Ecto.Changeset.change(inserted_at: old_timestamp)
+            |> Repo.update()
+          error -> error
+        end
 
       # Should not include old data in 7-day calculation
       result = ViralMetricsContext.compute_k_factor(days: 7)
@@ -77,29 +85,25 @@ defmodule ViralEngine.ViralMetricsContextTest do
     setup do
       # Buddy Challenge: 5 users, K-factor 2.0
       for i <- 1..5 do
+        link_attrs = AttributionLink.generate_signed_link(i, "buddy_challenge", "/invite", [])
         {:ok, _} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "buddy_challenge",
-            token: "bc_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 5,
             conversion_count: 2
-          })
+          }))
           |> Repo.insert()
       end
 
       # Results Rally: 3 users, K-factor 1.5
       for i <- 6..8 do
+        link_attrs = AttributionLink.generate_signed_link(i, "results_rally", "/invite", [])
         {:ok, _} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "results_rally",
-            token: "rr_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 3,
             conversion_count: 2
-          })
+          }))
           |> Repo.insert()
       end
 
@@ -133,37 +137,41 @@ defmodule ViralEngine.ViralMetricsContextTest do
   describe "cohort_analysis/1" do
     setup do
       # Week 1 cohort
-      week1_start = DateTime.add(DateTime.utc_now(), -14 * 24 * 60 * 60, :second)
+      week1_start = DateTime.add(DateTime.utc_now(), -14 * 24 * 60 * 60, :second) |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 
       for i <- 1..5 do
-        {:ok, _} =
+        link_attrs = AttributionLink.generate_signed_link(i, "buddy_challenge", "/invite", [])
+        {:ok, link} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "buddy_challenge",
-            token: "w1_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 4,
-            conversion_count: 2,
-            inserted_at: week1_start
-          })
+            conversion_count: 2
+          }))
           |> Repo.insert()
+
+        # Update timestamp to week 1
+        link
+        |> Ecto.Changeset.change(inserted_at: week1_start)
+        |> Repo.update()
       end
 
       # Week 2 cohort
-      week2_start = DateTime.add(DateTime.utc_now(), -7 * 24 * 60 * 60, :second)
+      week2_start = DateTime.add(DateTime.utc_now(), -7 * 24 * 60 * 60, :second) |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
 
       for i <- 6..10 do
-        {:ok, _} =
+        link_attrs = AttributionLink.generate_signed_link(i, "results_rally", "/invite", [])
+        {:ok, link} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "results_rally",
-            token: "w2_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 3,
-            conversion_count: 1,
-            inserted_at: week2_start
-          })
+            conversion_count: 1
+          }))
           |> Repo.insert()
+
+        # Update timestamp to week 2
+        link
+        |> Ecto.Changeset.change(inserted_at: week2_start)
+        |> Repo.update()
       end
 
       :ok
@@ -200,26 +208,22 @@ defmodule ViralEngine.ViralMetricsContextTest do
   describe "funnel_analysis/2" do
     setup do
       # Create funnel data
+      link_attrs1 = AttributionLink.generate_signed_link(1, "buddy_challenge", "/invite", [])
       {:ok, _} =
         %AttributionLink{}
-        |> AttributionLink.changeset(%{
-          referrer_id: 1,
-          source: "buddy_challenge",
-          token: "funnel_1",
+        |> AttributionLink.changeset(Map.merge(link_attrs1, %{
           click_count: 100,    # 100 clicks
           conversion_count: 20  # 20 conversions (20% CR)
-        })
+        }))
         |> Repo.insert()
 
+      link_attrs2 = AttributionLink.generate_signed_link(2, "buddy_challenge", "/invite", [])
       {:ok, _} =
         %AttributionLink{}
-        |> AttributionLink.changeset(%{
-          referrer_id: 2,
-          source: "buddy_challenge",
-          token: "funnel_2",
+        |> AttributionLink.changeset(Map.merge(link_attrs2, %{
           click_count: 50,
           conversion_count: 15
-        })
+        }))
         |> Repo.insert()
 
       :ok
@@ -272,29 +276,25 @@ defmodule ViralEngine.ViralMetricsContextTest do
     setup do
       # High efficiency loop
       for i <- 1..5 do
+        link_attrs = AttributionLink.generate_signed_link(i, "buddy_challenge", "/invite", [])
         {:ok, _} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "buddy_challenge",
-            token: "efficient_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 10,
             conversion_count: 8  # 80% conversion
-          })
+          }))
           |> Repo.insert()
       end
 
       # Low efficiency loop
       for i <- 6..10 do
+        link_attrs = AttributionLink.generate_signed_link(i, "streak_rescue", "/invite", [])
         {:ok, _} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "streak_rescue",
-            token: "inefficient_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 10,
             conversion_count: 1  # 10% conversion
-          })
+          }))
           |> Repo.insert()
       end
 
@@ -339,19 +339,21 @@ defmodule ViralEngine.ViralMetricsContextTest do
     setup do
       # Create data over multiple days
       for days_ago <- 1..7 do
-        timestamp = DateTime.add(DateTime.utc_now(), -days_ago * 24 * 60 * 60, :second)
+        timestamp = DateTime.add(DateTime.utc_now(), -days_ago * 24 * 60 * 60, :second) |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
+        link_attrs = AttributionLink.generate_signed_link(days_ago, "buddy_challenge", "/invite", [])
 
-        {:ok, _} =
+        {:ok, link} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: days_ago,
-            source: "buddy_challenge",
-            token: "timeline_#{days_ago}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: days_ago * 2,
-            conversion_count: days_ago,
-            inserted_at: timestamp
-          })
+            conversion_count: days_ago
+          }))
           |> Repo.insert()
+
+        # Update timestamp
+        link
+        |> Ecto.Changeset.change(inserted_at: timestamp)
+        |> Repo.update()
       end
 
       :ok
@@ -375,26 +377,22 @@ defmodule ViralEngine.ViralMetricsContextTest do
   describe "get_top_referrers/1" do
     setup do
       # Create top referrers
+      link_attrs1 = AttributionLink.generate_signed_link(1, "buddy_challenge", "/invite", [])
       {:ok, _} =
         %AttributionLink{}
-        |> AttributionLink.changeset(%{
-          referrer_id: 1,
-          source: "buddy_challenge",
-          token: "top_1",
+        |> AttributionLink.changeset(Map.merge(link_attrs1, %{
           click_count: 50,
           conversion_count: 25
-        })
+        }))
         |> Repo.insert()
 
+      link_attrs2 = AttributionLink.generate_signed_link(2, "results_rally", "/invite", [])
       {:ok, _} =
         %AttributionLink{}
-        |> AttributionLink.changeset(%{
-          referrer_id: 2,
-          source: "results_rally",
-          token: "top_2",
+        |> AttributionLink.changeset(Map.merge(link_attrs2, %{
           click_count: 30,
           conversion_count: 10
-        })
+        }))
         |> Repo.insert()
 
       :ok
@@ -422,15 +420,13 @@ defmodule ViralEngine.ViralMetricsContextTest do
     test "respects limit parameter" do
       # Create 20 referrers
       for i <- 3..22 do
+        link_attrs = AttributionLink.generate_signed_link(i, "test", "/invite", [])
         {:ok, _} =
           %AttributionLink{}
-          |> AttributionLink.changeset(%{
-            referrer_id: i,
-            source: "test",
-            token: "ref_#{i}",
+          |> AttributionLink.changeset(Map.merge(link_attrs, %{
             click_count: 1,
             conversion_count: 1
-          })
+          }))
           |> Repo.insert()
       end
 

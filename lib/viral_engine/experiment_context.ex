@@ -127,7 +127,7 @@ defmodule ViralEngine.ExperimentContext do
         # Mark exposure timestamp if not already marked
         if is_nil(assignment.exposed_at) do
           assignment
-          |> Ecto.Changeset.change(%{exposed_at: DateTime.utc_now()})
+          |> Ecto.Changeset.change(%{exposed_at: DateTime.utc_now() |> DateTime.truncate(:second)})
           |> Repo.update()
         else
           {:ok, assignment}
