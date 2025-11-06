@@ -3,6 +3,9 @@ import { resolve } from 'path'
 
 export default defineConfig(({ mode }) => ({
   base: mode === 'production' ? '/assets/' : '/assets/',
+  define: {
+    LV_VSN: JSON.stringify('1.1.16')
+  },
   plugins: [],
   resolve: {
     alias: {
