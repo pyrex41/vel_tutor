@@ -3315,7 +3315,7 @@
   "next": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Set Up Real-Time Infrastructure with Phoenix Channels and PubSub",
         "description": "Establish the foundational real-time communication layer using Phoenix Channels and PubSub to support live updates for presence, activity feeds, and leaderboards.",
         "details": "Integrate Phoenix Channels into the existing Elixir/Phoenix backend. Create channels for global presence, subject-specific presence, and activity feeds. Use PubSub for broadcasting events like user achievements. Ensure horizontal scalability by configuring Redis or PostgreSQL for PubSub. Pseudo-code: defmodule PresenceChannel do use Phoenix.Channel; def join('presence:lobby', _payload, socket) do send(self(), :after_join); {:ok, socket}; end; def handle_info(:after_join, socket) do Presence.track(socket, socket.assigns.user_id, %{online_at: inspect(System.system_time(:second))}); push(socket, 'presence_state', Presence.list(socket)); {:noreply, socket}; end; end. Adhere to non-functional requirements for concurrency and latency.",
@@ -3379,7 +3379,7 @@
         "expansionPrompt": "Break this task into subtasks covering Phoenix Channels integration, PubSub configuration with Redis/PostgreSQL, channel creation for presence and feeds, and comprehensive load testing for scalability."
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Implement Global and Subject-Specific Presence Indicators",
         "description": "Develop real-time indicators showing total active users and subject-specific active counts, with opt-out functionality.",
         "details": "Extend the PresenceChannel to track and broadcast global and subject-based counts. Use anonymized data, excluding PII. Add user settings for opt-out, which immediately removes them from presence lists. Pseudo-code: def update_presence(socket, subject) do count = Presence.list(socket) |> Enum.filter(fn {_, meta} -> meta.subject == subject end) |> length(); broadcast(socket, 'presence_update', %{subject: subject, count: count}); end. Ensure COPPA/FERPA compliance by default anonymization.",
@@ -3426,7 +3426,7 @@
         "expansionPrompt": "Divide into subtasks for extending PresenceChannel, implementing anonymized tracking and opt-out logic, and ensuring compliance with privacy regulations."
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Build Real-Time Activity Feed",
         "description": "Create an anonymized feed of user achievements updating in real-time via PubSub.",
         "details": "Set up an ActivityFeed module to listen for events (e.g., streak completions, high scores) and broadcast them. Store events in a database with anonymization. Pseudo-code: def broadcast_achievement(user_id, achievement) do anonymized = %{type: achievement.type, message: 'A student achieved ' <> achievement.description}; PubSub.broadcast('activity_feed', 'new_event', anonymized); end. Include opt-out checks.",
@@ -3471,7 +3471,7 @@
         "updatedAt": "2025-11-05T06:58:07.778Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Develop Mini-Leaderboards for Subject Pages",
         "description": "Implement contextual leaderboards showing top performers for the day or week on subject pages.",
         "details": "Create a LeaderboardService to query and cache top scores from the database. Display on subject pages with real-time updates via Channels. Pseudo-code: def get_top_performers(subject, period) do query = from u in User, join: s in Score, on: u.id == s.user_id, where: s.subject == ^subject and s.created_at >= ^period_start, order_by: [desc: s.score], limit: 10; Repo.all(query); end. Use caching for performance.",
@@ -3514,7 +3514,7 @@
         "updatedAt": "2025-11-05T20:33:39.174Z"
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Add Study Buddy Nudge Feature",
         "description": "Prompt users during practice sessions to invite friends, integrating with presence and viral loops.",
         "details": "In the practice session UI, add a periodic nudge with a shareable link. Track invites and conversions. Pseudo-code: def nudge_user(socket) do if eligible_for_nudge?(socket.assigns.user_id) do push(socket, 'buddy_nudge', %{message: 'Invite a friend!', link: generate_invite_link()}); end; end. Link to Buddy Challenge for rewards.",
@@ -3553,7 +3553,7 @@
         "updatedAt": "2025-11-05T20:46:13.275Z"
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Implement Buddy Challenge Viral Loop",
         "description": "Build the challenge mechanism where students can share micro-decks and earn rewards upon friend completion.",
         "details": "After sessions, generate 5-question micro-decks and shareable deep links. Track conversions and issue 'Streak Shield' rewards. Pseudo-code: def create_challenge(user_id, session_id) do questions = select_questions(session_id, 5); link = generate_deep_link(questions); track_invite(user_id, link); end. Integrate with analytics for attribution.",
@@ -3606,7 +3606,7 @@
         "updatedAt": "2025-11-05T20:33:40.477Z"
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Develop Results Rally Viral Loop",
         "description": "Enable creation of cohort leaderboards from diagnostic results with shareable links.",
         "details": "On results pages, show percentile ranks and 'Create Rally' CTA. Generate deep links to leaderboards updating in real-time. Pseudo-code: def create_rally(user_id, assessment_id) do rank = calculate_percentile(user_id, assessment_id); link = generate_leaderboard_link(assessment_id); end. Ensure real-time updates via Channels.",
@@ -3667,7 +3667,7 @@
         "updatedAt": "2025-11-05T20:33:41.648Z"
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Create Proud Parent Referral System",
         "description": "Automate weekly progress reels for parents with shareable links offering free class passes.",
         "details": "Generate visual summaries weekly, email to parents, and include referral CTAs. Track attributions. Pseudo-code: def generate_reel(student_id) do summary = compile_progress(student_id); reel = create_visual_summary(summary); email_parent(reel.link); end. Ensure privacy-safe content.",
@@ -3718,7 +3718,7 @@
         "updatedAt": "2025-11-05T20:33:42.945Z"
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Build Streak Rescue Mechanism",
         "description": "Prompt users near streak expiration to invite friends for co-practice sessions.",
         "details": "Monitor streaks and trigger prompts within 6 hours. Generate shareable co-practice links. Pseudo-code: def check_streak_expiry(user_id) do if hours_to_expiry(user_id) <= 6 do prompt_rescue(user_id); end; end. Reward completion with 'Streak Shield'.",
@@ -3763,7 +3763,7 @@
         "updatedAt": "2025-11-05T20:33:44.185Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Integrate Session Intelligence and Agentic Actions",
         "description": "Implement transcription, summarization, and AI-driven actions for students and tutors.",
         "details": "Use AI for session transcription and summarization. Trigger actions like auto-challenges or nudges based on summaries. Pseudo-code: def analyze_session(session_id) do transcript = get_transcript(session_id); summary = ai_summarize(transcript); trigger_actions(summary); end. Ensure explainability and fallbacks.",
@@ -3832,7 +3832,7 @@
         "updatedAt": "2025-11-05T20:46:21.164Z"
       },
       {
-        "id": "11",
+        "id": 11,
         "title": "Implement Analytics and Experimentation Framework",
         "description": "Set up event tracking, attribution, experimentation agent, and dashboards for K-factor measurement.",
         "details": "Implement event schema for invites, conversions, etc. Use signed links for tracking. Create an ExperimentationAgent for A/B tests. Build dashboards with cohort analysis. Pseudo-code: def track_event(event_type, data) do log_to_analytics(event_type, data); end. Monitor guardrail metrics.",
@@ -3909,6 +3909,672 @@
       "completedCount": 10,
       "tags": [
         "next"
+      ],
+      "created": "2025-11-06T00:00:02.728Z",
+      "description": "Tasks for next context"
+    }
+  },
+  "phase2": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Create Phase 2 Database Migrations",
+        "description": "Add new tables for rewards, challenge decks, and challenge sessions to support the viral loops and reward system.",
+        "details": "Implement the migration file as specified in section 2.6, creating tables for rewards, challenge_decks, and challenge_sessions with appropriate indexes. Use Ecto.Migration to define the schema changes, ensuring foreign key constraints and data types match the PRD. Run the migration in the development environment to verify schema integrity.",
+        "testStrategy": "Run Ecto migrations in test environment and verify table creation with SQL queries. Check that indexes are created and foreign keys are enforced.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze PRD Section 2.6 for Table Schemas",
+            "description": "Review the Product Requirements Document section 2.6 to extract detailed specifications for the rewards, challenge_decks, and challenge_sessions tables, including columns, data types, foreign keys, and indexes.",
+            "dependencies": [],
+            "details": "Carefully read and document the exact schema requirements from the PRD, noting any relationships between tables and ensuring alignment with the viral loops and reward system goals. This step ensures all subsequent migrations are based on accurate specifications.",
+            "status": "pending",
+            "testStrategy": "Manual review and documentation verification against PRD.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Migration for Rewards Table",
+            "description": "Implement the Ecto.Migration for the rewards table, defining columns for reward types, values, expiry dates, and user associations with appropriate data types and constraints.",
+            "dependencies": [
+              1
+            ],
+            "details": "Using Ecto.Migration, create the rewards table with fields such as id (primary key), user_id (foreign key to users), type (string), value (integer), expires_at (datetime), and timestamps. Ensure foreign key constraints are set and data types match the PRD specifications.",
+            "status": "pending",
+            "testStrategy": "Run the migration in a test database and query the table structure to verify columns and constraints.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create Migration for Challenge Decks Table",
+            "description": "Implement the Ecto.Migration for the challenge_decks table, defining columns for deck metadata, challenges, and any necessary indexes for performance.",
+            "dependencies": [
+              1
+            ],
+            "details": "Using Ecto.Migration, create the challenge_decks table with fields such as id (primary key), name (string), description (text), challenges (jsonb or array), created_by (foreign key to users), and timestamps. Add indexes on frequently queried fields like created_by and ensure data types align with PRD.",
+            "status": "pending",
+            "testStrategy": "Execute the migration and inspect the table schema via SQL queries to confirm indexes and data types.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Create Migration for Challenge Sessions Table",
+            "description": "Implement the Ecto.Migration for the challenge_sessions table, defining columns for session tracking, participant data, and links to rewards and decks.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Using Ecto.Migration, create the challenge_sessions table with fields such as id (primary key), deck_id (foreign key to challenge_decks), participants (array of user_ids), status (enum), started_at (datetime), completed_at (datetime), reward_id (foreign key to rewards), and timestamps. Include foreign key constraints and indexes for efficient queries.",
+            "status": "pending",
+            "testStrategy": "Apply the migration and use database tools to validate table creation, foreign keys, and indexes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Run and Verify Full Migration in Development Environment",
+            "description": "Execute the complete set of migrations in the development environment and verify schema integrity, including table creation, constraints, and indexes.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Run 'mix ecto.migrate' in the development environment. Query the database to confirm all three tables (rewards, challenge_decks, challenge_sessions) exist with correct structures. Check for any errors in foreign key enforcement and index performance. Document any issues for resolution.",
+            "status": "pending",
+            "testStrategy": "Use SQL queries to verify table existence, run sample inserts to test constraints, and check query performance with indexes.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2025-11-06T00:34:40.733Z"
+      },
+      {
+        "id": "2",
+        "title": "Implement Personalization Agent",
+        "description": "Develop the Personalization Agent as a GenServer to personalize content using Claude API with fallbacks.",
+        "details": "Code the ViralEngine.Agents.Personalization module with state struct, client API functions (start_link, personalize), and server callbacks (init, handle_call). Include logic for fetching user profiles, personalizing headlines, bodies, CTAs, and share copy. Integrate Claude API call with HTTPoison, handle fallbacks, and log decisions. Use up-to-date Anthropic API endpoints and authentication.",
+        "testStrategy": "Unit tests for personalization functions with mocked Claude responses. Integration tests to verify API calls and fallback behavior. Measure response time to ensure <500ms.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define GenServer Module Structure",
+            "description": "Set up the basic structure of the ViralEngine.Agents.Personalization GenServer module, including the state struct, client API functions (start_link, personalize), and server callbacks (init, handle_call).",
+            "dependencies": [],
+            "details": "Create the module file with the necessary imports, define a state struct to hold user profiles and configuration, implement start_link for supervised startup, personalize for client calls, and init/handle_call for server initialization and request handling. Ensure the module follows Elixir GenServer best practices.",
+            "status": "done",
+            "testStrategy": "Unit tests to verify GenServer lifecycle and state initialization.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-06T00:46:13.539Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement API Integration with Claude and Fallbacks",
+            "description": "Integrate the Claude API using HTTPoison for personalizing content elements like headlines, bodies, CTAs, and share copy, with fallback logic in case of API failures.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add logic to fetch user profiles, construct API requests to Anthropic's up-to-date endpoints with proper authentication, handle responses for personalization, and implement fallback mechanisms such as default templates or cached responses. Ensure the integration is asynchronous and handles rate limits.",
+            "status": "done",
+            "testStrategy": "Integration tests with mocked HTTPoison to simulate Claude API responses and verify fallback behavior.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-06T00:46:16.058Z"
+          },
+          {
+            "id": 3,
+            "title": "Add Logging and Error Handling",
+            "description": "Incorporate logging for personalization decisions and comprehensive error handling throughout the module.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement logging using Elixir's Logger to record API calls, decisions, and errors. Add try-catch blocks or error tuples for handling failures in API calls, profile fetching, and personalization logic. Ensure errors are propagated appropriately and logged for debugging.",
+            "status": "done",
+            "testStrategy": "Unit tests for error scenarios and log output verification.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-06T00:46:20.637Z"
+          },
+          {
+            "id": 4,
+            "title": "Define GenServer Module Structure for Personalization Agent",
+            "description": "Set up the basic GenServer structure for the ViralEngine.Agents.Personalization module, including the state struct, client API functions like start_link and personalize, and server callbacks such as init and handle_call.",
+            "dependencies": [],
+            "details": "Create the module file with the necessary imports, define the state struct to hold user profiles and configuration, implement start_link for supervised startup, and stub out the personalize client function and handle_call callback for processing personalization requests.",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify GenServer startup and basic state initialization.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement Claude API Integration with Fallbacks",
+            "description": "Integrate the Claude API using HTTPoison for personalizing content elements like headlines, bodies, CTAs, and share copy, including fallback logic when the API fails.",
+            "dependencies": [
+              4
+            ],
+            "details": "Add logic to fetch user profiles, construct API requests to up-to-date Anthropic endpoints with proper authentication, handle responses to personalize content, and implement fallback mechanisms such as default templates or cached responses if the API is unavailable or times out.",
+            "status": "pending",
+            "testStrategy": "Integration tests with mocked HTTP responses to verify API calls, personalization logic, and fallback behavior.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Add Logging and Error Handling",
+            "description": "Incorporate logging for decision-making processes and comprehensive error handling throughout the Personalization Agent.",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Implement logging using Elixir's Logger to record personalization decisions, API call outcomes, and errors. Add try-catch blocks or error tuples in handle_call and API integration to manage exceptions, timeouts, and invalid responses gracefully, ensuring the GenServer remains stable.",
+            "status": "pending",
+            "testStrategy": "Unit tests for error scenarios and log output verification to ensure proper handling and recording.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Define GenServer Module Structure for Personalization Agent",
+            "description": "Set up the basic structure of the ViralEngine.Agents.Personalization module as a GenServer, including the state struct, client API functions (start_link, personalize), and server callbacks (init, handle_call).",
+            "dependencies": [],
+            "details": "Create the module file with the necessary imports, define a state struct to hold user profiles and configuration, implement start_link for supervised startup, personalize for client calls, and init/handle_call for server-side logic initialization and request handling.",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify GenServer lifecycle, state initialization, and basic client API calls without external dependencies.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Implement Claude API Integration and Fallbacks",
+            "description": "Integrate the Claude API using HTTPoison for personalizing headlines, bodies, CTAs, and share copy, including fetching user profiles and handling fallbacks for API failures.",
+            "dependencies": [
+              7
+            ],
+            "details": "Add logic to fetch user profiles from the database, construct API requests to Anthropic's up-to-date endpoints with proper authentication, parse responses for personalized content, and implement fallback mechanisms such as default templates or cached responses when the API is unavailable.",
+            "status": "pending",
+            "testStrategy": "Integration tests with mocked HTTPoison responses to simulate successful API calls and failures, ensuring fallbacks trigger correctly and personalization logic works.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Add Logging and Error Handling",
+            "description": "Incorporate logging for decisions made during personalization and comprehensive error handling for API calls, state management, and unexpected failures.",
+            "dependencies": [
+              8
+            ],
+            "details": "Implement logging using Elixir's Logger to record personalization decisions, API response times, and errors. Add try-catch blocks or error tuples in handle_call for graceful handling of exceptions, ensuring the GenServer remains stable and provides meaningful error responses to clients.",
+            "status": "pending",
+            "testStrategy": "Unit tests for error scenarios with mocked failures, verifying logs are written and errors are handled without crashing the GenServer.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down the Personalization Agent implementation into subtasks for defining the GenServer module structure, implementing API integration with Claude and fallbacks, and adding logging and error handling.",
+        "updatedAt": "2025-11-06T00:46:25.545Z"
+      },
+      {
+        "id": "3",
+        "title": "Implement Incentives & Economy Agent",
+        "description": "Build the Incentives & Economy Agent as a GenServer to manage reward distribution, balances, and redemptions.",
+        "details": "Implement ViralEngine.Agents.IncentivesEconomy with state for daily caps, balances, and tracking. Define client API for grant_reward, check_balance, redeem_reward. Handle core logic for cap checks, reward creation, balance updates, and redemptions. Include helpers for expiry calculations and logging. Ensure thread-safety with GenServer.",
+        "testStrategy": "Unit tests for reward granting and redemption logic. Integration tests with database to verify balance updates and cap enforcement. Test concurrency with multiple users.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up GenServer and State Management",
+            "description": "Initialize the ViralEngine.Agents.IncentivesEconomy GenServer with state struct for daily caps, balances, and tracking.",
+            "dependencies": [],
+            "details": "Define the module with start_link, init callback to initialize state with maps for balances and caps. Implement handle_call for client API stubs. Ensure thread-safety by using GenServer for all state updates.",
+            "status": "pending",
+            "testStrategy": "Unit tests for GenServer initialization and state retrieval.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Core Reward Logic",
+            "description": "Develop the core logic for reward granting, balance checks, and redemptions including cap checks and expiry calculations.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add handle_call implementations for grant_reward (check caps, update balances), check_balance (query state), redeem_reward (validate and deduct). Include helper functions for expiry calculations, logging, and reward creation. Handle edge cases like cap exceedance.",
+            "status": "pending",
+            "testStrategy": "Unit tests for reward granting and redemption logic with mocked state.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Integrate with Database for Balances and Caps",
+            "description": "Connect the agent to the database for persistent storage of balances and caps, ensuring data consistency.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Use Ecto or similar for database operations in the GenServer callbacks. Load initial state from DB in init, persist updates in handle_call. Implement queries for balance checks and cap enforcement. Ensure atomic operations for thread-safety.",
+            "status": "pending",
+            "testStrategy": "Integration tests with database to verify balance updates and cap enforcement under concurrency.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the Incentives & Economy Agent into subtasks for GenServer setup and state management, core reward logic implementation, and integration with database for balances and caps.",
+        "updatedAt": "2025-11-06T00:34:41.629Z"
+      },
+      {
+        "id": "4",
+        "title": "Enhance Orchestrator with Loop Routing",
+        "description": "Update the Orchestrator to route events to Buddy Challenge and Results Rally loops with throttling and scoring.",
+        "details": "Modify ViralEngine.Agents.Orchestrator to include loop configs, user throttles, and experiments. Implement find_eligible_loops, select_best_loop, execute_loop functions. Add scoring logic with boosts and penalties. Integrate with MCP for agent calls. Ensure logging of decisions.",
+        "testStrategy": "Unit tests for loop eligibility and selection. Integration tests simulating event triggers and verifying correct loop execution. Test throttling to prevent spam.",
+        "priority": "high",
+        "dependencies": [
+          "2",
+          "3"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Loop Routing Logic",
+            "description": "Add core routing functions to the Orchestrator for finding eligible loops, selecting the best loop, and executing the loop based on event triggers.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Modify ViralEngine.Agents.Orchestrator to implement find_eligible_loops, select_best_loop, and execute_loop functions. Include loop configurations and experiments. Integrate with MCP for agent calls and ensure logging of routing decisions.",
+            "status": "pending",
+            "testStrategy": "Unit tests for loop eligibility and selection logic. Integration tests simulating event triggers and verifying correct loop execution.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Integrate Throttling and Scoring Mechanisms",
+            "description": "Incorporate user throttling controls and scoring logic with boosts and penalties into the Orchestrator's routing process.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Update ViralEngine.Agents.Orchestrator to include user throttles and experiments. Add scoring logic with boosts and penalties to influence loop selection. Ensure integration with MCP and logging of throttling and scoring decisions.",
+            "status": "pending",
+            "testStrategy": "Unit tests for scoring calculations and throttling rules. Integration tests to verify throttling prevents spam and scoring affects loop selection.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split the Orchestrator enhancement into subtasks for adding loop routing logic and integrating throttling and scoring mechanisms.",
+        "updatedAt": "2025-11-06T00:34:42.080Z"
+      },
+      {
+        "id": "5",
+        "title": "Implement Buddy Challenge Loop",
+        "description": "Develop the Buddy Challenge Loop for student-to-student challenges after practice.",
+        "details": "Code ViralEngine.Loops.BuddyChallenge with generate, handle_join, complete_challenge functions. Create challenge decks, generate share packs with personalization, handle attributions, and grant rewards. Integrate with Attribution, MCP, and Analytics modules.",
+        "testStrategy": "End-to-end tests for the complete flow: practice completion, share modal, link click, challenge completion, and reward granting. Verify deck creation and session management.",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Challenge Generation",
+            "description": "Develop the generate function in ViralEngine.Loops.BuddyChallenge to create challenge decks and share packs with personalization.",
+            "dependencies": [],
+            "details": "Code the generate function to build challenge decks based on practice completion, incorporate personalization using the Personalization Agent, and generate share packs including headlines, bodies, CTAs, and share copy. Ensure integration with user profiles and fallback logic for personalization.",
+            "status": "pending",
+            "testStrategy": "Unit tests for deck creation and share pack generation with mocked personalization responses. Verify personalization accuracy and fallback behavior.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Join Handling",
+            "description": "Develop the handle_join function in ViralEngine.Loops.BuddyChallenge to manage student joins via shared links.",
+            "dependencies": [],
+            "details": "Implement logic to handle incoming join requests from shared links, validate challenge sessions, update session states, and prepare the challenge environment. Integrate with session management and ensure real-time updates if needed.",
+            "status": "pending",
+            "testStrategy": "Unit tests for join validation and session updates. Integration tests to simulate link clicks and verify challenge initiation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement Completion Logic",
+            "description": "Develop the complete_challenge function in ViralEngine.Loops.BuddyChallenge to handle challenge completion, attributions, and initial reward granting.",
+            "dependencies": [],
+            "details": "Code the completion logic to process challenge outcomes, handle attributions for viral links, calculate and grant rewards using the Incentives & Economy Agent, and update user balances. Include logging and state management for completed challenges.",
+            "status": "pending",
+            "testStrategy": "Unit tests for reward calculation and granting logic. Integration tests to verify balance updates and attribution tracking after challenge completion.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Integrate with Modules and Analytics",
+            "description": "Integrate Buddy Challenge Loop with Attribution, MCP, Analytics, Personalization, and Rewards modules for full functionality.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Ensure seamless integration of the Buddy Challenge Loop with Attribution for link tracking, MCP for messaging, Analytics for event logging, Personalization Agent for content, and Incentives & Economy Agent for rewards. Handle real-time interactions and data flows between modules.",
+            "status": "pending",
+            "testStrategy": "End-to-end tests covering the full flow from practice to reward granting, including module interactions. Verify analytics logging and real-time updates.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the Buddy Challenge Loop into subtasks for challenge generation, join handling, completion logic, and integration with personalization and rewards.",
+        "updatedAt": "2025-11-06T00:34:42.574Z"
+      },
+      {
+        "id": "6",
+        "title": "Implement Results Rally Loop",
+        "description": "Build the Results Rally Loop for async-to-social sharing of diagnostic results with leaderboards.",
+        "details": "Implement ViralEngine.Loops.ResultsRally with generate, handle_join functions. Fetch cohort leaderboards, calculate ranks, generate share packs, and render widgets. Integrate with Presence for real-time updates and Attribution for links.",
+        "testStrategy": "End-to-end tests for diagnostic completion, leaderboard display, share link generation, and join flow leading to FVM. Test leaderboard rendering and presence indicators.",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Leaderboard Fetching and Ranking",
+            "description": "Fetch cohort leaderboards from the database and calculate user ranks based on diagnostic results.",
+            "dependencies": [],
+            "details": "Query the database for leaderboard data specific to the user's cohort, sort results by score or completion time, and compute the current user's rank. Ensure efficient querying with indexes and handle edge cases like ties or empty leaderboards.",
+            "status": "pending",
+            "testStrategy": "Unit tests for rank calculation logic with mocked database queries. Integration tests to verify leaderboard data fetching and sorting accuracy.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Generate Share Packs for Results Rally",
+            "description": "Create share packs containing personalized content for social sharing of diagnostic results.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use the Personalization Agent to generate shareable headlines, bodies, CTAs, and links. Include leaderboard rank and cohort data in the pack. Integrate with Attribution for tracking share links and ensure packs are formatted for various social platforms.",
+            "status": "pending",
+            "testStrategy": "Unit tests for share pack generation with mocked personalization responses. End-to-end tests to verify share link functionality and attribution tracking.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Render Results Rally Widgets",
+            "description": "Develop and render UI widgets for displaying leaderboards, ranks, and share options in the Results Rally Loop.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement frontend components using the framework's widget system to display leaderboard tables, user ranks, and share buttons. Ensure responsive design and accessibility. Integrate with backend APIs to fetch and update widget data dynamically.",
+            "status": "pending",
+            "testStrategy": "UI tests for widget rendering and responsiveness. Integration tests to check data binding and updates from backend APIs.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Real-Time Presence for Results Rally",
+            "description": "Add real-time updates to the Results Rally Loop using the Presence module for live leaderboard changes.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Subscribe to Presence channels for cohort-specific updates, such as new completions or rank changes. Update widgets in real-time without full page reloads. Handle connection states and fallback to polling if needed. Ensure thread-safety and performance.",
+            "status": "pending",
+            "testStrategy": "Integration tests for Presence subscriptions and real-time updates. Load tests to verify performance under concurrent users. End-to-end tests for seamless real-time experience.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Divide the Results Rally Loop into subtasks for leaderboard fetching and ranking, share pack generation, widget rendering, and real-time presence integration.",
+        "updatedAt": "2025-11-06T00:34:43.068Z"
+      },
+      {
+        "id": "7",
+        "title": "Create MCP Deployment Script",
+        "description": "Write and configure the deployment script for launching agents on Fly.io.",
+        "details": "Develop the deploy_phase2.sh script as per section 2.7, using fly mcp launch commands for personalization-agent and incentives-agent. Set environment variables, regions, VM sizes, and auto-stop configurations. Ensure the script redeploys the orchestrator.",
+        "testStrategy": "Dry-run the script in a staging environment. Verify agent deployments, connectivity, and secret handling. Check logs for successful launches.",
+        "priority": "medium",
+        "dependencies": [
+          "2",
+          "3",
+          "4"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize Deployment Script Structure",
+            "description": "Create the basic structure of the deploy_phase2.sh script, including shebang, error handling, and initial setup.",
+            "dependencies": [],
+            "details": "Start the deploy_phase2.sh script with a bash shebang, set error handling options like set -e, and include initial comments explaining the script's purpose. Ensure the script is executable and located in the appropriate project directory.",
+            "status": "pending",
+            "testStrategy": "Verify the script runs without errors in a dry-run mode and check for proper initialization.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure Personalization Agent Deployment",
+            "description": "Add fly mcp launch commands for the personalization-agent with specified configurations.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the deploy_phase2.sh script, include the fly mcp launch command for personalization-agent, setting environment variables, region (e.g., iad), VM size (e.g., shared-cpu-1x), and auto-stop configurations as per section 2.7. Ensure secrets and API keys are handled securely.",
+            "status": "pending",
+            "testStrategy": "Dry-run the launch command for personalization-agent and verify it deploys successfully in staging, checking logs for errors.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Configure Incentives Agent Deployment",
+            "description": "Add fly mcp launch commands for the incentives-agent with specified configurations.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Append to the deploy_phase2.sh script the fly mcp launch command for incentives-agent, configuring environment variables, region, VM size, and auto-stop settings. Integrate with the personalization-agent deployment to ensure sequential launching.",
+            "status": "pending",
+            "testStrategy": "Perform a dry-run deployment of incentives-agent and confirm connectivity and secret handling in logs.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement Orchestrator Redeployment Logic",
+            "description": "Include commands in the script to redeploy the orchestrator after agent launches.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Add fly mcp launch or redeploy commands for the orchestrator in deploy_phase2.sh, ensuring it uses updated configurations and integrates with the newly deployed agents. Set appropriate environment variables and regions for the orchestrator.",
+            "status": "pending",
+            "testStrategy": "Test the redeployment in staging, verifying that the orchestrator connects to the agents and logs successful integration.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Finalize Script with Environment Variables and Validation",
+            "description": "Complete the script by setting global environment variables, adding validation checks, and cleanup.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "In deploy_phase2.sh, define all necessary environment variables at the top, add validation steps to check for required secrets and dependencies, and include a final cleanup or success message. Ensure the script handles failures gracefully.",
+            "status": "pending",
+            "testStrategy": "Run the full script in staging, validate all deployments, check agent connectivity, and review logs for any issues.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2025-11-06T00:41:12.763Z"
+      },
+      {
+        "id": "8",
+        "title": "Write Phase 2 Integration Tests",
+        "description": "Create comprehensive integration tests for Buddy Challenge and Results Rally loops.",
+        "details": "Implement ViralEngine.Phase2IntegrationTest with test cases for complete flows as described in section 2.8. Use DataCase for database interactions, insert test data, and assert on rewards, sessions, and analytics events.",
+        "testStrategy": "Run tests in CI/CD pipeline. Verify all assertions pass, including reward balances and event logging. Test with mocked external APIs if needed.",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Integration Tests for Buddy Challenge Flows",
+            "description": "Create comprehensive integration tests specifically for the Buddy Challenge loop, including complete flow testing as described in section 2.8. This involves setting up test data for users, sessions, and challenges, executing the flow, and asserting on rewards, session updates, and analytics events.",
+            "dependencies": [],
+            "details": "Use DataCase in ViralEngine.Phase2IntegrationTest to insert test data for Buddy Challenge scenarios, such as user invitations, joins, and completions. Implement test cases that simulate the full Buddy Challenge flow, including event triggers, agent interactions, and reward distributions. Assert on correct reward balances, session states, and logged analytics events to ensure the loop functions end-to-end.",
+            "status": "pending",
+            "testStrategy": "Run tests in CI/CD pipeline with mocked external APIs if needed, verifying assertions on rewards, sessions, and events pass correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Integration Tests for Results Rally Flows",
+            "description": "Develop detailed integration tests for the Results Rally loop, covering the entire flow outlined in section 2.8. This includes preparing test data for rallies, user participations, and outcomes, running the flow, and validating rewards, sessions, and analytics.",
+            "dependencies": [],
+            "details": "Utilize DataCase within ViralEngine.Phase2IntegrationTest to set up test data for Results Rally, including rally creations, user entries, and result submissions. Create test cases that execute the complete Results Rally flow, integrating with agents for personalization and incentives. Perform assertions on reward grants, session modifications, and analytics event logging to confirm proper loop execution.",
+            "status": "pending",
+            "testStrategy": "Execute tests in the CI/CD pipeline, using mocks for external dependencies, and check that all assertions for rewards, sessions, and events are successful.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Separate the integration tests into subtasks for testing Buddy Challenge flows and Results Rally flows, including data setup and assertions.",
+        "updatedAt": "2025-11-06T00:34:43.561Z"
+      },
+      {
+        "id": "9",
+        "title": "Build Phase 2 Metrics Dashboard",
+        "description": "Develop a LiveView dashboard to monitor Phase 2 metrics and K-factors.",
+        "details": "Code ViralEngineWeb.Phase2DashboardLive as specified, fetching metrics for exposures, invites, joins, K-factors, and rewards. Implement render function with HTML templates. Add real-time updates every 10 seconds.",
+        "testStrategy": "Manual testing of dashboard rendering with sample data. Verify metric calculations against database queries. Test live updates by simulating events.",
+        "priority": "low",
+        "dependencies": [
+          "1",
+          "5",
+          "6"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement LiveView Render Function and Add Real-Time Updates",
+            "description": "Develop the render function for Phase2DashboardLive with HTML templates to display metrics like exposures, invites, joins, K-factors, and rewards. Integrate real-time updates to refresh the dashboard every 10 seconds.",
+            "dependencies": [],
+            "details": "Code the render/1 function in ViralEngineWeb.Phase2DashboardLive using Phoenix LiveView templates to fetch and display metrics from the database. Implement mount/3 and handle_info/2 callbacks for periodic updates, using Process.send_after/3 to trigger refreshes every 10 seconds. Ensure metrics are fetched efficiently and handle any potential errors in data retrieval.",
+            "status": "pending",
+            "testStrategy": "Manual testing of dashboard rendering with sample data, verifying metric calculations against database queries, and testing live updates by simulating events.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 1,
+        "expansionPrompt": "Break down the dashboard into subtasks for implementing the LiveView render function and adding real-time updates.",
+        "updatedAt": "2025-11-06T00:34:44.056Z"
+      },
+      {
+        "id": "10",
+        "title": "Execute Deployment Checklist and Verify Success Criteria",
+        "description": "Follow the Phase 2 Deployment Checklist and confirm all success criteria are met.",
+        "details": "Deploy agents, run migrations, set environment variables, execute integration tests, perform load testing, and verify metrics. Ensure K-factor tracking, share modals, deep links, and analytics are functional. Document any issues and iterate.",
+        "testStrategy": "Checklist verification: Confirm agent response times, test end-to-end flows, validate K-factors >=1.20 over 14 days. Use monitoring tools to track performance and errors.",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Perform Initial Deployment and Integration Testing",
+            "description": "Deploy agents, run migrations, set environment variables, and execute integration tests to ensure the system is operational.",
+            "dependencies": [],
+            "details": "Follow the deployment checklist to launch agents on Fly.io using the MCP script, apply database migrations, configure environment variables, and run integration tests to verify end-to-end flows, including agent responses and basic functionality.",
+            "status": "pending",
+            "testStrategy": "Execute integration tests to confirm agent response times and end-to-end flows are working correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Conduct Load Testing and Metrics Verification",
+            "description": "Perform load testing and verify key metrics, including K-factor tracking, share modals, deep links, and analytics functionality.",
+            "dependencies": [
+              1
+            ],
+            "details": "Run load testing scenarios to simulate user traffic, monitor performance metrics, validate that K-factors reach at least 1.20 over 14 days, and ensure share modals, deep links, and analytics are fully functional using monitoring tools.",
+            "status": "pending",
+            "testStrategy": "Use monitoring tools to track performance, errors, and validate K-factors; perform load tests to ensure system stability under stress.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Document Issues and Iterate on Deployment",
+            "description": "Document any issues identified during deployment and testing, then iterate to resolve them and re-verify success criteria.",
+            "dependencies": [
+              2
+            ],
+            "details": "Review logs and test results to identify issues, document them thoroughly, implement fixes or adjustments, and re-run tests to confirm all success criteria are met, including iterative improvements to achieve required metrics.",
+            "status": "pending",
+            "testStrategy": "Checklist verification post-iteration: Re-confirm agent response times, end-to-end flows, and K-factors using monitoring tools.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the deployment execution into subtasks for initial deployment and testing, load testing and metrics verification, and iteration on issues.",
+        "updatedAt": "2025-11-06T00:41:17.268Z"
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-11-06T00:46:25.546Z",
+      "taskCount": 10,
+      "completedCount": 10,
+      "tags": [
+        "phase2"
       ]
     }
   }

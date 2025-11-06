@@ -50,6 +50,7 @@ defmodule ViralEngine.MixProject do
       {:swoosh, "~> 1.3"},
       {:hackney, "~> 1.18"},
       {:finch, "~> 0.13"},
+      {:httpoison, "~> 2.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},

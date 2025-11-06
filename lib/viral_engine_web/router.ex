@@ -216,6 +216,9 @@ defmodule ViralEngineWeb.Router do
     live("/dashboard/guardrails", GuardrailDashboardLive)
     live("/dashboard/reports", PerformanceReportLive)
     live("/dashboard/reports/:id", PerformanceReportLive)
+
+    # Phase 2 Viral Loops Dashboard
+    live("/dashboard/phase2", Phase2DashboardLive)
   end
 
   # Enable LiveDashboard in development

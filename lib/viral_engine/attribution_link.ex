@@ -69,7 +69,7 @@ defmodule ViralEngine.AttributionLink do
       source: source,
       target_url: target_url,
       metadata: metadata,
-      expires_at: DateTime.add(DateTime.utc_now(), expires_in_days * 24 * 60 * 60, :second)
+      expires_at: DateTime.add(DateTime.utc_now() |> DateTime.truncate(:second), expires_in_days * 24 * 60 * 60, :second)
     }
   end
 

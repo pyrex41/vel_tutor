@@ -8,7 +8,8 @@
 import Config
 
 config :viral_engine,
-  ecto_repos: [ViralEngine.Repo]
+  ecto_repos: [ViralEngine.Repo],
+  claude_api_key: System.get_env("ANTHROPIC_API_KEY")
 
 # Configures the endpoint
 config :viral_engine, ViralEngineWeb.Endpoint,

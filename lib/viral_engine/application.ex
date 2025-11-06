@@ -24,6 +24,10 @@ defmodule ViralEngine.Application do
       ViralEngine.AuditLogRetentionWorker,
       # Start the MCP Orchestrator
       ViralEngine.Agents.Orchestrator,
+      # Start the Personalization Agent
+      ViralEngine.Agents.Personalization,
+      # Start the Incentives & Economy Agent
+      ViralEngine.Agents.IncentivesEconomy,
       # Start the Loop Orchestrator (viral prompts)
       ViralEngine.LoopOrchestrator,
       # Start the rate limit reset scheduler

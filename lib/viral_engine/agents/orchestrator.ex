@@ -9,7 +9,7 @@ defmodule ViralEngine.Agents.Orchestrator do
   use GenServer
   require Logger
 
-  alias ViralEngine.{Repo, AgentDecision, ViralEvent, Agents.ProviderRouter}
+  alias ViralEngine.{Repo, AgentDecision, ViralEvent, Agents.ProviderRouter, Support.DateTimeHelpers}
 
   # Client API
 
@@ -68,6 +68,9 @@ defmodule ViralEngine.Agents.Orchestrator do
       cache_size: 0,
       last_error: nil,
       config: config,
+      loop_configs: load_loop_configs(),
+      user_throttles: %{},
+      active_experiments: %{},
       viral_loops: %{
         buddy_challenge: ViralEngine.Agents.BuddyChallenge,
         results_rally: ViralEngine.Agents.ResultsRally,
@@ -84,15 +87,27 @@ defmodule ViralEngine.Agents.Orchestrator do
 
   @impl true
   def handle_call({:trigger_event, event}, _from, state) do
-    case process_event(event, state) do
-      {:ok, decision} ->
-        # Log decision to database
-        log_decision(event, decision)
-        {:reply, {:ok, decision}, state}
+    Logger.info("Processing event: #{event.type} for user #{event.user_id}")
+
+    with {:ok, eligible_loops} <- find_eligible_loops(event, state),
+         {:ok, selected_loop} <- select_best_loop(eligible_loops, event),
+         {:ok, _} <- check_throttle(event.user_id, selected_loop, state),
+         {:ok, decision} <- execute_loop(selected_loop, event) do
+      new_state = update_throttle(state, event.user_id, selected_loop)
+
+      log_decision(event, selected_loop, decision)
+
+      {:reply, {:ok, decision}, new_state}
+    else
+      {:error, :no_eligible_loops} ->
+        {:reply, {:skip, :no_match}, state}
+
+      {:error, :throttled} ->
+        {:reply, {:skip, :throttled}, state}
 
       {:error, reason} ->
-        Logger.error("Event processing failed: #{inspect(reason)}")
-        {:reply, {:error, reason}, %{state | last_error: reason}}
+        Logger.warning("Loop execution failed: #{inspect(reason)}")
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -104,7 +119,7 @@ defmodule ViralEngine.Agents.Orchestrator do
       active_loops: state.active_loops,
       cache_size: state.cache_size,
       last_error: state.last_error,
-      timestamp: DateTime.utc_now()
+      timestamp: DateTimeHelpers.now_for_ecto()
     }
 
     {:reply, health_data, state}
@@ -151,8 +166,134 @@ defmodule ViralEngine.Agents.Orchestrator do
     end
   end
 
+  # Phase 2: Loop Routing Logic
+
+  defp find_eligible_loops(event, state) do
+    eligible =
+      state.loop_configs
+      |> Enum.filter(fn {_id, config} ->
+        event.type in config.trigger_events and
+          meets_criteria(event, config)
+      end)
+      |> Enum.map(fn {id, config} -> {id, config} end)
+
+    if Enum.empty?(eligible) do
+      {:error, :no_eligible_loops}
+    else
+      {:ok, eligible}
+    end
+  end
+
+  defp select_best_loop(eligible_loops, event) do
+    selected =
+      eligible_loops
+      |> Enum.map(fn {id, config} ->
+        score = score_loop(id, config, event)
+        {id, config, score}
+      end)
+      |> Enum.max_by(fn {_id, _config, score} -> score end)
+
+    {:ok, selected}
+  end
+
+  defp execute_loop({loop_id, config, _score}, event) do
+    case loop_id do
+      :buddy_challenge ->
+        ViralEngine.Loops.BuddyChallenge.generate(event, config)
+
+      :results_rally ->
+        ViralEngine.Loops.ResultsRally.generate(event, config)
+
+      _ ->
+        {:error, :unknown_loop}
+    end
+  end
+
+  # Helpers
+
+  defp load_loop_configs do
+    %{
+      buddy_challenge: %{
+        trigger_events: [:practice_completed, :diagnostic_completed],
+        cooldown_seconds: 3600,
+        min_score: 60,
+        expected_k: 0.35
+      },
+      results_rally: %{
+        trigger_events: [:diagnostic_completed, :practice_test_completed],
+        cooldown_seconds: 86400,
+        min_participants: 5,
+        expected_k: 0.28
+      }
+    }
+  end
+
+  defp meets_criteria(event, config) do
+    case config do
+      %{min_score: min_score} ->
+        (event.context[:score] || 0) >= min_score
+
+      %{min_participants: min_participants} ->
+        count_cohort_participants(event.user_id) >= min_participants
+
+      _ ->
+        true
+    end
+  end
+
+  defp score_loop(loop_id, config, event) do
+    base_score = config.expected_k
+
+    # Boost for high engagement
+    engagement_boost = if event.context[:high_engagement], do: 0.15, else: 0.0
+
+    # Boost for milestones
+    milestone_boost = if event.context[:milestone], do: 0.20, else: 0.0
+
+    # Penalty for recent use
+    recency_penalty = calculate_recency_penalty(loop_id, event.user_id)
+
+    base_score + engagement_boost + milestone_boost - recency_penalty
+  end
+
+  defp calculate_recency_penalty(loop_id, user_id) do
+    # Check when this loop was last used for this user
+    case get_last_trigger(loop_id, user_id) do
+      nil ->
+        0.0
+
+      last_time ->
+        hours_ago = DateTime.diff(DateTime.utc_now(), last_time) / 3600
+        # Decay over 48 hours
+        max(0.0, 0.3 - hours_ago / 48)
+    end
+  end
+
+  defp check_throttle(user_id, {loop_id, config, _score}, state) do
+    case get_in(state.user_throttles, [user_id, loop_id]) do
+      nil ->
+        {:ok, true}
+
+      last_triggered ->
+        if DateTime.diff(DateTime.utc_now(), last_triggered) > config.cooldown_seconds do
+          {:ok, true}
+        else
+          {:error, :throttled}
+        end
+    end
+  end
+
+  defp update_throttle(state, user_id, {loop_id, _config, _score}) do
+    put_in(
+      state.user_throttles,
+      Map.put(state.user_throttles, user_id, %{
+        loop_id => DateTimeHelpers.now_for_ecto()
+      })
+    )
+  end
+
   defp process_event(%{type: event_type} = event, state) do
-    timestamp = DateTime.utc_now()
+    timestamp = DateTimeHelpers.now_for_ecto()
 
     # Log event to database
     viral_event = %ViralEvent{
@@ -228,21 +369,26 @@ defmodule ViralEngine.Agents.Orchestrator do
     # TODO: Route to Proud Parent loop
   end
 
-  defp log_decision(_event, decision) do
+  defp log_decision(event, {loop_id, config, score}, decision) do
     agent_decision = %AgentDecision{
       agent_id: "orchestrator",
-      decision_type: "event_routing",
-      decision_data: decision,
-      timestamp: decision.timestamp,
-      # Phase 1: no loops
-      viral_loop_id: nil,
+      decision_type: "loop_selected",
+      decision_data: %{
+        event_type: event.type,
+        loop_id: loop_id,
+        score: score,
+        expected_k: config.expected_k,
+        decision: decision
+      },
+      timestamp: DateTimeHelpers.now_for_ecto(),
+      viral_loop_id: Atom.to_string(loop_id),
       # TODO: measure actual latency
       latency_ms: 0,
       success: true
     }
 
     case Repo.insert(agent_decision) do
-      {:ok, _} -> Logger.info("Decision logged to database")
+      {:ok, _} -> Logger.info("Loop decision logged: #{loop_id} with score #{score}")
       {:error, changeset} -> Logger.error("Failed to log decision: #{inspect(changeset.errors)}")
     end
   end
@@ -252,7 +398,7 @@ defmodule ViralEngine.Agents.Orchestrator do
       agent_id: "orchestrator",
       decision_type: "ai_routing",
       decision_data: decision,
-      timestamp: DateTime.utc_now(),
+      timestamp: DateTimeHelpers.now_for_ecto(),
       viral_loop_id: decision[:loop_id],
       # TODO: measure actual AI call latency
       latency_ms: 0,
@@ -266,5 +412,18 @@ defmodule ViralEngine.Agents.Orchestrator do
       {:error, changeset} ->
         Logger.error("Failed to log AI decision: #{inspect(changeset.errors)}")
     end
+  end
+
+  # Missing helper functions
+
+  defp get_last_trigger(_loop_id, _user_id) do
+    # TODO: Implement proper query for last trigger
+    # For now, return nil to avoid throttling
+    nil
+  end
+
+  defp count_cohort_participants(user_id) do
+    # For now, return a default count - in production this would check actual cohort size
+    10
   end
 end

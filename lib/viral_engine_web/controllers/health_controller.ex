@@ -22,16 +22,17 @@ defmodule ViralEngineWeb.HealthController do
     # Run health checks concurrently for speed
     tasks = [
       Task.async(fn -> check_database() end),
-      Task.async(fn -> check_providers() end)
+      Task.async(fn -> check_providers() end),
+      Task.async(fn -> check_agents() end)
     ]
 
     results = Task.await_many(tasks, 5000)
-    [db_result, providers_result] = results
+    [db_result, providers_result, agents_result] = results
 
     response_time_ms = System.monotonic_time(:millisecond) - start_time
 
     # Determine overall health
-    all_healthy = db_result.success && providers_result.active_count > 0
+    all_healthy = db_result.success && providers_result.active_count > 0 && agents_result.active_count > 0
 
     status_code = if all_healthy, do: 200, else: 503
 
@@ -43,7 +44,8 @@ defmodule ViralEngineWeb.HealthController do
       response_time_ms: response_time_ms,
       checks: %{
         database: db_result,
-        providers: providers_result
+        providers: providers_result,
+        agents: agents_result
       }
     }
 
@@ -115,6 +117,58 @@ defmodule ViralEngineWeb.HealthController do
       providers: provider_statuses,
       message: "#{active_count}/#{length(providers)} providers healthy"
     }
+  end
+
+  defp check_agents do
+    agents = [
+      {"personalization-agent", &check_agent_health/1},
+      {"incentives-agent", &check_agent_health/1}
+    ]
+
+    # Check each agent concurrently with timeout
+    results =
+      Task.async_stream(
+        agents,
+        fn {name, check_fn} ->
+          try do
+            case check_fn.(name) do
+              :healthy -> {name, :healthy}
+              :unhealthy -> {name, :unhealthy}
+            end
+          catch
+            _, _ -> {name, :unhealthy}
+          end
+        end,
+        timeout: 2000,
+        on_timeout: :kill_task
+      )
+      |> Enum.to_list()
+
+    agent_statuses =
+      Enum.map(results, fn
+        {:ok, {name, status}} -> {name, status}
+        {:exit, _} -> {"unknown", :timeout}
+      end)
+      |> Map.new()
+
+    active_count = Enum.count(agent_statuses, fn {_, status} -> status == :healthy end)
+
+    %{
+      active_count: active_count,
+      total_count: length(agents),
+      agents: agent_statuses,
+      message: "#{active_count}/#{length(agents)} agents healthy"
+    }
+  end
+
+  defp check_agent_health(agent_name) do
+    # Simple ping check to MCP agent
+    case System.cmd("fly", ["mcp", "ping", "--server", agent_name], stderr_to_stdout: true) do
+      {_, 0} -> :healthy
+      _ -> :unhealthy
+    end
+  rescue
+    _ -> :unhealthy
   end
 
   defp check_openai do
