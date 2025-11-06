@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => ({
           return mode === 'production' ? 'assets/[name]-[hash][extname]' : 'assets/[name][extname]'
         }
       },
-      external: mode === 'production' ? ['phoenix', 'phoenix_html', 'phoenix_live_view'] : []
+      external: []
     },
     outDir: '../priv/static/assets',
     emptyOutDir: false,  // Don't delete other files in priv/static
