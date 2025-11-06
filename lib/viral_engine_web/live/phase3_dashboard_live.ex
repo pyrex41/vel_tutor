@@ -180,7 +180,7 @@ defmodule ViralEngineWeb.Phase3DashboardLive do
               </div>
               <div>
                 <p class="text-sm text-gray-600 mb-2">TrustSafety Agent Status</p>
-                <p class="text-lg font-medium <%= if @system_health.trust_safety_alive, do: "text-green-600", else: "text-red-600" %>">
+                <p class={"text-lg font-medium #{if @system_health.trust_safety_alive, do: "text-green-600", else: "text-red-600"}"}>
                   <%= if @system_health.trust_safety_alive, do: "✓ Running", else: "✗ Stopped" %>
                 </p>
               </div>
