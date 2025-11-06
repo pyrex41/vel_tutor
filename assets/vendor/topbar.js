@@ -3,7 +3,7 @@
  * http://buunguyen.github.io/topbar
  * Copyright (c) 2014 Bui Nguyet Anh; Licensed MIT */
 
-(function (window, document) {
+const topbarModule = (function (window, document) {
   "use strict";
 
   // https://gist.github.com/paulirish/1579671
@@ -149,15 +149,10 @@
     }
   };
 
-  if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = topbar;
-  } else if (typeof define === 'function' && define.amd) {
-    define(topbar);
-  } else {
-    this.topbar = topbar;
-  }
+  // Return topbar for module systems
+  return topbar;
 
 }).call(this, window, document);
 
-// ES module export for modern bundlers
-export default topbar;
+// ES module export
+export default topbarModule;
