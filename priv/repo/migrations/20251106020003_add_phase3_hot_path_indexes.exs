@@ -35,5 +35,10 @@ defmodule ViralEngine.Repo.Migrations.AddPhase3HotPathIndexes do
     create_if_not_exists index(:weekly_recaps, [:week_start, :inserted_at],
       name: :weekly_recaps_week_time_idx
     )
+
+    # Index for parental consent lookups (COPPA compliance)
+    create_if_not_exists index(:parental_consents, [:user_id, :consent_given],
+      name: :parental_consents_user_consent_idx
+    )
   end
 end
