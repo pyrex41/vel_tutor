@@ -17,10 +17,11 @@ defmodule ViralEngine.Agents.TrustSafety do
   alias ViralEngine.{DeviceFlag, ParentalConsent, Accounts.User}
   import Ecto.Query
 
-  @fraud_threshold 7.0
-  @rate_limit_window 60_000 # 1 minute in ms
-  @rate_limit_max 10
-  @coppa_age_threshold 13
+  # Configuration - can be overridden in config/config.exs
+  @fraud_threshold Application.compile_env(:viral_engine, :fraud_threshold, 7.0)
+  @rate_limit_window Application.compile_env(:viral_engine, :rate_limit_window, 60_000)  # 1 minute in ms
+  @rate_limit_max Application.compile_env(:viral_engine, :rate_limit_max, 10)
+  @coppa_age_threshold Application.compile_env(:viral_engine, :coppa_age_threshold, 13)
 
   # Client API
 
@@ -94,7 +95,17 @@ defmodule ViralEngine.Agents.TrustSafety do
         {:error, reason} -> {:error, reason}
       end
 
-    {:reply, result, state}
+    # Update rate limiting state after successful check
+    new_state =
+      case result do
+        {:ok, :allowed} ->
+          update_rate_limit_state(context, state)
+
+        _ ->
+          state
+      end
+
+    {:reply, result, new_state}
   end
 
   @impl true
@@ -192,21 +203,85 @@ defmodule ViralEngine.Agents.TrustSafety do
     # Check if device or IP already signed up recently
     device_id = context[:device_id]
     ip_address = context[:ip_address]
+    yesterday = DateTime.add(DateTime.utc_now(), -86400, :second)
 
-    query =
-      from u in User,
-        where: u.id != ^user_id,
-        where: fragment("inserted_at > NOW() - INTERVAL '24 hours'"),
-        limit: 1
+    # Check DeviceFlag table for recent signups from same device or IP
+    duplicate_query =
+      from(d in DeviceFlag,
+        where: d.inserted_at >= ^yesterday,
+        where: d.flag_type == "signup" or is_nil(d.flag_type)
+      )
 
-    case Repo.one(query) do
-      nil -> :ok
-      _user -> {:error, :duplicate_signup}
+    duplicate_query =
+      if device_id do
+        from(d in duplicate_query, or_where: d.device_id == ^device_id)
+      else
+        duplicate_query
+      end
+
+    duplicate_query =
+      if ip_address do
+        from(d in duplicate_query, or_where: d.ip_address == ^ip_address)
+      else
+        duplicate_query
+      end
+
+    case Repo.one(from(d in duplicate_query, limit: 1)) do
+      nil ->
+        # No duplicate found, record this signup attempt
+        record_signup_attempt(user_id, device_id, ip_address)
+        :ok
+
+      _flag ->
+        {:error, :duplicate_signup}
     end
   end
 
-  defp check_duplicate_share(_user_id, _context) do
-    # Implement duplicate share detection
+  defp check_duplicate_share(user_id, context) do
+    # Check for duplicate share actions within short time window
+    device_id = context[:device_id]
+    five_minutes_ago = DateTime.add(DateTime.utc_now(), -300, :second)
+
+    query =
+      from(d in DeviceFlag,
+        where: d.flag_type == "share",
+        where: d.inserted_at >= ^five_minutes_ago
+      )
+
+    query =
+      if device_id do
+        from(d in query, where: d.device_id == ^device_id)
+      else
+        query
+      end
+
+    case Repo.aggregate(query, :count, :id) do
+      count when count >= 5 ->
+        {:error, :duplicate_share}
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp record_signup_attempt(user_id, device_id, ip_address) do
+    # Record signup attempt in DeviceFlag for future duplicate detection
+    if device_id && ip_address do
+      attrs = %{
+        device_id: device_id,
+        ip_address: ip_address,
+        flag_type: "signup",
+        flag_reason: "Signup attempt recorded",
+        risk_score: 0.0,
+        blocked: false
+      }
+
+      case Repo.insert(DeviceFlag.changeset(%DeviceFlag{}, attrs)) do
+        {:ok, _} -> :ok
+        {:error, _} -> :ok  # Don't fail signup if recording fails
+      end
+    end
+
     :ok
   end
 
@@ -356,15 +431,61 @@ defmodule ViralEngine.Agents.TrustSafety do
     end
   end
 
-  defp count_reports_for_entity(_entity_id) do
-    # Query database for count
-    # For now, return 0
-    0
+  defp count_reports_for_entity(entity_id) do
+    # Query database for abuse reports count for this entity
+    yesterday = DateTime.add(DateTime.utc_now(), -86400, :second)
+
+    from(d in DeviceFlag,
+      where: d.device_id == ^entity_id,
+      where: d.flag_type == "abuse",
+      where: d.inserted_at >= ^yesterday
+    )
+    |> Repo.aggregate(:count, :id)
   end
 
   defp count_recent_signups_from_ip(ip_address) do
-    # Query for signups from this IP in last 24 hours
-    # For now, return 0
-    0
+    # Query DeviceFlags for recent signups from this IP
+    yesterday = DateTime.add(DateTime.utc_now(), -86400, :second)
+
+    from(d in DeviceFlag,
+      where: d.ip_address == ^ip_address,
+      where: d.inserted_at >= ^yesterday,
+      distinct: d.device_id
+    )
+    |> Repo.aggregate(:count, :id)
+  end
+
+  defp update_rate_limit_state(%{user_id: user_id, action_type: action_type}, state) do
+    key = {user_id, action_type}
+    now = System.monotonic_time(:millisecond)
+
+    rate_data = Map.get(state.rate_limits, key, %{count: 0, window_start: now})
+
+    new_rate_data =
+      if now - rate_data.window_start > @rate_limit_window do
+        # Reset window
+        %{count: 1, window_start: now}
+      else
+        # Increment count
+        %{rate_data | count: rate_data.count + 1}
+      end
+
+    # Update state with new rate limit data
+    new_rate_limits = Map.put(state.rate_limits, key, new_rate_data)
+
+    # Clean up old entries to prevent memory leak
+    cleaned_rate_limits = clean_old_rate_limits(new_rate_limits, now)
+
+    %{state | rate_limits: cleaned_rate_limits}
+  end
+
+  defp clean_old_rate_limits(rate_limits, now) do
+    # Remove entries older than 2x the rate limit window
+    cutoff = now - @rate_limit_window * 2
+
+    Enum.filter(rate_limits, fn {_key, data} ->
+      data.window_start > cutoff
+    end)
+    |> Enum.into(%{})
   end
 end

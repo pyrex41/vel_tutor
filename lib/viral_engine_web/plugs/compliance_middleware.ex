@@ -66,6 +66,16 @@ defmodule ViralEngineWeb.ComplianceMiddleware do
   defp perform_compliance_check(conn) do
     context = extract_context(conn)
 
+    # Require user_id for compliance checks
+    if is_nil(context[:user_id]) do
+      Logger.warning("Compliance check failed: no user_id found in request to #{conn.request_path}")
+      block_request(conn, :authentication_required)
+    else
+      check_with_trust_safety(conn, context)
+    end
+  end
+
+  defp check_with_trust_safety(conn, context) do
     case TrustSafety.check_action(context) do
       {:ok, :allowed} ->
         Logger.debug("Compliance check passed for #{conn.request_path}")
@@ -230,6 +240,11 @@ defmodule ViralEngineWeb.ComplianceMiddleware do
   defp get_error_details(:rate_limited) do
     {429, "rate_limited",
      "Too many requests. Please slow down and try again later."}
+  end
+
+  defp get_error_details(:authentication_required) do
+    {401, "authentication_required",
+     "You must be logged in to access this resource."}
   end
 
   defp get_error_details(_reason) do
