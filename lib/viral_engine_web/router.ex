@@ -20,25 +20,31 @@ defmodule ViralEngineWeb.Router do
     end
   end
 
-  pipeline :api do
+  # Public API pipeline (no authentication or compliance required)
+  pipeline :api_public do
     plug(:accepts, ["json"])
-    plug(ViralEngineWeb.Plugs.TenantContextPlug)
     plug(ViralEngineWeb.Plugs.RateLimitPlug)
   end
 
-  # Pipeline for COPPA/FERPA compliance on sensitive endpoints
-  pipeline :compliance_protected do
+  # Authenticated API pipeline with COPPA/FERPA compliance (default)
+  pipeline :api do
     plug(:accepts, ["json"])
     plug(ViralEngineWeb.Plugs.TenantContextPlug)
     plug(ViralEngineWeb.Plugs.RateLimitPlug)
     plug(ViralEngineWeb.ComplianceMiddleware)
   end
 
+  # Public API endpoints (no authentication or compliance required)
+  scope "/api/public", ViralEngineWeb do
+    pipe_through(:api_public)
+
+    # Health check
+    get("/health", HealthController, :index)
+  end
+
+  # Authenticated API endpoints (compliance middleware applied by default)
   scope "/api", ViralEngineWeb do
     pipe_through(:api)
-
-    # Health check (public)
-    get("/health", HealthController, :index)
 
     # Organization management
     post("/organizations", OrganizationController, :create)
@@ -232,9 +238,9 @@ defmodule ViralEngineWeb.Router do
     live("/dashboard/phase3", Phase3DashboardLive)
   end
 
-  # Phase 3 Compliance-Protected API Routes
+  # Phase 3 API Routes (compliance middleware applied by default via :api pipeline)
   scope "/api/phase3", ViralEngineWeb do
-    pipe_through(:compliance_protected)
+    pipe_through(:api)
 
     # User profile and social features (require COPPA compliance)
     get("/users/:id/profile", UserController, :show_profile)

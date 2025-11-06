@@ -94,16 +94,71 @@ defmodule ViralEngine.Jobs.WeeklyRecapGenerator do
     end
   end
 
-  # Generate recap for each parent
+  # Generate recap for each parent (optimized to avoid N+1 queries)
   defp generate_recaps_for_parents(parents, week_start) do
+    week_end = Date.add(week_start, 6)
+    week_end_inclusive = Date.add(week_end, 1)
+    parent_ids = Enum.map(parents, & &1.id)
+
+    # Batch query: Check for existing recaps for all parents at once
+    existing_recaps_by_parent =
+      from(r in WeeklyRecap,
+        where: r.parent_id in ^parent_ids,
+        where: r.week_start == ^week_start
+      )
+      |> Repo.all()
+      |> Map.new(fn recap -> {recap.parent_id, recap} end)
+
+    # Batch query: Load all students for all parents at once
+    students_by_parent =
+      from(u in User,
+        where: u.parent_id in ^parent_ids,
+        where: u.persona == "student"
+      )
+      |> Repo.all()
+      |> Enum.group_by(& &1.parent_id)
+
+    # Get all student IDs for session query
+    all_student_ids =
+      students_by_parent
+      |> Map.values()
+      |> List.flatten()
+      |> Enum.map(& &1.id)
+
+    # Batch query: Load all sessions for all students at once
+    sessions_by_student =
+      if Enum.empty?(all_student_ids) do
+        %{}
+      else
+        from(s in TutoringSession,
+          where: s.student_id in ^all_student_ids,
+          where: s.started_at >= ^week_start,
+          where: s.started_at < ^week_end_inclusive,
+          where: not is_nil(s.ended_at)
+        )
+        |> Repo.all()
+        |> Enum.group_by(& &1.student_id)
+      end
+
+    # Now process each parent with preloaded data (no more DB queries)
     recaps =
       Enum.reduce(parents, [], fn parent, acc ->
-        case generate_recap_for_parent(parent, week_start) do
+        case generate_recap_for_parent_batched(
+               parent,
+               week_start,
+               week_end,
+               existing_recaps_by_parent,
+               students_by_parent,
+               sessions_by_student
+             ) do
           {:ok, recap} ->
             [recap | acc]
 
           {:error, reason} ->
-            Logger.warning("Failed to generate recap for parent #{parent.id}: #{inspect(reason)}")
+            Logger.debug(
+              "Skipping recap for parent #{parent.id}: #{inspect(reason)}"
+            )
+
             acc
         end
       end)
@@ -111,51 +166,49 @@ defmodule ViralEngine.Jobs.WeeklyRecapGenerator do
     {:ok, recaps}
   end
 
-  defp generate_recap_for_parent(parent, week_start) do
-    week_end = Date.add(week_start, 6)
+  defp generate_recap_for_parent_batched(
+         parent,
+         week_start,
+         week_end,
+         existing_recaps,
+         students_by_parent,
+         sessions_by_student
+       ) do
+    # Check preloaded existing recap
+    case Map.get(existing_recaps, parent.id) do
+      nil ->
+        # Get preloaded students
+        students = Map.get(students_by_parent, parent.id, [])
 
-    # Check if recap already exists
-    existing_recap =
-      from(r in WeeklyRecap,
-        where: r.parent_id == ^parent.id,
-        where: r.week_start == ^week_start
-      )
-      |> Repo.one()
+        if Enum.empty?(students) do
+          {:error, :no_students_found}
+        else
+          # Get preloaded sessions for all students
+          student_ids = Enum.map(students, & &1.id)
 
-    if existing_recap do
-      Logger.debug("Recap already exists for parent #{parent.id}, week #{week_start}")
-      {:ok, existing_recap}
-    else
-      # Find student(s) for this parent
-      students =
-        from(u in User,
-          where: u.parent_id == ^parent.id,
-          where: u.persona == "student"
-        )
-        |> Repo.all()
+          sessions =
+            student_ids
+            |> Enum.flat_map(fn student_id ->
+              Map.get(sessions_by_student, student_id, [])
+            end)
 
-      if Enum.empty?(students) do
-        {:error, :no_students_found}
-      else
-        create_new_recap(parent, students, week_start, week_end)
-      end
+          if Enum.empty?(sessions) do
+            {:error, :no_sessions_in_week}
+          else
+            create_new_recap(parent, students, sessions, week_start, week_end)
+          end
+        end
+
+      existing_recap ->
+        Logger.debug("Recap already exists for parent #{parent.id}, week #{week_start}")
+        {:ok, existing_recap}
     end
   end
 
-  defp create_new_recap(parent, students, week_start, week_end) do
+  defp create_new_recap(parent, students, sessions, week_start, week_end) do
     student_ids = Enum.map(students, & &1.id)
-    week_end_inclusive = Date.add(week_end, 1)
 
-    # Fetch all sessions for these students in the week
-    sessions =
-      from(s in TutoringSession,
-        where: s.student_id in ^student_ids,
-        where: s.started_at >= ^week_start,
-        where: s.started_at < ^week_end_inclusive,
-        where: not is_nil(s.ended_at)
-      )
-      |> Repo.all()
-
+    # Sessions are already preloaded from batch query
     if Enum.empty?(sessions) do
       {:error, :no_sessions_in_week}
     else

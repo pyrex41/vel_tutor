@@ -118,10 +118,16 @@ defmodule ViralEngine.Agents.TrustSafety do
   def handle_cast({:report_abuse, report}, state) do
     Logger.warning("Abuse reported: #{inspect(report)}")
 
-    # Add to abuse reports and potentially add to blocklist
+    # Add timestamp to report for cleanup
+    timestamped_report = Map.put(report, :timestamp, DateTime.utc_now())
+
+    # Add to abuse reports with cleanup and potentially add to blocklist
+    updated_abuse_reports = [timestamped_report | state.abuse_reports]
+    cleaned_abuse_reports = clean_old_abuse_reports(updated_abuse_reports)
+
     new_state = %{
       state
-      | abuse_reports: [report | state.abuse_reports],
+      | abuse_reports: cleaned_abuse_reports,
         blocklist:
           if should_block_from_report?(report) do
             add_to_blocklist(state.blocklist, report)
@@ -483,9 +489,21 @@ defmodule ViralEngine.Agents.TrustSafety do
     # Remove entries older than 2x the rate limit window
     cutoff = now - @rate_limit_window * 2
 
-    Enum.filter(rate_limits, fn {_key, data} ->
+    # Use Map.filter to properly filter the map (not Enum.filter which returns a list)
+    Map.filter(rate_limits, fn {_key, data} ->
       data.window_start > cutoff
     end)
-    |> Enum.into(%{})
+  end
+
+  defp clean_old_abuse_reports(abuse_reports) do
+    # Keep only reports from the last 24 hours to prevent unbounded growth
+    yesterday = DateTime.add(DateTime.utc_now(), -86400, :second)
+
+    Enum.filter(abuse_reports, fn report ->
+      case report[:timestamp] do
+        nil -> false  # Remove reports without timestamp
+        timestamp -> DateTime.compare(timestamp, yesterday) == :gt
+      end
+    end)
   end
 end
