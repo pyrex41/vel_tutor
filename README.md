@@ -48,7 +48,12 @@ vel_tutor/
 │   └── docs/             # Agent documentation
 ├── .taskmaster/           # Task Master AI configuration
 ├── .claude/               # Claude Code integration
-├── test/                  # Test suite
+├── test/                  # Elixir test suite
+├── tests/e2e/             # Playwright E2E tests
+│   ├── learning/         # Learning feature tests
+│   ├── social/           # Social feature tests
+│   └── utils/            # Test utilities and helpers
+├── TEST_PLAN.md           # E2E testing strategy and roadmap
 └── priv/                  # Database migrations and static assets
 ```
 
@@ -215,7 +220,7 @@ cd ../vel_tutor-frontend && claude
 - **Task Master AI**: Automated task management and workflow orchestration
 - **MCP Integration**: Seamless AI tool integration
 - **Multi-model Support**: Flexible AI provider configuration
-- **Comprehensive Testing**: Full test suite with load testing
+- **Comprehensive Testing**: Full Elixir test suite + Playwright E2E testing with 50+ test cases covering all major features
 
 ## Configuration
 
@@ -334,10 +339,35 @@ k6 run test/load/k6-stress-test.js
 
 ### End-to-End Testing
 
+Comprehensive Playwright E2E test suite covering all major features:
+
 ```bash
-# Run E2E tests (requires Cypress)
-cd assets && npm run cypress:open
+# Run full E2E test suite
+npm run test:e2e
+
+# Run specific test categories
+npx playwright test tests/e2e/learning/     # Learning features
+npx playwright test tests/e2e/social/       # Social features
+npx playwright test tests/e2e/auth.spec.ts  # Authentication
+
+# Run tests with UI mode
+npx playwright test --ui
+
+# Generate test report
+npx playwright show-report
 ```
+
+**Test Coverage:**
+- **Learning Features**: Practice sessions, diagnostics, flashcards
+- **Social Features**: Leaderboards, badges, rewards, activity feed, viral sharing, presence
+- **Cross-cutting**: Mobile responsiveness, accessibility, performance, error handling
+- **Real-time Features**: LiveView updates, presence indicators, activity feeds
+
+**Test Infrastructure:**
+- Enhanced test helpers with LiveView support
+- Performance monitoring and accessibility checks
+- Mobile responsiveness testing
+- Comprehensive test data seeding
 
 ## AI Agent System (BMAD)
 
