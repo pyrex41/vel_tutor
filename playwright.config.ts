@@ -70,7 +70,7 @@ export default defineConfig({
     command: 'mix phx.server',
     url: 'http://localhost:4000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000, // Increased timeout for server startup
     stdout: 'pipe',
     stderr: 'pipe',
     env: {
