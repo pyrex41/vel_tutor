@@ -94,7 +94,7 @@ defmodule ViralEngineWeb.PracticeSessionLive do
 
   defp initialize_session(socket, user, session) do
     if connected?(socket) do
-      ViralEngine.PresenceTracker.track_user(socket, user, subject_id: "practice")
+      ViralEngine.PresenceTracker.track_socket(socket, user, subject_id: "practice")
       Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:subject:practice")
     end
 

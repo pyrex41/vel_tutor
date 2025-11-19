@@ -34,7 +34,7 @@ defmodule ViralEngineWeb.RallyLive do
       Phoenix.PubSub.subscribe(ViralEngine.PubSub, "rally:#{rally.id}")
 
       # Track presence
-      {:ok, _} = ViralEngine.PresenceTracker.track_user(socket, user, rally_id: rally.id)
+      ViralEngine.PresenceTracker.track_socket(socket, user, rally_id: rally.id)
 
       # Subscribe to presence
       Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:rally:#{rally.id}")

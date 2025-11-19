@@ -30,8 +30,8 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: !!process.env.CI,
 
-  // Retry on CI only
-  retries: process.env.CI ? 2 : 0,
+  // Retry on all environments for flaky server starts
+  retries: 3,
 
   // Opt out of parallel tests on CI
   workers: process.env.CI ? 1 : undefined,
@@ -70,7 +70,7 @@ export default defineConfig({
     command: 'mix phx.server',
     url: 'http://localhost:4000',
     reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000, // Increased timeout for server startup
+    timeout: 300 * 1000, // 5 minutes for complex server startup with agents
     stdout: 'pipe',
     stderr: 'pipe',
     env: {

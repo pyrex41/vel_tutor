@@ -4,6 +4,8 @@ defmodule ViralEngine.PresenceTest do
 
   alias ViralEngine.Presence
 
+  @endpoint ViralEngineWeb.Endpoint
+
   setup do
     {:ok, _} = Presence.start_link([])
     :ok

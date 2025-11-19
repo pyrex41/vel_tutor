@@ -4583,7 +4583,7 @@
   "phase3": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Create Phase 3 Database Schema",
         "description": "Add new tables for parental consents, device flags, tutoring sessions, weekly recaps, and achievements to support Trust & Safety, Session Intelligence, and viral loops.",
         "details": "Run the migration file `priv/repo/migrations/20250105_phase3_schema.exs` which creates tables: parental_consents, device_flags, tutoring_sessions, weekly_recaps, achievements. Ensure indexes are added for performance. Use Ecto.Migration with create_if_not_exists to avoid errors if tables exist. Update existing User and TutoringSession schemas if needed to include new fields like age, parent_id, etc.",
@@ -4633,7 +4633,7 @@
         "updatedAt": "2025-11-06T14:18:36.389Z"
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Implement Trust & Safety Agent",
         "description": "Develop the TrustSafety GenServer module for fraud detection, COPPA/FERPA compliance, and abuse prevention.",
         "details": "Implement the full ViralEngine.Agents.TrustSafety module as provided, including state management, client API functions (check_action, report_abuse, redact_data, update_user_signal), server callbacks, and helper functions for checks like blocklist, rate limits, duplicates, fraud scoring, compliance, and redaction. Integrate with existing Repo for database queries. Use up-to-date Elixir best practices, such as proper error handling and logging.",
@@ -4710,7 +4710,7 @@
         "updatedAt": "2025-11-06T14:18:36.901Z"
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Implement Session Intelligence Pipeline",
         "description": "Build the Oban worker for processing tutoring sessions: transcription, summarization with AIClient (multi-provider), and generating agentic actions.",
         "status": "done",
@@ -4775,7 +4775,7 @@
         "updatedAt": "2025-11-06T14:18:37.400Z"
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Implement Proud Parent Loop",
         "description": "Create the ProudParent loop module for weekly progress sharing between parents.",
         "details": "Implement ViralEngine.Loops.ProudParent with generate/2, handle_join/2, complete_signup/3 functions. Include progress reel generation, email template creation, and reward granting via MCP. Ensure privacy-safe data handling. Integrate with Attribution for links and Analytics for logging.",
@@ -4829,7 +4829,7 @@
         "updatedAt": "2025-11-06T14:18:37.924Z"
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Implement Tutor Spotlight Loop",
         "description": "Develop the TutorSpotlight loop module for tutors sharing post-session referral packs.",
         "details": "Implement ViralEngine.Loops.TutorSpotlight with generate/2, handle_join/2, complete_booking/3. Generate tutor cards, share packs, and handle WhatsApp/SMS/Email links. Grant rewards and log analytics. Ensure tutor profile fetching and feedback retrieval.",
@@ -4883,7 +4883,7 @@
         "updatedAt": "2025-11-06T14:18:38.471Z"
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Implement Weekly Recap Generator Job",
         "description": "Create the Oban worker for generating weekly recaps and triggering Proud Parent loops.",
         "details": "Implement ViralEngine.Jobs.WeeklyRecapGenerator as Oban.Worker. Query active parents, generate recaps with session counts, skills, improvements, etc. Trigger events to Orchestrator. Schedule via cron or Oban cron.",
@@ -4924,7 +4924,7 @@
         "updatedAt": "2025-11-06T14:18:39.033Z"
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Add Compliance Middleware",
         "description": "Implement Phoenix plug for enforcing COPPA/FERPA compliance on sensitive endpoints.",
         "details": "Create ViralEngineWeb.ComplianceMiddleware plug. Check paths requiring compliance, call TrustSafety agent, handle errors with JSON responses. Extract context from conn headers/IP. Add to router pipeline for relevant routes.",
@@ -4964,7 +4964,7 @@
         "updatedAt": "2025-11-06T14:18:39.599Z"
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Deploy Phase 3 Agents and Jobs",
         "description": "Set up MCP deployment for TrustSafety agent and update Orchestrator for new loops.",
         "details": "Use fly mcp launch for TrustSafety agent with secrets. Update fly.orchestrator.toml. Schedule WeeklyRecapGenerator via cron. Ensure auto-stop disabled for always-on agents.",
@@ -5006,7 +5006,7 @@
         "updatedAt": "2025-11-06T14:18:40.149Z"
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Implement Phase 3 Integration Tests",
         "description": "Write comprehensive tests for TrustSafety, Session Pipeline, Proud Parent, and Tutor Spotlight.",
         "details": "Create ViralEngine.Phase3IntegrationTest with tests for fraud blocking, compliance, session processing, loop generation, etc. Use ExUnit and mocks for external calls.",
@@ -5075,7 +5075,7 @@
         "updatedAt": "2025-11-06T14:18:40.708Z"
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Implement Phase 3 Metrics Dashboard",
         "description": "Build LiveView dashboard for monitoring loops, TrustSafety, Session Intelligence, and compliance metrics.",
         "details": "Create ViralEngineWeb.Phase3DashboardLive with real-time metrics fetching. Display K-factors, checks, fraud rates, etc. Use Phoenix LiveView for updates.",
@@ -5117,6 +5117,17 @@
         "recommendedSubtasks": 2,
         "expansionPrompt": "Subtasks for LiveView setup and metrics fetching/display, including real-time updates.",
         "updatedAt": "2025-11-06T14:18:41.277Z"
+      },
+      {
+        "id": 11,
+        "title": "Fix UI Responsiveness and Mobile Issues",
+        "description": "Address mobile-specific UI problems including overflow issues, modal closing behaviors, and touch event conflicts to ensure a seamless experience on mobile devices.",
+        "details": "This task focuses on enhancing the frontend for mobile responsiveness using Tailwind CSS classes and fixing interaction issues in JavaScript. Based on codebase analysis via Glob tool (e.g., exploring **/*.js, **/*.css, **/*.html.eex or **/*.html.leex for LiveView templates), the project uses Phoenix LiveView with Tailwind CSS for styling and assets/js/app.js for client-side scripts. Key files include assets/css/app.css for global styles and LiveView templates in lib/viral_engine_web/templates/ or live/ directories. Subtask 1: Audit existing grids and modals in assets/css/app.css and LiveView templates (e.g., search for class attributes using Grep tool on 'class=' patterns). Add responsive Tailwind classes like sm:, md:, lg: to ensure proper layout on small screens (e.g., change 'grid-cols-3' to 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'). Reference Tailwind's responsive design best practices for breakpoints (sm: 640px, md: 768px). Subtask 2: In assets/js/app.js, locate modal event handlers (grep for 'modal' or 'backdrop'). Prevent default behavior on mobile backdrop taps by adding event.preventDefault() in touch event listeners, ensuring modals don't close unintentionally on touch devices. Use modern JavaScript with addEventListener for 'touchstart' events, aligning with current best practices for mobile touch handling. Subtask 3: Update Playwright test specs (found via Glob **/*_test.exs or **/*.spec.js) to include mobile viewport assertions. Add assertions for 375x667 viewport (iPhone SE) in tests tagged with 'mobile responsive', verifying element visibility and layout without overflow. Ensure tests use Playwright's page.setViewportSize() and expect() for responsive checks. Overall, follow Tailwind CSS v3+ conventions for utility-first styling and Playwright best practices for mobile testing, integrating with existing Phoenix LiveView patterns for dynamic updates.",
+        "testStrategy": "Run the specified Playwright tests with 'npx playwright test --grep \"mobile responsive\"' to validate on 375x667 viewport. Verify 100% pass rate, checking for no overflow (e.g., elements fit within screen width), correct modal behavior (taps on backdrop do not close modal on mobile), and proper responsive layouts. Manually test on actual mobile devices or emulators for touch conflicts. Use browser dev tools to inspect responsive classes and ensure no CSS conflicts. Confirm subtasks by reviewing code changes in assets/css/app.css, assets/js/app.js, and test files, ensuring alignment with Tailwind and Playwright documentation.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
@@ -5126,7 +5137,10 @@
       "completedCount": 10,
       "tags": [
         "phase3"
-      ]
+      ],
+      "created": "2025-11-14T03:03:34.530Z",
+      "description": "Tasks for phase3 context",
+      "updated": "2025-11-14T03:04:22.062Z"
     }
   }
 }

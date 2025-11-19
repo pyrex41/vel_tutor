@@ -1,9 +1,10 @@
 defmodule ViralEngineWeb.PresenceChannelTest do
   use ViralEngineWeb.ChannelCase
+  import ViralEngine.Fixtures
   alias ViralEngine.Presence
 
   setup do
-    user = insert(:user)
+    user = create_user()
 
     {:ok, _, socket} =
       ViralEngineWeb.UserSocket

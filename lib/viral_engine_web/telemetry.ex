@@ -66,14 +66,20 @@ defmodule ViralEngineWeb.Telemetry do
   end
 
   def measure_orchestrator_health do
-    case ViralEngine.Agents.Orchestrator.health() do
-      %{active_loops: active_loops, cache_size: cache_size} ->
-        :telemetry.execute([:mcp, :orchestrator, :health], %{
-          active_loops: active_loops,
-          cache_size: cache_size
-        })
+    try do
+      case ViralEngine.Agents.Orchestrator.health() do
+        %{active_loops: active_loops, cache_size: cache_size} ->
+          :telemetry.execute([:mcp, :orchestrator, :health], %{
+            active_loops: active_loops,
+            cache_size: cache_size
+          })
 
-      _ ->
+        _ ->
+          :ok
+      end
+    catch
+      :exit, {:noproc, _} ->
+        # Orchestrator not started yet, skip measurement
         :ok
     end
   end

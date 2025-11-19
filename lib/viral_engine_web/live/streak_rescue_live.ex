@@ -13,7 +13,7 @@ defmodule ViralEngineWeb.StreakRescueLive do
 
     if connected?(socket) do
       # Track presence in streak rescue room
-      {:ok, _} = ViralEngine.PresenceTracker.track_user(socket, user, room: "streak_rescue")
+      ViralEngine.PresenceTracker.track_socket(socket, user, room: "streak_rescue")
 
       # Subscribe to presence updates
       Phoenix.PubSub.subscribe(ViralEngine.PubSub, "presence:streak_rescue")

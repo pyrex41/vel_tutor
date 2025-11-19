@@ -12,6 +12,8 @@ defmodule ViralEngine.Application do
       {Phoenix.PubSub, name: ViralEngine.PubSub},
       # Start the Presence system
       ViralEngine.Presence,
+      # Start the Presence Tracker
+      ViralEngine.PresenceTracker,
       # Start the Telemetry supervisor
       ViralEngineWeb.Telemetry,
       # Start Finch for HTTP requests
